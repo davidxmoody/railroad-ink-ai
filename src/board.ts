@@ -1,7 +1,5 @@
 import {Rotation, Tile, TrackType} from "./dice"
 
-const SIZE = 7
-
 interface Connection {
   y: number
   x: number
@@ -10,6 +8,8 @@ interface Connection {
 }
 
 export class Board {
+  public static size = 7
+
   public static exits: Connection[] = [
     {y: 0, x: 1, r: 0, t: "d"},
     {y: 0, x: 3, r: 0, t: "l"},
@@ -29,13 +29,13 @@ export class Board {
   private openConnections = [...Board.exits]
 
   private checkBounds(y: number, x: number) {
-    if (y < 0 || x < 0 || y >= SIZE || x >= SIZE)
+    if (y < 0 || x < 0 || y >= Board.size || x >= Board.size)
       throw new Error("Board reference out of bounds")
   }
 
   public get(y: number, x: number) {
     this.checkBounds(y, x)
-    return this.grid[y * SIZE + x]
+    return this.grid[y * Board.size + x]
   }
 
   public isValid(y: number, x: number, tile: Tile) {
@@ -58,7 +58,7 @@ export class Board {
     this.checkBounds(y, x)
     if (!this.isValid(y, x, tile)) throw new Error("Invalid tile placement")
 
-    this.grid[y * SIZE + x] = tile
+    this.grid[y * Board.size + x] = tile
 
     for (const r of [0, 1, 2, 3] as const) {
       const connection = this.openConnections.find(
@@ -74,7 +74,7 @@ export class Board {
         const cX = r === 1 ? x + 1 : r === 3 ? x - 1 : x
         const cR = ((r + 2) % 4) as Rotation
 
-        if (cY < 0 || cX < 0 || cY >= SIZE || cX >= SIZE) {
+        if (cY < 0 || cX < 0 || cY >= Board.size || cX >= Board.size) {
           continue // Routes can safely go off the edge of the board
         }
 
@@ -84,10 +84,10 @@ export class Board {
   }
 
   public print() {
-    for (let y = 0; y < SIZE; y++) {
-      for (let x = 0; x < SIZE; x++) {
+    for (let y = 0; y < Board.size; y++) {
+      for (let x = 0; x < Board.size; x++) {
         // TODO
-        console.log(this.grid[y * SIZE + x])
+        console.log(this.grid[y * Board.size + x])
       }
     }
   }
