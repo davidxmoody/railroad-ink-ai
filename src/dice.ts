@@ -1,5 +1,7 @@
 export type TrackType = "d" | "l"
 
+export type Rotation = 0 | 1 | 2 | 3
+
 export interface Tile {
   0?: TrackType // North
   1?: TrackType // East
