@@ -10,7 +10,7 @@ export default function App() {
 
       <Flex mt={24} flexWrap="wrap">
         {[...routeDieA, ...routeDieB, ...specialRouteTiles].map((tile, i) => (
-          <Box m={1} border="1px solid lightgrey">
+          <Box m={8} border="1px solid lightgrey">
             <DrawnTile key={i} tile={tile} />
           </Box>
         ))}
