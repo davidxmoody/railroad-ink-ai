@@ -1,32 +1,46 @@
-import {Tile} from "../dice"
+import {Rotation, Tile} from "../dice"
 
 interface Props {
   tile: Tile
 }
 
 export default function DrawnTile({tile}: Props) {
-  const station = hasStation(tile)
-
   return (
     <svg
       viewBox="0 0 100 100"
       width={100}
       height={100}
       stroke="black"
-      strokeWidth={2}
       display="block"
+      strokeWidth={3}
     >
-      {station ? <rect x={40} y={40} width={20} height={20} /> : null}
-
-      {([0, 1, 2, 3] as const).map((r) => (
+      {([0, 1, 2, 3] as Rotation[]).map((r) => (
         <g key={r} transform={`rotate(${r * 90}, 50, 50)`}>
           {tile[r] === "d" ? (
-            <path d="M 40,0 L 40,40 M 60,0 L 60,40 M 50,4 L 50,12 M 50,16 L 50,24, M 50,28 L 50,36" />
+            <>
+              <path d="M40,0 v41 M60,0 v41" />
+              <path strokeWidth={2} d="M50,4 v9 m0,6 v9 m0,6 v9" />
+            </>
+          ) : tile[r] === "l" && tile.overpass ? (
+            <path
+              fill="transparent"
+              d="M50,0 v31 M41,8 h18 m-18,12 h18 M30,28 q20,6 40,0"
+            />
           ) : tile[r] === "l" ? (
-            <path d="M 50,0 L 50,40 M 42,8 L 58,8 M 42,20 L 58,20 M 42,32 L 58,32" />
+            <path d="M50,0 v51 M41,8 h18 m-18,12 h18 m-18,12 h18" />
           ) : null}
+
+          {shouldDrawMiddleRoadEdge(tile, r) ? <path d="M39,40 h22" /> : null}
         </g>
       ))}
+
+      {hasStation(tile) ? <rect x={39} y={39} width={22} height={22} /> : null}
+
+      {hasRailCross(tile) ? <path d="M43,43 l14,14 m0,-14 l-14,14" /> : null}
+
+      {hasHorizontalStraightRail(tile) ? <path d="M50,41 v18" /> : null}
+
+      {hasEastSouthRailCorner(tile) ? <path d="M44,44 l14,14" /> : null}
     </svg>
   )
 }
@@ -40,4 +54,44 @@ function hasStation(tile: Tile) {
     tile[0] === "l" || tile[1] === "l" || tile[2] === "l" || tile[3] === "l"
 
   return hasRoad && hasRail
+}
+
+function shouldDrawMiddleRoadEdge(tile: Tile, r: Rotation) {
+  return (
+    (tile[r] === undefined || (tile[r] === "l" && tile.overpass)) &&
+    (tile[((r + 3) % 4) as Rotation] === "d" ||
+      tile[((r + 1) % 4) as Rotation] === "d")
+  )
+}
+
+function countTrackTypes(tile: Tile) {
+  const counts = {d: 0, l: 0, e: 0}
+  counts[tile[0] ?? "e"]++
+  counts[tile[1] ?? "e"]++
+  counts[tile[2] ?? "e"]++
+  counts[tile[3] ?? "e"]++
+  return counts
+}
+
+function hasRailCross(tile: Tile) {
+  const counts = countTrackTypes(tile)
+  return counts.l === 4 || (counts.l === 3 && counts.e === 1)
+}
+
+function hasHorizontalStraightRail(tile: Tile) {
+  return (
+    tile[0] === undefined &&
+    tile[1] === "l" &&
+    tile[2] === undefined &&
+    tile[3] === "l"
+  )
+}
+
+function hasEastSouthRailCorner(tile: Tile) {
+  return (
+    tile[0] === undefined &&
+    tile[1] === "l" &&
+    tile[2] === "l" &&
+    tile[3] === undefined
+  )
 }
