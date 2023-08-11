@@ -25,17 +25,27 @@ export class Board {
     {y: 1, x: 0, r: 3, t: "l"},
   ]
 
-  private grid: Tile[] = []
-  private openConnections = [...Board.exits]
+  private grid: Tile[]
+  private openConnections: Connection[]
+
+  public constructor(data?: {grid: Tile[]; openConnections: Connection[]}) {
+    this.grid = data?.grid ?? []
+    this.openConnections = data?.openConnections ?? [...Board.exits]
+  }
 
   private checkBounds(y: number, x: number) {
     if (y < 0 || x < 0 || y >= Board.size || x >= Board.size)
       throw new Error("Board reference out of bounds")
   }
 
-  public get(y: number, x: number) {
+  public get(y: number, x: number): Tile | undefined {
     this.checkBounds(y, x)
     return this.grid[y * Board.size + x]
+  }
+
+  public getConnections(y: number, x: number): Connection[] {
+    this.checkBounds(y, x)
+    return this.openConnections.filter((c) => c.y === y && c.x === x)
   }
 
   public isValid(y: number, x: number, tile: Tile) {
@@ -58,18 +68,22 @@ export class Board {
     this.checkBounds(y, x)
     if (!this.isValid(y, x, tile)) throw new Error("Invalid tile placement")
 
-    this.grid[y * Board.size + x] = tile
+    const newGrid = [...this.grid]
+    newGrid[y * Board.size + x] = tile
+
+    let newOpenConnections = this.openConnections
 
     for (const r of [0, 1, 2, 3] as const) {
-      const connection = this.openConnections.find(
+      const connection = newOpenConnections.find(
         (c) => c.y === y && c.x === x && c.r === r,
       )
 
       if (connection) {
-        this.openConnections = this.openConnections.filter(
-          (c) => c !== connection,
-        )
+        newOpenConnections = newOpenConnections.filter((c) => c !== connection)
       } else {
+        const cT = tile[r]
+        if (cT === undefined) continue
+
         const cY = r === 0 ? y - 1 : r === 2 ? y + 1 : y
         const cX = r === 1 ? x + 1 : r === 3 ? x - 1 : x
         const cR = ((r + 2) % 4) as Rotation
@@ -78,17 +92,10 @@ export class Board {
           continue // Routes can safely go off the edge of the board
         }
 
-        this.openConnections.push({y: cY, x: cX, r: cR, t: tile[r]!})
+        newOpenConnections.push({y: cY, x: cX, r: cR, t: cT})
       }
     }
-  }
 
-  public print() {
-    for (let y = 0; y < Board.size; y++) {
-      for (let x = 0; x < Board.size; x++) {
-        // TODO
-        console.log(this.grid[y * Board.size + x])
-      }
-    }
+    return new Board({grid: newGrid, openConnections: newOpenConnections})
   }
 }

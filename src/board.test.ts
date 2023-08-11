@@ -6,10 +6,10 @@ describe("tile placement", () => {
     placements: Array<{y: number; x: number; tile: Tile}>,
     finalExpectation: boolean,
   ) {
-    const board = new Board()
+    let board = new Board()
 
     for (const {y, x, tile} of placements.slice(0, placements.length - 1)) {
-      board.set(y, x, tile)
+      board = board.set(y, x, tile)
     }
 
     const {y, x, tile} = placements[placements.length - 1]
@@ -69,6 +69,16 @@ describe("tile placement", () => {
       [
         {y: 3, x: 6, tile: {1: "d", 2: "d"}},
         {y: 4, x: 6, tile: {1: "d", 3: "d"}},
+      ],
+      false,
+    )
+  })
+
+  test("existing tile no connection", () => {
+    tryPlacement(
+      [
+        {y: 5, x: 0, tile: {1: "l", 3: "l"}},
+        {y: 6, x: 0, tile: {1: "d", 3: "d"}},
       ],
       false,
     )

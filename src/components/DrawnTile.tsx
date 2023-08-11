@@ -1,10 +1,14 @@
 import {Rotation, Tile} from "../dice"
 
 interface Props {
-  tile: Tile
+  tile: Tile | undefined
 }
 
 export default function DrawnTile({tile}: Props) {
+  if (!tile) {
+    return null
+  }
+
   return (
     <svg
       viewBox="0 0 100 100"
@@ -40,7 +44,9 @@ export default function DrawnTile({tile}: Props) {
 
       {hasHorizontalStraightRail(tile) ? <path d="M50,41 v18" /> : null}
 
-      {hasEastSouthRailCorner(tile) ? <path d="M44,44 l14,14" /> : null}
+      {hasVerticalStraightRail(tile) ? <path d="M41,50 h18" /> : null}
+
+      {/* TODOhasRailCorner(tile) ? <g transform={`rotate(${}, 50, 50)`}><path d="M44,44 l14,14" /></g> : null */}
     </svg>
   )
 }
@@ -87,10 +93,10 @@ function hasHorizontalStraightRail(tile: Tile) {
   )
 }
 
-function hasEastSouthRailCorner(tile: Tile) {
+function hasVerticalStraightRail(tile: Tile) {
   return (
-    tile[0] === undefined &&
-    tile[1] === "l" &&
+    tile[0] === "l" &&
+    tile[1] === undefined &&
     tile[2] === "l" &&
     tile[3] === undefined
   )
