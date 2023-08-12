@@ -242,4 +242,32 @@ describe("scoring", () => {
       })
     })
   })
+
+  describe("errors", () => {
+    test("one error", () => {
+      const board = generateBoard([{y: 3, x: 0, tile: {1: "d", 3: "d"}}])
+
+      expect(calculateScore(board)).toMatchObject({
+        errors: -1,
+      })
+    })
+
+    test("many errors", () => {
+      const board = generateBoard([
+        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 6, tile: {1: "d", 2: "d"}},
+        {y: 6, x: 5, tile: {1: "d", 2: "d"}},
+        {y: 6, x: 6, tile: {1: "d", 3: "d"}},
+        {y: 6, x: 3, tile: {1: "l", 2: "l"}},
+        {y: 6, x: 4, tile: {0: "d", 1: "l", 2: "d", 3: "l", overpass: true}},
+        {y: 3, x: 1, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
+        {y: 4, x: 1, tile: {0: "l", 1: "l", 2: "l", 3: "l"}},
+        {y: 4, x: 0, tile: {1: "l", 3: "l"}},
+      ])
+
+      expect(calculateScore(board)).toMatchObject({
+        errors: -7,
+      })
+    })
+  })
 })

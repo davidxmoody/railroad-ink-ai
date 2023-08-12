@@ -5,24 +5,25 @@ export interface Connection {
   x: number
   r: Rotation
   t: TrackType
+  e?: boolean
 }
 
 export class Board {
   public static size = 7
 
   public static exits: Connection[] = [
-    {y: 0, x: 1, r: 0, t: "d"},
-    {y: 0, x: 3, r: 0, t: "l"},
-    {y: 0, x: 5, r: 0, t: "d"},
-    {y: 1, x: 6, r: 1, t: "l"},
-    {y: 3, x: 6, r: 1, t: "d"},
-    {y: 5, x: 6, r: 1, t: "l"},
-    {y: 6, x: 5, r: 2, t: "d"},
-    {y: 6, x: 3, r: 2, t: "l"},
-    {y: 6, x: 1, r: 2, t: "d"},
-    {y: 5, x: 0, r: 3, t: "l"},
-    {y: 3, x: 0, r: 3, t: "d"},
-    {y: 1, x: 0, r: 3, t: "l"},
+    {y: 0, x: 1, r: 0, t: "d", e: true},
+    {y: 0, x: 3, r: 0, t: "l", e: true},
+    {y: 0, x: 5, r: 0, t: "d", e: true},
+    {y: 1, x: 6, r: 1, t: "l", e: true},
+    {y: 3, x: 6, r: 1, t: "d", e: true},
+    {y: 5, x: 6, r: 1, t: "l", e: true},
+    {y: 6, x: 5, r: 2, t: "d", e: true},
+    {y: 6, x: 3, r: 2, t: "l", e: true},
+    {y: 6, x: 1, r: 2, t: "d", e: true},
+    {y: 5, x: 0, r: 3, t: "l", e: true},
+    {y: 3, x: 0, r: 3, t: "d", e: true},
+    {y: 1, x: 0, r: 3, t: "l", e: true},
   ]
 
   private grid: Tile[]
@@ -46,6 +47,10 @@ export class Board {
   public getConnections(y: number, x: number): Connection[] {
     this.checkBounds(y, x)
     return this.openConnections.filter((c) => c.y === y && c.x === x)
+  }
+
+  public countErrors() {
+    return this.openConnections.filter((c) => !c.e).length
   }
 
   public isValid(y: number, x: number, tile: Tile) {

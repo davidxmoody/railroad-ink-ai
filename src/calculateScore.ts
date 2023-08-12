@@ -7,8 +7,12 @@ export default function calculateScore(board: Board) {
     road: 0,
     rail: 0,
     center: calculateCenterScore(board),
-    errors: 0,
+    errors: calculateErrorsScore(board),
   }
+}
+
+function calculateErrorsScore(board: Board) {
+  return -1 * board.countErrors() || 0
 }
 
 function calculateCenterScore(board: Board) {
