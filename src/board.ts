@@ -1,6 +1,6 @@
 import {Rotation, Tile, TrackType} from "./dice"
 
-interface Connection {
+export interface Connection {
   y: number
   x: number
   r: Rotation
@@ -55,13 +55,14 @@ export class Board {
       (c) => c.y === y && c.x === x,
     )
 
-    if (connections.length === 0) return false
-
+    let numMatchingConnections = 0
     for (const connection of connections) {
-      if (connection.t !== tile[connection.r]) return false
+      if (tile[connection.r] === undefined) continue
+      if (tile[connection.r] !== connection.t) return false
+      numMatchingConnections++
     }
 
-    return true
+    return numMatchingConnections >= 1
   }
 
   public set(y: number, x: number, tile: Tile) {

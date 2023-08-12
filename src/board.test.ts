@@ -83,4 +83,15 @@ describe("tile placement", () => {
       false,
     )
   })
+
+  test("existing tile ignoring exit", () => {
+    tryPlacement(
+      [
+        {y: 5, x: 0, tile: {2: "d", 3: "l"}},
+        {y: 6, x: 0, tile: {0: "d", 1: "d"}},
+        {y: 6, x: 1, tile: {0: "d", 3: "d"}},
+      ],
+      true,
+    )
+  })
 })
