@@ -2,26 +2,23 @@ import {Board, Connection} from "./board"
 import {Rotation} from "./dice"
 
 export default function calculateScore(board: Board) {
-  let exits = 0
-
-  const alreadyCheckedExits: Connection[] = []
-
-  for (const exit of Board.exits) {
-    if (alreadyCheckedExits.includes(exit)) continue
-
-    const connectedExits = traverse(board, exit)
-    alreadyCheckedExits.push(...connectedExits)
-
-    exits += exitScoringTable[1 + connectedExits.length] ?? 0
-  }
-
   return {
-    exits,
+    exits: calculateExitsScore(board),
     road: 0,
     rail: 0,
-    center: 0,
+    center: calculateCenterScore(board),
     errors: 0,
   }
+}
+
+function calculateCenterScore(board: Board) {
+  let centerScore = 0
+  for (let y = 2; y <= 4; y++) {
+    for (let x = 2; x <= 4; x++) {
+      if (board.get(y, x)) centerScore++
+    }
+  }
+  return centerScore
 }
 
 const exitScoringTable: Record<number, number | undefined> = {
@@ -36,6 +33,23 @@ const exitScoringTable: Record<number, number | undefined> = {
   10: 36,
   11: 40,
   12: 45,
+}
+
+function calculateExitsScore(board: Board) {
+  let exitsScore = 0
+
+  const alreadyCheckedExits: Connection[] = []
+
+  for (const exit of Board.exits) {
+    if (alreadyCheckedExits.includes(exit)) continue
+
+    const connectedExits = traverse(board, exit)
+    alreadyCheckedExits.push(...connectedExits)
+
+    exitsScore += exitScoringTable[1 + connectedExits.length] ?? 0
+  }
+
+  return exitsScore
 }
 
 function traverse(board: Board, startingConnection: Connection) {

@@ -193,4 +193,53 @@ describe("scoring", () => {
       })
     })
   })
+
+  describe("center square", () => {
+    test("one filled", () => {
+      const board = generateBoard([
+        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 1, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 2, tile: {1: "d", 3: "d"}},
+      ])
+
+      expect(calculateScore(board)).toMatchObject({
+        center: 1,
+      })
+    })
+
+    test("four filled", () => {
+      const board = generateBoard([
+        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 1, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 2, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 3, tile: {2: "d", 3: "d"}},
+        {y: 4, x: 3, tile: {0: "d", 1: "d"}},
+        {y: 4, x: 4, tile: {2: "d", 3: "d"}},
+      ])
+
+      expect(calculateScore(board)).toMatchObject({
+        center: 4,
+      })
+    })
+
+    test("nine filled", () => {
+      const board = generateBoard([
+        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 1, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 2, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+        {y: 2, x: 2, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+        {y: 3, x: 3, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+        {y: 4, x: 2, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+        {y: 4, x: 3, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+        {y: 4, x: 4, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+        {y: 3, x: 4, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+        {y: 2, x: 4, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+        {y: 2, x: 3, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+      ])
+
+      expect(calculateScore(board)).toMatchObject({
+        center: 9,
+      })
+    })
+  })
 })

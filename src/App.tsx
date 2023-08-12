@@ -26,6 +26,14 @@ export default function App() {
             return
           }
           setBoard(board.set(y, x, allTiles[selectedTileIndex]))
+          ;(window as any).board = (window as any).board ?? []
+          ;(window as any).board.push({
+            y,
+            x,
+            tile: allTiles[selectedTileIndex],
+          })
+
+          console.log((window as any).board)
         }}
       />
 
