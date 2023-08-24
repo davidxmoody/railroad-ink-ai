@@ -277,6 +277,7 @@ describe("scoring", () => {
 
       expect(calculateScore(board)).toMatchObject({
         road: 1,
+        rail: 0,
       })
     })
 
@@ -292,6 +293,7 @@ describe("scoring", () => {
 
       expect(calculateScore(board)).toMatchObject({
         road: 6,
+        rail: 0,
       })
     })
 
@@ -305,10 +307,11 @@ describe("scoring", () => {
 
       expect(calculateScore(board)).toMatchObject({
         road: 5,
+        rail: 0,
       })
     })
 
-    test("tricky loop with rail to ignore", () => {
+    test("tricky loop with rail", () => {
       const board = generateBoard([
         {y: 3, x: 0, tile: {0: "d", 1: "d", 2: "l", 3: "d"}},
         {y: 4, x: 0, tile: {0: "l", 2: "l"}},
@@ -325,6 +328,7 @@ describe("scoring", () => {
 
       expect(calculateScore(board)).toMatchObject({
         road: 6,
+        rail: 8,
       })
     })
   })
