@@ -1,6 +1,8 @@
 export type TrackType = "d" | "l"
 
-export type Rotation = 0 | 1 | 2 | 3
+export const rotations = [0, 1, 2, 3] as const
+
+export type Rotation = (typeof rotations)[number]
 
 export interface Tile {
   0?: TrackType // North

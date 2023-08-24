@@ -44,7 +44,16 @@ export class Board {
     return this.grid[y * Board.size + x]
   }
 
-  public getConnections(y: number, x: number): Connection[] {
+  public forEachTile(fn: (y: number, x: number, tile: Tile) => void) {
+    for (let y = 0; y < Board.size; y++) {
+      for (let x = 0; x < Board.size; x++) {
+        const tile: Tile | undefined = this.grid[y * Board.size + x]
+        if (tile) fn(y, x, tile)
+      }
+    }
+  }
+
+  public getOpenConnections(y: number, x: number): Connection[] {
     this.checkBounds(y, x)
     return this.openConnections.filter((c) => c.y === y && c.x === x)
   }

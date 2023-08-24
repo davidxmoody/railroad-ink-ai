@@ -37,7 +37,7 @@ export default function InteractiveBoard(props: Props) {
               position="relative"
             >
               <DrawnTile tile={props.board.get(y, x)} />
-              {props.board.getConnections(y, x).map((c) => (
+              {props.board.getOpenConnections(y, x).map((c) => (
                 <Box
                   key={c.r}
                   position="absolute"

@@ -270,4 +270,62 @@ describe("scoring", () => {
       })
     })
   })
+
+  describe("longest road/rail", () => {
+    test("one segment long", () => {
+      const board = generateBoard([{y: 3, x: 0, tile: {1: "d", 3: "d"}}])
+
+      expect(calculateScore(board)).toMatchObject({
+        road: 1,
+      })
+    })
+
+    test("several segments long", () => {
+      const board = generateBoard([
+        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 1, tile: {2: "d", 3: "d"}},
+        {y: 4, x: 1, tile: {0: "d", 1: "d"}},
+        {y: 4, x: 2, tile: {0: "d", 3: "d"}},
+        {y: 3, x: 2, tile: {1: "d", 2: "d"}},
+        {y: 3, x: 3, tile: {1: "d", 3: "d"}},
+      ])
+
+      expect(calculateScore(board)).toMatchObject({
+        road: 6,
+      })
+    })
+
+    test("simple loop", () => {
+      const board = generateBoard([
+        {y: 3, x: 0, tile: {1: "d", 2: "d", 3: "d"}},
+        {y: 3, x: 1, tile: {2: "d", 3: "d"}},
+        {y: 4, x: 1, tile: {0: "d", 3: "d"}},
+        {y: 4, x: 0, tile: {0: "d", 1: "d"}},
+      ])
+
+      expect(calculateScore(board)).toMatchObject({
+        road: 5,
+      })
+    })
+
+    test("tricky loop with rail to ignore", () => {
+      const board = generateBoard([
+        {y: 3, x: 0, tile: {0: "d", 1: "d", 2: "l", 3: "d"}},
+        {y: 4, x: 0, tile: {0: "l", 2: "l"}},
+        {y: 5, x: 0, tile: {0: "l", 2: "l"}},
+        {y: 6, x: 0, tile: {0: "l", 1: "l"}},
+        {y: 3, x: 1, tile: {0: "d", 1: "d", 2: "l", 3: "d"}},
+        {y: 4, x: 1, tile: {0: "l", 2: "l"}},
+        {y: 5, x: 1, tile: {0: "l", 2: "l"}},
+        {y: 6, x: 1, tile: {0: "l", 3: "l"}},
+        {y: 3, x: 2, tile: {1: "l", 3: "d"}},
+        {y: 2, x: 0, tile: {1: "d", 2: "d"}},
+        {y: 2, x: 1, tile: {2: "d", 3: "d"}},
+      ])
+
+      expect(calculateScore(board)).toMatchObject({
+        road: 6,
+      })
+    })
+  })
 })

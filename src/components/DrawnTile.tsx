@@ -70,7 +70,7 @@ function shouldDrawMiddleRoadEdge(tile: Tile, r: Rotation) {
   )
 }
 
-function countTrackTypes(tile: Tile) {
+export function countTrackTypes(tile: Tile) {
   const counts = {d: 0, l: 0, e: 0}
   counts[tile[0] ?? "e"]++
   counts[tile[1] ?? "e"]++

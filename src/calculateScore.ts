@@ -1,11 +1,11 @@
 import {Board, Connection} from "./board"
-import {Rotation} from "./dice"
+import {Rotation, rotations, TrackType} from "./dice"
 
 export default function calculateScore(board: Board) {
   return {
     exits: calculateExitsScore(board),
-    road: 0,
-    rail: 0,
+    road: calculateLongestRouteScore(board, "d"),
+    rail: calculateLongestRouteScore(board, "l"),
     center: calculateCenterScore(board),
     errors: calculateErrorsScore(board),
   }
@@ -92,8 +92,6 @@ function traverse(board: Board, startingConnection: Connection) {
         const cX = r === 1 ? c.x + 1 : r === 3 ? c.x - 1 : c.x
         const cR = ((r + 2) % 4) as Rotation
 
-        // TODO check for connection to other exits
-
         if (cY < 0 || cX < 0 || cY >= Board.size || cX >= Board.size) {
           continue
         }
@@ -104,4 +102,65 @@ function traverse(board: Board, startingConnection: Connection) {
   }
 
   return reachedExits
+}
+
+function calculateLongestRouteScore(board: Board, trackType: TrackType) {
+  let longestRoute = 0
+
+  board.forEachTile((y, x, tile) => {
+    if (rotations.some((r) => tile[r] === trackType)) {
+      traverseAllRoutes(
+        board,
+        trackType,
+        [y, x],
+        [[y, x]],
+        [],
+        (routeLength) => {
+          if (routeLength > longestRoute) longestRoute = routeLength
+        },
+      )
+    }
+  })
+
+  return longestRoute
+}
+
+function traverseAllRoutes(
+  board: Board,
+  trackType: TrackType,
+  p: [number, number],
+  visitedPositions: Array<[number, number]>,
+  visitedConnections: string[],
+  onRouteLength: (routeLength: number) => void,
+) {
+  onRouteLength(visitedPositions.length)
+
+  for (const r of rotations) {
+    if (board.get(p[0], p[1])?.[r] !== trackType) continue
+
+    const p2 = step(p[0], p[1], r)
+    if (!p2) continue
+    if (!board.get(...p2)) continue
+
+    const c = `${(p[0] + p2[0]) / 2},${(p[1] + p2[1]) / 2}`
+    if (visitedConnections.includes(c)) continue
+
+    traverseAllRoutes(
+      board,
+      trackType,
+      p2,
+      [...visitedPositions, p2],
+      [...visitedConnections, c],
+      onRouteLength,
+    )
+  }
+}
+
+function step(y: number, x: number, r: Rotation): [number, number] | undefined {
+  const y2 = r === 0 ? y - 1 : r === 2 ? y + 1 : y
+  const x2 = r === 1 ? x + 1 : r === 3 ? x - 1 : x
+
+  if (y2 < 0 || x2 < 0 || y2 >= Board.size || x2 >= Board.size) return undefined
+
+  return [y2, x2]
 }
