@@ -1,3 +1,4 @@
+import {describe, test, expect} from "vitest"
 import {Board} from "./board"
 import calculateScore from "./calculateScore"
 import type {Tile} from "./dice"
