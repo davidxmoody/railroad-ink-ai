@@ -1,7 +1,7 @@
 <script lang="ts">
   import {type Rotation, type Tile, rotations} from "../logic/dice"
 
-  export let tile: Tile
+  export let tile: Tile | undefined
 
   function hasStation(tile: Tile) {
     if (tile.overpass) return false
@@ -55,48 +55,50 @@
   }
 </script>
 
-<svg
-  viewBox="0 0 100 100"
-  width={100}
-  height={100}
-  stroke="black"
-  display="block"
-  stroke-width={3}
->
-  {#each rotations as r}
-    <g transform={`rotate(${r * 90}, 50, 50)`}>
-      {#if tile[r] === "d"}
-        <path d="M40,0 v41 M60,0 v41" />
-        <path stroke-width={2} d="M50,4 v9 m0,6 v9 m0,6 v9" />
-      {:else if tile[r] === "l" && tile.overpass}
-        <path
-          fill="transparent"
-          d="M50,0 v31 M41,8 h18 m-18,12 h18 M30,28 q20,6 40,0"
-        />
-      {:else if tile[r] === "l"}
-        <path d="M50,0 v51 M41,8 h18 m-18,12 h18 m-18,12 h18" />
+{#if tile}
+  <svg
+    viewBox="0 0 100 100"
+    width={100}
+    height={100}
+    stroke="black"
+    display="block"
+    stroke-width={3}
+  >
+    {#each rotations as r}
+      <g transform={`rotate(${r * 90}, 50, 50)`}>
+        {#if tile[r] === "d"}
+          <path d="M40,0 v41 M60,0 v41" />
+          <path stroke-width={2} d="M50,4 v9 m0,6 v9 m0,6 v9" />
+        {:else if tile[r] === "l" && tile.overpass}
+          <path
+            fill="transparent"
+            d="M50,0 v31 M41,8 h18 m-18,12 h18 M30,28 q20,6 40,0"
+          />
+        {:else if tile[r] === "l"}
+          <path d="M50,0 v51 M41,8 h18 m-18,12 h18 m-18,12 h18" />
+        {/if}
+
+        {#if shouldDrawMiddleRoadEdge(tile, r)}
+          <path d="M39,40 h22" />
+        {/if}
+      </g>
+      ))}
+
+      {#if hasStation(tile)}
+        <rect x={39} y={39} width={22} height={22} />
       {/if}
 
-      {#if shouldDrawMiddleRoadEdge(tile, r)}
-        <path d="M39,40 h22" />
+      {#if hasRailCross(tile)}
+        <path d="M43,43 l14,14 m0,-14 l-14,14" />
       {/if}
-    </g>
-    ))}
 
-    {#if hasStation(tile)}
-      <rect x={39} y={39} width={22} height={22} />
-    {/if}
+      {#if hasHorizontalStraightRail(tile)}
+        <path d="M50,41 v18" />
+      {/if}
 
-    {#if hasRailCross(tile)}
-      <path d="M43,43 l14,14 m0,-14 l-14,14" />
-    {/if}
-
-    {#if hasHorizontalStraightRail(tile)}
-      <path d="M50,41 v18" />
-    {/if}
-
-    {#if hasVerticalStraightRail(tile)}
-      <path d="M41,50 h18" />
-    {/if}
-  {/each}
-</svg>
+      {#if hasVerticalStraightRail(tile)}
+        <path d="M41,50 h18" />
+      {/if}
+    {/each}
+  </svg>
+{/if}
