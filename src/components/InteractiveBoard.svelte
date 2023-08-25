@@ -28,11 +28,11 @@
         >
           <DrawnTile tile={board.get(y, x)} size={60} />
 
-          {#each board.getOpenConnections(y, x) as c}
+          {#each Board.exits.filter((e) => e.y === y && e.x === x) as exit}
             <div
-              class="connection"
-              style:background={c.t === "l" ? "red" : "blue"}
-              style:transform={`rotate(${90 * c.r}deg)`}
+              class="exit"
+              style:background={exit.t === "l" ? "red" : "blue"}
+              style:transform={`rotate(${90 * exit.r}deg)`}
             />
           {/each}
         </div>
@@ -62,7 +62,7 @@
     background-color: rgba(0, 200, 0, 0.3);
   }
 
-  .connection {
+  .exit {
     position: absolute;
     width: 20px;
     height: 5px;

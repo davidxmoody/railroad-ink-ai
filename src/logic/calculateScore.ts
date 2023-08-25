@@ -1,5 +1,6 @@
-import {Board, type Connection} from "./board"
-import {type Rotation, rotations, type TrackType} from "./dice"
+import {Board, type Exit} from "./board"
+import {rotations, type TrackType} from "./dice"
+import {step} from "./helpers"
 
 export default function calculateScore(board: Board) {
   return {
@@ -42,7 +43,7 @@ const exitScoringTable: Record<number, number | undefined> = {
 function calculateExitsScore(board: Board) {
   let exitsScore = 0
 
-  const alreadyCheckedExits: Connection[] = []
+  const alreadyCheckedExits: Exit[] = []
 
   for (const exit of Board.exits) {
     if (alreadyCheckedExits.includes(exit)) continue
@@ -50,58 +51,43 @@ function calculateExitsScore(board: Board) {
     const connectedExits = traverse(board, exit)
     alreadyCheckedExits.push(...connectedExits)
 
-    exitsScore += exitScoringTable[1 + connectedExits.length] ?? 0
+    exitsScore += exitScoringTable[connectedExits.length] ?? 0
   }
 
   return exitsScore
 }
 
-function traverse(board: Board, startingConnection: Connection) {
-  const reachedExits: Connection[] = []
-  const visited: Record<string, boolean> = {}
-  const unexploredConnections = [startingConnection]
+function traverse(board: Board, startingExit: Exit) {
+  const tileAtExit = board.get(startingExit.y, startingExit.x)
+  if (!tileAtExit?.[startingExit.r]) return [startingExit]
 
-  while (unexploredConnections.length) {
-    const c = unexploredConnections.shift()!
+  const visitedExits: Exit[] = []
+  const visitedTileKeys: Record<string, boolean> = {}
+  const unexploredTiles: Array<{y: number; x: number; t: TrackType}> = [
+    startingExit,
+  ]
 
-    const tile = board.get(c.y, c.x)
+  while (unexploredTiles.length) {
+    const {y, x, t} = unexploredTiles.shift()!
+    const tile = board.get(y, x)!
 
-    if (tile && tile[c.r] === c.t) {
-      const key = `${c.y},${c.x}${tile.overpass ? c.t : ""}`
-      if (visited[key]) continue
+    const key = `${y},${x}${tile.overpass ? t : ""}`
+    if (visitedTileKeys[key]) continue
+    visitedTileKeys[key] = true
 
-      visited[key] = true
+    const connectedExit = Board.exits.find(
+      (e) =>
+        e.y === y &&
+        e.x === x &&
+        tile[e.r] &&
+        (!tile.overpass || tile[e.r] === t),
+    )
+    if (connectedExit) visitedExits.push(connectedExit)
 
-      for (const r of [0, 1, 2, 3] as Rotation[]) {
-        if (c.r === r) continue
-        if (tile[r] === undefined) continue
-        if (tile.overpass && c.t !== tile[r]) continue
-
-        for (const exit of Board.exits) {
-          if (
-            exit.y === c.y &&
-            exit.x === c.x &&
-            exit.r === r &&
-            exit.t === tile[r]
-          ) {
-            reachedExits.push(exit)
-          }
-        }
-
-        const cY = r === 0 ? c.y - 1 : r === 2 ? c.y + 1 : c.y
-        const cX = r === 1 ? c.x + 1 : r === 3 ? c.x - 1 : c.x
-        const cR = ((r + 2) % 4) as Rotation
-
-        if (cY < 0 || cX < 0 || cY >= Board.size || cX >= Board.size) {
-          continue
-        }
-
-        unexploredConnections.push({y: cY, x: cX, r: cR, t: tile[r]!})
-      }
-    }
+    unexploredTiles.push(...board.getConnectedTiles(y, x, t))
   }
 
-  return reachedExits
+  return visitedExits
 }
 
 function calculateLongestRouteScore(board: Board, trackType: TrackType) {
@@ -154,13 +140,4 @@ function traverseAllRoutes(
       onRouteLength,
     )
   }
-}
-
-function step(y: number, x: number, r: Rotation): [number, number] | undefined {
-  const y2 = r === 0 ? y - 1 : r === 2 ? y + 1 : y
-  const x2 = r === 1 ? x + 1 : r === 3 ? x - 1 : x
-
-  if (y2 < 0 || x2 < 0 || y2 >= Board.size || x2 >= Board.size) return undefined
-
-  return [y2, x2]
 }
