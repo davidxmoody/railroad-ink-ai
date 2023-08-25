@@ -28,7 +28,6 @@ module.exports = {
     },
   ],
   rules: {
-    "svelte/valid-compile": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-unused-vars": ["warn", {argsIgnorePattern: "^_"}],
   },

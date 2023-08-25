@@ -2,6 +2,7 @@
   import {type Rotation, type Tile, rotations} from "../logic/dice"
 
   export let tile: Tile | undefined
+  export let size = 100
 
   function hasStation(tile: Tile) {
     if (tile.overpass) return false
@@ -58,8 +59,8 @@
 {#if tile}
   <svg
     viewBox="0 0 100 100"
-    width={100}
-    height={100}
+    width={size}
+    height={size}
     stroke="black"
     display="block"
     stroke-width={3}

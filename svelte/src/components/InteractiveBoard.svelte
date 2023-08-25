@@ -3,9 +3,9 @@
   import type {Tile} from "../logic/dice"
   import DrawnTile from "./DrawnTile.svelte"
 
-  let board: Board
-  let selectedTile: Tile | null
-  let onClickSquare: (y: number, x: number) => void
+  export let board: Board
+  export let selectedTile: Tile | undefined
+  export let onClickSquare: (y: number, x: number) => void
 
   function isCenterSquare(y: number, x: number) {
     return y >= 2 && y <= 4 && x >= 2 && x <= 4
@@ -22,8 +22,11 @@
           class:valid-placement={selectedTile &&
             board.isValid(y, x, selectedTile)}
           on:click={() => onClickSquare(y, x)}
+          on:keypress={() => onClickSquare(y, x)}
+          role="button"
+          tabindex="0"
         >
-          <DrawnTile tile={board.get(y, x)} />
+          <DrawnTile tile={board.get(y, x)} size={60} />
 
           {#each board.getOpenConnections(y, x) as c}
             <div
@@ -45,6 +48,10 @@
     border-width: 1px;
     border-style: solid;
     border-color: lightgrey;
+    color: lightgrey;
+    margin: 1px;
+    cursor: pointer;
+    position: relative;
   }
 
   .center-square {
@@ -57,8 +64,10 @@
 
   .connection {
     position: absolute;
-    width: 10px;
-    height: 10px;
+    width: 20px;
+    height: 5px;
     top: 0;
+    left: 20px;
+    transform-origin: center 30px;
   }
 </style>
