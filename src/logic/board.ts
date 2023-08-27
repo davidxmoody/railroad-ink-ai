@@ -1,13 +1,5 @@
-import {rotations, type Rotation, type Tile, type TrackType} from "./dice"
-import {flipRotation, step} from "./helpers"
-import type {Position, TrackPosition} from "./types"
-
-export interface Exit {
-  y: number
-  x: number
-  r: Rotation
-  t: TrackType
-}
+import type {Tile, TrackType, Position, TrackPosition, Exit} from "./types"
+import {flipRotation, rotations, step} from "./helpers"
 
 export class Board {
   public static size = 7

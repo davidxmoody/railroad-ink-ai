@@ -1,16 +1,4 @@
-export type TrackType = "d" | "l"
-
-export const rotations = [0, 1, 2, 3] as const
-
-export type Rotation = (typeof rotations)[number]
-
-export interface Tile {
-  0?: TrackType // North
-  1?: TrackType // East
-  2?: TrackType // South
-  3?: TrackType // West
-  overpass?: boolean
-}
+import type {Tile} from "./types"
 
 export const routeDieA: Tile[] = [
   {1: "d", 3: "d"},

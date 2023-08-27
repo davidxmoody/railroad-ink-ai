@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {type Rotation, type Tile, rotations} from "../logic/dice"
+  import {rotations} from "../logic/helpers"
+  import type {Rotation, Tile} from "../logic/types"
 
   export let tile: Tile | undefined
   export let size = 100
@@ -23,7 +24,7 @@
     )
   }
 
-  export function countTrackTypes(tile: Tile) {
+  function countTrackTypes(tile: Tile) {
     const counts = {d: 0, l: 0, e: 0}
     counts[tile[0] ?? "e"]++
     counts[tile[1] ?? "e"]++

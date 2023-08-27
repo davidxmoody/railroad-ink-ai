@@ -1,6 +1,6 @@
-import {Board, type Exit} from "./board"
-import {rotations, type TrackType} from "./dice"
-import type {Position, TrackPosition} from "./types"
+import {Board} from "./board"
+import {rotations} from "./helpers"
+import type {Exit, Position, TrackPosition, TrackType} from "./types"
 
 export default function calculateScore(board: Board) {
   return {

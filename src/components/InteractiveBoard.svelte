@@ -1,6 +1,6 @@
 <script lang="ts">
   import {Board} from "../logic/board"
-  import type {Tile} from "../logic/dice"
+  import type {Tile} from "../logic/types"
   import DrawnTile from "./DrawnTile.svelte"
 
   export let board: Board

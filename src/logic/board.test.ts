@@ -1,6 +1,6 @@
 import {describe, test, expect} from "vitest"
 import {Board} from "./board"
-import type {Tile} from "./dice"
+import type {Tile} from "./types"
 
 describe("tile placement", () => {
   function tryPlacement(

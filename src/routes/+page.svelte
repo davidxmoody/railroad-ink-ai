@@ -3,12 +3,8 @@
   import InteractiveBoard from "../components/InteractiveBoard.svelte"
   import ScoreTable from "../components/ScoreTable.svelte"
   import {Board} from "../logic/board"
-  import {
-    routeDieA,
-    routeDieB,
-    specialRouteTiles,
-    type Tile,
-  } from "../logic/dice"
+  import {routeDieA, routeDieB, specialRouteTiles} from "../logic/dice"
+  import type {Tile} from "../logic/types"
 
   let allTiles = [...routeDieA, ...routeDieB, ...specialRouteTiles]
   let selectedTileIndex = 0

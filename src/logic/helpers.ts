@@ -1,6 +1,5 @@
 import {Board} from "./board"
-import type {Rotation} from "./dice"
-import type {Position} from "./types"
+import type {Position, Rotation} from "./types"
 
 export function step(p: Position, r: Rotation): Position | undefined {
   const p2 = {
@@ -17,3 +16,5 @@ export function step(p: Position, r: Rotation): Position | undefined {
 export function flipRotation(r: Rotation) {
   return ((r + 2) % 4) as Rotation
 }
+
+export const rotations: Rotation[] = [0, 1, 2, 3]

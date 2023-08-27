@@ -1,7 +1,7 @@
 import {describe, test, expect} from "vitest"
 import {Board} from "./board"
 import calculateScore from "./calculateScore"
-import type {Tile} from "./dice"
+import type {Tile} from "./types"
 
 function generateBoard(placements: Array<{y: number; x: number; tile: Tile}>) {
   let board = new Board()
