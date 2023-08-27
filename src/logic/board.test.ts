@@ -10,11 +10,11 @@ describe("tile placement", () => {
     let board = new Board()
 
     for (const {y, x, tile} of placements.slice(0, placements.length - 1)) {
-      board = board.set(y, x, tile)
+      board = board.set({y, x}, tile)
     }
 
     const {y, x, tile} = placements[placements.length - 1]
-    const finalIsValid = board.isValid(y, x, tile)
+    const finalIsValid = board.isValid({y, x}, tile)
 
     expect(finalIsValid).toEqual(finalExpectation)
   }

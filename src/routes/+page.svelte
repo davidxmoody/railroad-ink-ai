@@ -15,46 +15,46 @@
   let board = new Board()
 
   const placements = [
-//    {y: 5, x: 0, tile: {2: "d", 3: "l"}},
-//    {y: 6, x: 0, tile: {0: "d", 1: "d"}},
-//    {y: 6, x: 1, tile: {0: "d", 3: "d"}},
-//    {y: 5, x: 1, tile: {1: "d", 2: "d"}},
-//    {y: 5, x: 2, tile: {1: "d", 3: "d"}},
-//    {y: 5, x: 3, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
-//    {y: 5, x: 4, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-//    {y: 6, x: 4, tile: {0: "d", 1: "d", 2: "d"}},
-//    {y: 6, x: 5, tile: {0: "d", 2: "d", 3: "d"}},
-//    {y: 5, x: 5, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-//    {y: 6, x: 3, tile: {0: "l", 2: "l"}},
-//    {y: 4, x: 3, tile: {0: "l", 2: "l"}},
-//    {y: 3, x: 3, tile: {0: "l", 2: "l"}},
-//    {y: 2, x: 3, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
-//    {y: 0, x: 3, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
-//    {y: 1, x: 3, tile: {0: "l", 2: "l"}},
-//    {y: 5, x: 6, tile: {1: "l", 3: "d"}},
-//    {y: 4, x: 4, tile: {1: "d", 2: "d"}},
-//    {y: 4, x: 5, tile: {2: "d", 3: "d"}},
-//    {y: 3, x: 0, tile: {2: "d", 3: "d"}},
-//    {y: 4, x: 0, tile: {0: "d", 1: "d"}},
-//    {y: 4, x: 1, tile: {2: "d", 3: "d"}},
-//    {y: 0, x: 4, tile: {0: "d", 1: "d", 3: "d"}},
-//    {y: 0, x: 5, tile: {0: "d", 1: "d", 3: "d"}},
-//    {y: 0, x: 6, tile: {0: "d", 1: "d", 3: "d"}},
-//    {y: 0, x: 2, tile: {0: "d", 1: "d", 3: "d"}},
-//    {y: 0, x: 1, tile: {0: "d", 1: "d", 3: "d"}},
-//    {y: 0, x: 0, tile: {0: "d", 1: "d", 3: "d"}},
+    //    {y: 5, x: 0, tile: {2: "d", 3: "l"}},
+    //    {y: 6, x: 0, tile: {0: "d", 1: "d"}},
+    //    {y: 6, x: 1, tile: {0: "d", 3: "d"}},
+    //    {y: 5, x: 1, tile: {1: "d", 2: "d"}},
+    //    {y: 5, x: 2, tile: {1: "d", 3: "d"}},
+    //    {y: 5, x: 3, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
+    //    {y: 5, x: 4, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+    //    {y: 6, x: 4, tile: {0: "d", 1: "d", 2: "d"}},
+    //    {y: 6, x: 5, tile: {0: "d", 2: "d", 3: "d"}},
+    //    {y: 5, x: 5, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+    //    {y: 6, x: 3, tile: {0: "l", 2: "l"}},
+    //    {y: 4, x: 3, tile: {0: "l", 2: "l"}},
+    //    {y: 3, x: 3, tile: {0: "l", 2: "l"}},
+    //    {y: 2, x: 3, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
+    //    {y: 0, x: 3, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
+    //    {y: 1, x: 3, tile: {0: "l", 2: "l"}},
+    //    {y: 5, x: 6, tile: {1: "l", 3: "d"}},
+    //    {y: 4, x: 4, tile: {1: "d", 2: "d"}},
+    //    {y: 4, x: 5, tile: {2: "d", 3: "d"}},
+    //    {y: 3, x: 0, tile: {2: "d", 3: "d"}},
+    //    {y: 4, x: 0, tile: {0: "d", 1: "d"}},
+    //    {y: 4, x: 1, tile: {2: "d", 3: "d"}},
+    //    {y: 0, x: 4, tile: {0: "d", 1: "d", 3: "d"}},
+    //    {y: 0, x: 5, tile: {0: "d", 1: "d", 3: "d"}},
+    //    {y: 0, x: 6, tile: {0: "d", 1: "d", 3: "d"}},
+    //    {y: 0, x: 2, tile: {0: "d", 1: "d", 3: "d"}},
+    //    {y: 0, x: 1, tile: {0: "d", 1: "d", 3: "d"}},
+    //    {y: 0, x: 0, tile: {0: "d", 1: "d", 3: "d"}},
   ] as const
 
   for (const {y, x, tile} of placements) {
-    board = board.set(y, x, tile)
+    board = board.set({y, x}, tile)
   }
 
   function onClickSquare(y: number, x: number) {
     if (
       allTiles[selectedTileIndex] &&
-      board.isValid(y, x, allTiles[selectedTileIndex])
+      board.isValid({y, x}, allTiles[selectedTileIndex])
     ) {
-      board = board.set(y, x, allTiles[selectedTileIndex])
+      board = board.set({y, x}, allTiles[selectedTileIndex])
     }
   }
 

@@ -6,7 +6,7 @@ import type {Tile} from "./dice"
 function generateBoard(placements: Array<{y: number; x: number; tile: Tile}>) {
   let board = new Board()
   for (const {y, x, tile} of placements) {
-    board = board.set(y, x, tile)
+    board = board.set({y, x}, tile)
   }
   return board
 }

@@ -1,17 +1,17 @@
 import {Board} from "./board"
 import type {Rotation} from "./dice"
+import type {Position} from "./types"
 
-export function step(
-  y: number,
-  x: number,
-  r: Rotation,
-): [number, number] | undefined {
-  const y2 = r === 0 ? y - 1 : r === 2 ? y + 1 : y
-  const x2 = r === 1 ? x + 1 : r === 3 ? x - 1 : x
+export function step(p: Position, r: Rotation): Position | undefined {
+  const p2 = {
+    y: r === 0 ? p.y - 1 : r === 2 ? p.y + 1 : p.y,
+    x: r === 1 ? p.x + 1 : r === 3 ? p.x - 1 : p.x,
+  }
 
-  if (y2 < 0 || x2 < 0 || y2 >= Board.size || x2 >= Board.size) return undefined
+  if (p2.y < 0 || p2.x < 0 || p2.y >= Board.size || p2.x >= Board.size)
+    return undefined
 
-  return [y2, x2]
+  return p2
 }
 
 export function flipRotation(r: Rotation) {

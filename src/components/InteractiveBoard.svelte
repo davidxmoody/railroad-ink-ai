@@ -20,13 +20,13 @@
           class="cell"
           class:center-square={isCenterSquare(y, x)}
           class:valid-placement={selectedTile &&
-            board.isValid(y, x, selectedTile)}
+            board.isValid({y, x}, selectedTile)}
           on:click={() => onClickSquare(y, x)}
           on:keypress={() => onClickSquare(y, x)}
           role="button"
           tabindex="0"
         >
-          <DrawnTile tile={board.get(y, x)} size={60} />
+          <DrawnTile tile={board.get({y, x})} size={60} />
 
           {#each Board.exits.filter((e) => e.y === y && e.x === x) as exit}
             <div

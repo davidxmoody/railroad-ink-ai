@@ -1,6 +1,6 @@
 import {Board, type Exit} from "./board"
 import {rotations, type TrackType} from "./dice"
-import {step} from "./helpers"
+import type {Position, TrackPosition} from "./types"
 
 export default function calculateScore(board: Board) {
   return {
@@ -20,7 +20,7 @@ function calculateCenterScore(board: Board) {
   let centerScore = 0
   for (let y = 2; y <= 4; y++) {
     for (let x = 2; x <= 4; x++) {
-      if (board.get(y, x)) centerScore++
+      if (board.get({y, x})) centerScore++
     }
   }
   return centerScore
@@ -48,7 +48,7 @@ function calculateExitsScore(board: Board) {
   for (const exit of Board.exits) {
     if (alreadyCheckedExits.includes(exit)) continue
 
-    const connectedExits = traverse(board, exit)
+    const connectedExits = findConnectedExits(board, exit)
     alreadyCheckedExits.push(...connectedExits)
 
     exitsScore += exitScoringTable[connectedExits.length] ?? 0
@@ -57,34 +57,32 @@ function calculateExitsScore(board: Board) {
   return exitsScore
 }
 
-function traverse(board: Board, startingExit: Exit) {
-  const tileAtExit = board.get(startingExit.y, startingExit.x)
+function findConnectedExits(board: Board, startingExit: Exit) {
+  const tileAtExit = board.get(startingExit)
   if (!tileAtExit?.[startingExit.r]) return [startingExit]
 
   const visitedExits: Exit[] = []
   const visitedTileKeys: Record<string, boolean> = {}
-  const unexploredTiles: Array<{y: number; x: number; t: TrackType}> = [
-    startingExit,
-  ]
+  const unexploredTrackPositions: TrackPosition[] = [startingExit]
 
-  while (unexploredTiles.length) {
-    const {y, x, t} = unexploredTiles.shift()!
-    const tile = board.get(y, x)!
+  while (unexploredTrackPositions.length) {
+    const tp = unexploredTrackPositions.shift()!
+    const tile = board.get(tp)!
 
-    const key = `${y},${x}${tile.overpass ? t : ""}`
+    const key = `${tp.y},${tp.x}${tile.overpass ? tp.t : ""}`
     if (visitedTileKeys[key]) continue
     visitedTileKeys[key] = true
 
     const connectedExit = Board.exits.find(
       (e) =>
-        e.y === y &&
-        e.x === x &&
+        e.y === tp.y &&
+        e.x === tp.x &&
         tile[e.r] &&
-        (!tile.overpass || tile[e.r] === t),
+        (!tile.overpass || tile[e.r] === tp.t),
     )
     if (connectedExit) visitedExits.push(connectedExit)
 
-    unexploredTiles.push(...board.getConnectedTiles(y, x, t))
+    unexploredTrackPositions.push(...board.getConnectedTiles(tp))
   }
 
   return visitedExits
@@ -93,13 +91,13 @@ function traverse(board: Board, startingExit: Exit) {
 function calculateLongestRouteScore(board: Board, trackType: TrackType) {
   let longestRoute = 0
 
-  board.forEachTile((y, x, tile) => {
+  board.forEachTile(({y, x}, tile) => {
     if (rotations.some((r) => tile[r] === trackType)) {
       traverseAllRoutes(
         board,
         trackType,
-        [y, x],
-        [[y, x]],
+        {y, x},
+        [{y, x}],
         [],
         (routeLength) => {
           if (routeLength > longestRoute) longestRoute = routeLength
@@ -114,21 +112,20 @@ function calculateLongestRouteScore(board: Board, trackType: TrackType) {
 function traverseAllRoutes(
   board: Board,
   trackType: TrackType,
-  p: [number, number],
-  visitedPositions: Array<[number, number]>,
+  p: Position,
+  visitedPositions: Position[],
   visitedConnections: string[],
   onRouteLength: (routeLength: number) => void,
 ) {
   onRouteLength(visitedPositions.length)
 
-  for (const r of rotations) {
-    if (board.get(p[0], p[1])?.[r] !== trackType) continue
+  const connectedTiles = board.getConnectedTiles(
+    {...p, t: trackType},
+    trackType,
+  )
 
-    const p2 = step(p[0], p[1], r)
-    if (!p2) continue
-    if (!board.get(...p2)) continue
-
-    const c = `${(p[0] + p2[0]) / 2},${(p[1] + p2[1]) / 2}`
+  for (const p2 of connectedTiles) {
+    const c = `${(p.y + p2.y) / 2},${(p.x + p2.x) / 2}`
     if (visitedConnections.includes(c)) continue
 
     traverseAllRoutes(
