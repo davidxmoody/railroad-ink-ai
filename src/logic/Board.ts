@@ -1,5 +1,5 @@
 import type {Tile, TrackType, Position, TrackPosition, Exit} from "./types"
-import {flipRotation, rotations, step} from "./helpers"
+import {flipRotation, hasOverpass, rotations, step} from "./helpers"
 
 export class Board {
   public static size = 7
@@ -103,7 +103,7 @@ export class Board {
       const newT = tile[r]
       if (!newT) return []
       if (onlyConsiderTrackType && newT !== onlyConsiderTrackType) return []
-      if (tile.overpass && newT !== tp.t) return []
+      if (hasOverpass(tile) && newT !== tp.t) return []
 
       const newPos = step(tp, r)
       if (!newPos) return []

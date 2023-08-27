@@ -1,5 +1,5 @@
 import {Board} from "./Board"
-import type {Position, Rotation} from "./types"
+import type {Position, Rotation, Tile} from "./types"
 
 export function step(p: Position, r: Rotation): Position | undefined {
   const p2 = {
@@ -18,3 +18,7 @@ export function flipRotation(r: Rotation) {
 }
 
 export const rotations: Rotation[] = [0, 1, 2, 3]
+
+export function hasOverpass(tile: Tile) {
+  return tile.overpass
+}

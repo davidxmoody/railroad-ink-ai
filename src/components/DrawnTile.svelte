@@ -1,12 +1,12 @@
 <script lang="ts">
-  import {rotations} from "../logic/helpers"
+  import {rotations, hasOverpass} from "../logic/helpers"
   import type {Rotation, Tile} from "../logic/types"
 
   export let tile: Tile | undefined
   export let size = 100
 
   function hasStation(tile: Tile) {
-    if (tile.overpass) return false
+    if (hasOverpass(tile)) return false
 
     const hasRoad =
       tile[0] === "D" || tile[1] === "D" || tile[2] === "D" || tile[3] === "D"
@@ -18,7 +18,7 @@
 
   function shouldDrawMiddleRoadEdge(tile: Tile, r: Rotation) {
     return (
-      (tile[r] === undefined || (tile[r] === "L" && tile.overpass)) &&
+      (tile[r] === undefined || (tile[r] === "L" && hasOverpass(tile))) &&
       (tile[((r + 3) % 4) as Rotation] === "D" ||
         tile[((r + 1) % 4) as Rotation] === "D")
     )
@@ -71,7 +71,7 @@
         {#if tile[r] === "D"}
           <path d="M40,0 v41 M60,0 v41" />
           <path stroke-width={2} d="M50,4 v9 m0,6 v9 m0,6 v9" />
-        {:else if tile[r] === "L" && tile.overpass}
+        {:else if tile[r] === "L" && hasOverpass(tile)}
           <path
             fill="transparent"
             d="M50,0 v31 M41,8 h18 m-18,12 h18 M30,28 q20,6 40,0"

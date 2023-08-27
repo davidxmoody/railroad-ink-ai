@@ -1,5 +1,5 @@
 import {Board} from "./Board"
-import {rotations} from "./helpers"
+import {hasOverpass, rotations} from "./helpers"
 import type {Exit, Position, TrackPosition, TrackType} from "./types"
 
 export default function calculateScore(board: Board) {
@@ -69,7 +69,7 @@ function findConnectedExits(board: Board, startingExit: Exit) {
     const tp = unexploredTrackPositions.shift()!
     const tile = board.get(tp)!
 
-    const key = `${tp.y},${tp.x}${tile.overpass ? tp.t : ""}`
+    const key = `${tp.y},${tp.x}${hasOverpass(tile) ? tp.t : ""}`
     if (visitedTileKeys[key]) continue
     visitedTileKeys[key] = true
 
@@ -78,7 +78,7 @@ function findConnectedExits(board: Board, startingExit: Exit) {
         e.y === tp.y &&
         e.x === tp.x &&
         tile[e.r] &&
-        (!tile.overpass || tile[e.r] === tp.t),
+        (!hasOverpass(tile) || tile[e.r] === tp.t),
     )
     if (connectedExit) visitedExits.push(connectedExit)
 
