@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Board} from "../logic/board"
+  import {Board} from "../logic/Board"
   import type {Tile} from "../logic/types"
   import DrawnTile from "./DrawnTile.svelte"
 

@@ -1,4 +1,4 @@
-import {Board} from "./board"
+import {Board} from "./Board"
 import type {Position, Rotation} from "./types"
 
 export function step(p: Position, r: Rotation): Position | undefined {

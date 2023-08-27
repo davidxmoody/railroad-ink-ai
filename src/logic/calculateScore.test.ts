@@ -1,5 +1,5 @@
 import {describe, test, expect} from "vitest"
-import {Board} from "./board"
+import {Board} from "./Board"
 import calculateScore from "./calculateScore"
 import type {Tile} from "./types"
 

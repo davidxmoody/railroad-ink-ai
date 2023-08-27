@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type {Board} from "../logic/board"
+  import type {Board} from "../logic/Board"
   import calculateScore from "../logic/calculateScore"
 
   export let board: Board

@@ -1,4 +1,4 @@
-import {Board} from "./board"
+import {Board} from "./Board"
 import {rotations} from "./helpers"
 import type {Exit, Position, TrackPosition, TrackType} from "./types"
 

@@ -2,7 +2,7 @@
   import DrawnTile from "../components/DrawnTile.svelte"
   import InteractiveBoard from "../components/InteractiveBoard.svelte"
   import ScoreTable from "../components/ScoreTable.svelte"
-  import {Board} from "../logic/board"
+  import {Board} from "../logic/Board"
   import {routeDieA, routeDieB, specialRouteTiles} from "../logic/dice"
   import type {Tile} from "../logic/types"
 
