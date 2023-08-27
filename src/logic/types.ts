@@ -1,4 +1,4 @@
-export type TrackType = "d" | "l"
+export type TrackType = "D" | "L"
 
 export type Rotation = 0 | 1 | 2 | 3
 

@@ -9,49 +9,49 @@
     if (tile.overpass) return false
 
     const hasRoad =
-      tile[0] === "d" || tile[1] === "d" || tile[2] === "d" || tile[3] === "d"
+      tile[0] === "D" || tile[1] === "D" || tile[2] === "D" || tile[3] === "D"
     const hasRail =
-      tile[0] === "l" || tile[1] === "l" || tile[2] === "l" || tile[3] === "l"
+      tile[0] === "L" || tile[1] === "L" || tile[2] === "L" || tile[3] === "L"
 
     return hasRoad && hasRail
   }
 
   function shouldDrawMiddleRoadEdge(tile: Tile, r: Rotation) {
     return (
-      (tile[r] === undefined || (tile[r] === "l" && tile.overpass)) &&
-      (tile[((r + 3) % 4) as Rotation] === "d" ||
-        tile[((r + 1) % 4) as Rotation] === "d")
+      (tile[r] === undefined || (tile[r] === "L" && tile.overpass)) &&
+      (tile[((r + 3) % 4) as Rotation] === "D" ||
+        tile[((r + 1) % 4) as Rotation] === "D")
     )
   }
 
   function countTrackTypes(tile: Tile) {
-    const counts = {d: 0, l: 0, e: 0}
-    counts[tile[0] ?? "e"]++
-    counts[tile[1] ?? "e"]++
-    counts[tile[2] ?? "e"]++
-    counts[tile[3] ?? "e"]++
+    const counts = {D: 0, L: 0, _: 0}
+    counts[tile[0] ?? "_"]++
+    counts[tile[1] ?? "_"]++
+    counts[tile[2] ?? "_"]++
+    counts[tile[3] ?? "_"]++
     return counts
   }
 
   function hasRailCross(tile: Tile) {
     const counts = countTrackTypes(tile)
-    return counts.l === 4 || (counts.l === 3 && counts.e === 1)
+    return counts.L === 4 || (counts.L === 3 && counts._ === 1)
   }
 
   function hasHorizontalStraightRail(tile: Tile) {
     return (
       tile[0] === undefined &&
-      tile[1] === "l" &&
+      tile[1] === "L" &&
       tile[2] === undefined &&
-      tile[3] === "l"
+      tile[3] === "L"
     )
   }
 
   function hasVerticalStraightRail(tile: Tile) {
     return (
-      tile[0] === "l" &&
+      tile[0] === "L" &&
       tile[1] === undefined &&
-      tile[2] === "l" &&
+      tile[2] === "L" &&
       tile[3] === undefined
     )
   }
@@ -68,15 +68,15 @@
   >
     {#each rotations as r}
       <g transform={`rotate(${r * 90}, 50, 50)`}>
-        {#if tile[r] === "d"}
+        {#if tile[r] === "D"}
           <path d="M40,0 v41 M60,0 v41" />
           <path stroke-width={2} d="M50,4 v9 m0,6 v9 m0,6 v9" />
-        {:else if tile[r] === "l" && tile.overpass}
+        {:else if tile[r] === "L" && tile.overpass}
           <path
             fill="transparent"
             d="M50,0 v31 M41,8 h18 m-18,12 h18 M30,28 q20,6 40,0"
           />
-        {:else if tile[r] === "l"}
+        {:else if tile[r] === "L"}
           <path d="M50,0 v51 M41,8 h18 m-18,12 h18 m-18,12 h18" />
         {/if}
 

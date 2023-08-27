@@ -27,8 +27,8 @@ describe("scoring", () => {
   describe("exits", () => {
     test("no exits connected", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 6, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 0, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 6, tile: {1: "D", 3: "D"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -38,9 +38,9 @@ describe("scoring", () => {
 
     test("two exits connected", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {0: "d", 3: "d"}},
-        {y: 2, x: 0, tile: {0: "l", 2: "d"}},
-        {y: 1, x: 0, tile: {2: "l", 3: "l"}},
+        {y: 3, x: 0, tile: {0: "D", 3: "D"}},
+        {y: 2, x: 0, tile: {0: "L", 2: "D"}},
+        {y: 1, x: 0, tile: {2: "L", 3: "L"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -50,13 +50,13 @@ describe("scoring", () => {
 
     test("four exits connected", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {0: "d", 3: "d"}},
-        {y: 2, x: 0, tile: {0: "l", 2: "d"}},
-        {y: 1, x: 0, tile: {0: "l", 2: "l", 3: "l"}},
-        {y: 0, x: 0, tile: {1: "l", 2: "l"}},
-        {y: 0, x: 1, tile: {0: "d", 1: "l", 2: "l", 3: "l"}},
-        {y: 0, x: 2, tile: {1: "l", 3: "l"}},
-        {y: 0, x: 3, tile: {0: "l", 3: "l"}},
+        {y: 3, x: 0, tile: {0: "D", 3: "D"}},
+        {y: 2, x: 0, tile: {0: "L", 2: "D"}},
+        {y: 1, x: 0, tile: {0: "L", 2: "L", 3: "L"}},
+        {y: 0, x: 0, tile: {1: "L", 2: "L"}},
+        {y: 0, x: 1, tile: {0: "D", 1: "L", 2: "L", 3: "L"}},
+        {y: 0, x: 2, tile: {1: "L", 3: "L"}},
+        {y: 0, x: 3, tile: {0: "L", 3: "L"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -66,18 +66,18 @@ describe("scoring", () => {
 
     test("two groups of two exits connected", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 1, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 2, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 3, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 4, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 5, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 6, tile: {1: "d", 3: "d"}},
-        {y: 1, x: 0, tile: {1: "l", 3: "l"}},
-        {y: 1, x: 1, tile: {1: "l", 3: "l"}},
-        {y: 1, x: 2, tile: {1: "l", 3: "l"}},
-        {y: 0, x: 3, tile: {0: "l", 2: "l"}},
-        {y: 1, x: 3, tile: {0: "l", 3: "l"}},
+        {y: 3, x: 0, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 1, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 2, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 3, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 4, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 5, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 6, tile: {1: "D", 3: "D"}},
+        {y: 1, x: 0, tile: {1: "L", 3: "L"}},
+        {y: 1, x: 1, tile: {1: "L", 3: "L"}},
+        {y: 1, x: 2, tile: {1: "L", 3: "L"}},
+        {y: 0, x: 3, tile: {0: "L", 2: "L"}},
+        {y: 1, x: 3, tile: {0: "L", 3: "L"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -87,14 +87,14 @@ describe("scoring", () => {
 
     test("two exits connected with overpass not connected", () => {
       const board = generateBoard([
-        {y: 0, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 1, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 2, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 3, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 4, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 6, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 5, x: 0, tile: {1: "l", 3: "l"}},
-        {y: 5, x: 1, tile: {0: "d", 1: "l", 2: "d", 3: "l", overpass: true}},
+        {y: 0, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 1, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 2, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 3, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 4, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 6, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 5, x: 0, tile: {1: "L", 3: "L"}},
+        {y: 5, x: 1, tile: {0: "D", 1: "L", 2: "D", 3: "L", overpass: true}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -104,19 +104,19 @@ describe("scoring", () => {
 
     test("two groups of two exits connected with overpass", () => {
       const board = generateBoard([
-        {y: 0, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 1, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 2, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 3, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 4, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 6, x: 1, tile: {0: "d", 2: "d"}},
-        {y: 5, x: 0, tile: {1: "l", 3: "l"}},
-        {y: 5, x: 1, tile: {0: "d", 1: "l", 2: "d", 3: "l", overpass: true}},
-        {y: 5, x: 2, tile: {1: "l", 3: "l"}},
-        {y: 5, x: 3, tile: {1: "l", 3: "l"}},
-        {y: 5, x: 4, tile: {1: "l", 3: "l"}},
-        {y: 5, x: 5, tile: {1: "l", 3: "l"}},
-        {y: 5, x: 6, tile: {1: "l", 3: "l"}},
+        {y: 0, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 1, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 2, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 3, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 4, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 6, x: 1, tile: {0: "D", 2: "D"}},
+        {y: 5, x: 0, tile: {1: "L", 3: "L"}},
+        {y: 5, x: 1, tile: {0: "D", 1: "L", 2: "D", 3: "L", overpass: true}},
+        {y: 5, x: 2, tile: {1: "L", 3: "L"}},
+        {y: 5, x: 3, tile: {1: "L", 3: "L"}},
+        {y: 5, x: 4, tile: {1: "L", 3: "L"}},
+        {y: 5, x: 5, tile: {1: "L", 3: "L"}},
+        {y: 5, x: 6, tile: {1: "L", 3: "L"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -126,30 +126,30 @@ describe("scoring", () => {
 
     test("all twelve exits connected", () => {
       const board = generateBoard([
-        {y: 3, x: 6, tile: {0: "l", 1: "d", 2: "l", 3: "l"}},
-        {y: 3, x: 0, tile: {0: "l", 1: "l", 2: "l", 3: "d"}},
-        {y: 4, x: 0, tile: {0: "l", 2: "l"}},
-        {y: 2, x: 0, tile: {0: "l", 2: "l"}},
-        {y: 2, x: 6, tile: {0: "l", 2: "l"}},
-        {y: 4, x: 6, tile: {0: "l", 2: "l"}},
-        {y: 1, x: 6, tile: {0: "l", 1: "l", 2: "l"}},
-        {y: 5, x: 6, tile: {0: "l", 1: "l", 2: "l"}},
-        {y: 5, x: 0, tile: {0: "l", 2: "l", 3: "l"}},
-        {y: 1, x: 0, tile: {0: "l", 2: "l", 3: "l"}},
-        {y: 6, x: 6, tile: {0: "l", 3: "l"}},
-        {y: 6, x: 0, tile: {0: "l", 1: "l"}},
-        {y: 0, x: 0, tile: {1: "l", 2: "l"}},
-        {y: 0, x: 6, tile: {2: "l", 3: "l"}},
-        {y: 0, x: 5, tile: {0: "d", 1: "l", 2: "l", 3: "l"}},
-        {y: 0, x: 1, tile: {0: "d", 1: "l", 2: "l", 3: "l"}},
-        {y: 6, x: 1, tile: {0: "l", 1: "l", 2: "d", 3: "l"}},
-        {y: 6, x: 5, tile: {0: "l", 1: "l", 2: "d", 3: "l"}},
-        {y: 6, x: 2, tile: {1: "l", 3: "l"}},
-        {y: 6, x: 4, tile: {1: "l", 3: "l"}},
-        {y: 0, x: 2, tile: {1: "l", 3: "l"}},
-        {y: 0, x: 4, tile: {1: "l", 3: "l"}},
-        {y: 0, x: 3, tile: {0: "l", 1: "l", 3: "l"}},
-        {y: 6, x: 3, tile: {1: "l", 2: "l", 3: "l"}},
+        {y: 3, x: 6, tile: {0: "L", 1: "D", 2: "L", 3: "L"}},
+        {y: 3, x: 0, tile: {0: "L", 1: "L", 2: "L", 3: "D"}},
+        {y: 4, x: 0, tile: {0: "L", 2: "L"}},
+        {y: 2, x: 0, tile: {0: "L", 2: "L"}},
+        {y: 2, x: 6, tile: {0: "L", 2: "L"}},
+        {y: 4, x: 6, tile: {0: "L", 2: "L"}},
+        {y: 1, x: 6, tile: {0: "L", 1: "L", 2: "L"}},
+        {y: 5, x: 6, tile: {0: "L", 1: "L", 2: "L"}},
+        {y: 5, x: 0, tile: {0: "L", 2: "L", 3: "L"}},
+        {y: 1, x: 0, tile: {0: "L", 2: "L", 3: "L"}},
+        {y: 6, x: 6, tile: {0: "L", 3: "L"}},
+        {y: 6, x: 0, tile: {0: "L", 1: "L"}},
+        {y: 0, x: 0, tile: {1: "L", 2: "L"}},
+        {y: 0, x: 6, tile: {2: "L", 3: "L"}},
+        {y: 0, x: 5, tile: {0: "D", 1: "L", 2: "L", 3: "L"}},
+        {y: 0, x: 1, tile: {0: "D", 1: "L", 2: "L", 3: "L"}},
+        {y: 6, x: 1, tile: {0: "L", 1: "L", 2: "D", 3: "L"}},
+        {y: 6, x: 5, tile: {0: "L", 1: "L", 2: "D", 3: "L"}},
+        {y: 6, x: 2, tile: {1: "L", 3: "L"}},
+        {y: 6, x: 4, tile: {1: "L", 3: "L"}},
+        {y: 0, x: 2, tile: {1: "L", 3: "L"}},
+        {y: 0, x: 4, tile: {1: "L", 3: "L"}},
+        {y: 0, x: 3, tile: {0: "L", 1: "L", 3: "L"}},
+        {y: 6, x: 3, tile: {1: "L", 2: "L", 3: "L"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -159,34 +159,34 @@ describe("scoring", () => {
 
     test("three groups of exits connected", () => {
       const board = generateBoard([
-        {y: 5, x: 0, tile: {2: "d", 3: "l"}},
-        {y: 6, x: 0, tile: {0: "d", 1: "d"}},
-        {y: 6, x: 1, tile: {0: "d", 3: "d"}},
-        {y: 5, x: 1, tile: {1: "d", 2: "d"}},
-        {y: 5, x: 2, tile: {1: "d", 3: "d"}},
-        {y: 5, x: 3, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
-        {y: 5, x: 4, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-        {y: 6, x: 4, tile: {0: "d", 1: "d", 2: "d"}},
-        {y: 6, x: 5, tile: {0: "d", 2: "d", 3: "d"}},
-        {y: 5, x: 5, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-        {y: 6, x: 3, tile: {0: "l", 2: "l"}},
-        {y: 4, x: 3, tile: {0: "l", 2: "l"}},
-        {y: 3, x: 3, tile: {0: "l", 2: "l"}},
-        {y: 2, x: 3, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
-        {y: 0, x: 3, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
-        {y: 1, x: 3, tile: {0: "l", 2: "l"}},
-        {y: 5, x: 6, tile: {1: "l", 3: "d"}},
-        {y: 4, x: 4, tile: {1: "d", 2: "d"}},
-        {y: 4, x: 5, tile: {2: "d", 3: "d"}},
-        {y: 3, x: 0, tile: {2: "d", 3: "d"}},
-        {y: 4, x: 0, tile: {0: "d", 1: "d"}},
-        {y: 4, x: 1, tile: {2: "d", 3: "d"}},
-        {y: 0, x: 4, tile: {0: "d", 1: "d", 3: "d"}},
-        {y: 0, x: 5, tile: {0: "d", 1: "d", 3: "d"}},
-        {y: 0, x: 6, tile: {0: "d", 1: "d", 3: "d"}},
-        {y: 0, x: 2, tile: {0: "d", 1: "d", 3: "d"}},
-        {y: 0, x: 1, tile: {0: "d", 1: "d", 3: "d"}},
-        {y: 0, x: 0, tile: {0: "d", 1: "d", 3: "d"}},
+        {y: 5, x: 0, tile: {2: "D", 3: "L"}},
+        {y: 6, x: 0, tile: {0: "D", 1: "D"}},
+        {y: 6, x: 1, tile: {0: "D", 3: "D"}},
+        {y: 5, x: 1, tile: {1: "D", 2: "D"}},
+        {y: 5, x: 2, tile: {1: "D", 3: "D"}},
+        {y: 5, x: 3, tile: {0: "L", 1: "D", 2: "L", 3: "D", overpass: true}},
+        {y: 5, x: 4, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
+        {y: 6, x: 4, tile: {0: "D", 1: "D", 2: "D"}},
+        {y: 6, x: 5, tile: {0: "D", 2: "D", 3: "D"}},
+        {y: 5, x: 5, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
+        {y: 6, x: 3, tile: {0: "L", 2: "L"}},
+        {y: 4, x: 3, tile: {0: "L", 2: "L"}},
+        {y: 3, x: 3, tile: {0: "L", 2: "L"}},
+        {y: 2, x: 3, tile: {0: "L", 1: "D", 2: "L", 3: "D", overpass: true}},
+        {y: 0, x: 3, tile: {0: "L", 1: "D", 2: "L", 3: "D", overpass: true}},
+        {y: 1, x: 3, tile: {0: "L", 2: "L"}},
+        {y: 5, x: 6, tile: {1: "L", 3: "D"}},
+        {y: 4, x: 4, tile: {1: "D", 2: "D"}},
+        {y: 4, x: 5, tile: {2: "D", 3: "D"}},
+        {y: 3, x: 0, tile: {2: "D", 3: "D"}},
+        {y: 4, x: 0, tile: {0: "D", 1: "D"}},
+        {y: 4, x: 1, tile: {2: "D", 3: "D"}},
+        {y: 0, x: 4, tile: {0: "D", 1: "D", 3: "D"}},
+        {y: 0, x: 5, tile: {0: "D", 1: "D", 3: "D"}},
+        {y: 0, x: 6, tile: {0: "D", 1: "D", 3: "D"}},
+        {y: 0, x: 2, tile: {0: "D", 1: "D", 3: "D"}},
+        {y: 0, x: 1, tile: {0: "D", 1: "D", 3: "D"}},
+        {y: 0, x: 0, tile: {0: "D", 1: "D", 3: "D"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -198,9 +198,9 @@ describe("scoring", () => {
   describe("center square", () => {
     test("one filled", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 1, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 2, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 0, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 1, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 2, tile: {1: "D", 3: "D"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -210,12 +210,12 @@ describe("scoring", () => {
 
     test("four filled", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 1, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 2, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 3, tile: {2: "d", 3: "d"}},
-        {y: 4, x: 3, tile: {0: "d", 1: "d"}},
-        {y: 4, x: 4, tile: {2: "d", 3: "d"}},
+        {y: 3, x: 0, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 1, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 2, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 3, tile: {2: "D", 3: "D"}},
+        {y: 4, x: 3, tile: {0: "D", 1: "D"}},
+        {y: 4, x: 4, tile: {2: "D", 3: "D"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -225,17 +225,17 @@ describe("scoring", () => {
 
     test("nine filled", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 1, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 2, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-        {y: 2, x: 2, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-        {y: 3, x: 3, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-        {y: 4, x: 2, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-        {y: 4, x: 3, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-        {y: 4, x: 4, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-        {y: 3, x: 4, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-        {y: 2, x: 4, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
-        {y: 2, x: 3, tile: {0: "d", 1: "d", 2: "d", 3: "d"}},
+        {y: 3, x: 0, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 1, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 2, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
+        {y: 2, x: 2, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
+        {y: 3, x: 3, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
+        {y: 4, x: 2, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
+        {y: 4, x: 3, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
+        {y: 4, x: 4, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
+        {y: 3, x: 4, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
+        {y: 2, x: 4, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
+        {y: 2, x: 3, tile: {0: "D", 1: "D", 2: "D", 3: "D"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -246,7 +246,7 @@ describe("scoring", () => {
 
   describe("errors", () => {
     test("one error", () => {
-      const board = generateBoard([{y: 3, x: 0, tile: {1: "d", 3: "d"}}])
+      const board = generateBoard([{y: 3, x: 0, tile: {1: "D", 3: "D"}}])
 
       expect(calculateScore(board)).toMatchObject({
         errors: -1,
@@ -255,15 +255,15 @@ describe("scoring", () => {
 
     test("many errors", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 6, tile: {1: "d", 2: "d"}},
-        {y: 6, x: 5, tile: {1: "d", 2: "d"}},
-        {y: 6, x: 6, tile: {1: "d", 3: "d"}},
-        {y: 6, x: 3, tile: {1: "l", 2: "l"}},
-        {y: 6, x: 4, tile: {0: "d", 1: "l", 2: "d", 3: "l", overpass: true}},
-        {y: 3, x: 1, tile: {0: "l", 1: "d", 2: "l", 3: "d", overpass: true}},
-        {y: 4, x: 1, tile: {0: "l", 1: "l", 2: "l", 3: "l"}},
-        {y: 4, x: 0, tile: {1: "l", 3: "l"}},
+        {y: 3, x: 0, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 6, tile: {1: "D", 2: "D"}},
+        {y: 6, x: 5, tile: {1: "D", 2: "D"}},
+        {y: 6, x: 6, tile: {1: "D", 3: "D"}},
+        {y: 6, x: 3, tile: {1: "L", 2: "L"}},
+        {y: 6, x: 4, tile: {0: "D", 1: "L", 2: "D", 3: "L", overpass: true}},
+        {y: 3, x: 1, tile: {0: "L", 1: "D", 2: "L", 3: "D", overpass: true}},
+        {y: 4, x: 1, tile: {0: "L", 1: "L", 2: "L", 3: "L"}},
+        {y: 4, x: 0, tile: {1: "L", 3: "L"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -274,7 +274,7 @@ describe("scoring", () => {
 
   describe("longest road/rail", () => {
     test("one segment long", () => {
-      const board = generateBoard([{y: 3, x: 0, tile: {1: "d", 3: "d"}}])
+      const board = generateBoard([{y: 3, x: 0, tile: {1: "D", 3: "D"}}])
 
       expect(calculateScore(board)).toMatchObject({
         road: 1,
@@ -284,12 +284,12 @@ describe("scoring", () => {
 
     test("several segments long", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {1: "d", 3: "d"}},
-        {y: 3, x: 1, tile: {2: "d", 3: "d"}},
-        {y: 4, x: 1, tile: {0: "d", 1: "d"}},
-        {y: 4, x: 2, tile: {0: "d", 3: "d"}},
-        {y: 3, x: 2, tile: {1: "d", 2: "d"}},
-        {y: 3, x: 3, tile: {1: "d", 3: "d"}},
+        {y: 3, x: 0, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 1, tile: {2: "D", 3: "D"}},
+        {y: 4, x: 1, tile: {0: "D", 1: "D"}},
+        {y: 4, x: 2, tile: {0: "D", 3: "D"}},
+        {y: 3, x: 2, tile: {1: "D", 2: "D"}},
+        {y: 3, x: 3, tile: {1: "D", 3: "D"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -300,10 +300,10 @@ describe("scoring", () => {
 
     test("simple loop", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {1: "d", 2: "d", 3: "d"}},
-        {y: 3, x: 1, tile: {2: "d", 3: "d"}},
-        {y: 4, x: 1, tile: {0: "d", 3: "d"}},
-        {y: 4, x: 0, tile: {0: "d", 1: "d"}},
+        {y: 3, x: 0, tile: {1: "D", 2: "D", 3: "D"}},
+        {y: 3, x: 1, tile: {2: "D", 3: "D"}},
+        {y: 4, x: 1, tile: {0: "D", 3: "D"}},
+        {y: 4, x: 0, tile: {0: "D", 1: "D"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({
@@ -314,17 +314,17 @@ describe("scoring", () => {
 
     test("tricky loop with rail", () => {
       const board = generateBoard([
-        {y: 3, x: 0, tile: {0: "d", 1: "d", 2: "l", 3: "d"}},
-        {y: 4, x: 0, tile: {0: "l", 2: "l"}},
-        {y: 5, x: 0, tile: {0: "l", 2: "l"}},
-        {y: 6, x: 0, tile: {0: "l", 1: "l"}},
-        {y: 3, x: 1, tile: {0: "d", 1: "d", 2: "l", 3: "d"}},
-        {y: 4, x: 1, tile: {0: "l", 2: "l"}},
-        {y: 5, x: 1, tile: {0: "l", 2: "l"}},
-        {y: 6, x: 1, tile: {0: "l", 3: "l"}},
-        {y: 3, x: 2, tile: {1: "l", 3: "d"}},
-        {y: 2, x: 0, tile: {1: "d", 2: "d"}},
-        {y: 2, x: 1, tile: {2: "d", 3: "d"}},
+        {y: 3, x: 0, tile: {0: "D", 1: "D", 2: "L", 3: "D"}},
+        {y: 4, x: 0, tile: {0: "L", 2: "L"}},
+        {y: 5, x: 0, tile: {0: "L", 2: "L"}},
+        {y: 6, x: 0, tile: {0: "L", 1: "L"}},
+        {y: 3, x: 1, tile: {0: "D", 1: "D", 2: "L", 3: "D"}},
+        {y: 4, x: 1, tile: {0: "L", 2: "L"}},
+        {y: 5, x: 1, tile: {0: "L", 2: "L"}},
+        {y: 6, x: 1, tile: {0: "L", 3: "L"}},
+        {y: 3, x: 2, tile: {1: "L", 3: "D"}},
+        {y: 2, x: 0, tile: {1: "D", 2: "D"}},
+        {y: 2, x: 1, tile: {2: "D", 3: "D"}},
       ])
 
       expect(calculateScore(board)).toMatchObject({

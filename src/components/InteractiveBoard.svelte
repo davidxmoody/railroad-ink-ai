@@ -31,7 +31,7 @@
           {#each Board.exits.filter((e) => e.y === y && e.x === x) as exit}
             <div
               class="exit"
-              style:background={exit.t === "l" ? "red" : "blue"}
+              style:background={exit.t === "L" ? "red" : "blue"}
               style:transform={`rotate(${90 * exit.r}deg)`}
             />
           {/each}

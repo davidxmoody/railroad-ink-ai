@@ -5,8 +5,8 @@ import type {Exit, Position, TrackPosition, TrackType} from "./types"
 export default function calculateScore(board: Board) {
   return {
     exits: calculateExitsScore(board),
-    road: calculateLongestRouteScore(board, "d"),
-    rail: calculateLongestRouteScore(board, "l"),
+    road: calculateLongestRouteScore(board, "D"),
+    rail: calculateLongestRouteScore(board, "L"),
     center: calculateCenterScore(board),
     errors: calculateErrorsScore(board),
   }
