@@ -1,58 +1,47 @@
 <script lang="ts">
-  import {rotations, hasOverpass} from "../logic/helpers"
-  import type {Rotation, Tile} from "../logic/types"
+  import {rotations, hasOverpass, hasTrackType} from "../logic/helpers"
+  import type {Rotation, TileString, MaybeTrackType} from "../logic/types"
 
-  export let tile: Tile | undefined
+  export let tile: TileString | undefined
   export let size = 100
 
-  function hasStation(tile: Tile) {
-    if (hasOverpass(tile)) return false
-
-    const hasRoad =
-      tile[0] === "D" || tile[1] === "D" || tile[2] === "D" || tile[3] === "D"
-    const hasRail =
-      tile[0] === "L" || tile[1] === "L" || tile[2] === "L" || tile[3] === "L"
-
-    return hasRoad && hasRail
+  function hasStation(tile: TileString) {
+    return (
+      !hasOverpass(tile) && hasTrackType(tile, "D") && hasTrackType(tile, "L")
+    )
   }
 
-  function shouldDrawMiddleRoadEdge(tile: Tile, r: Rotation) {
+  function shouldDrawMiddleRoadEdge(tile: TileString, r: Rotation) {
     return (
-      (tile[r] === undefined || (tile[r] === "L" && hasOverpass(tile))) &&
+      (tile[r] === "_" || (tile[r] === "L" && hasOverpass(tile))) &&
       (tile[((r + 3) % 4) as Rotation] === "D" ||
         tile[((r + 1) % 4) as Rotation] === "D")
     )
   }
 
-  function countTrackTypes(tile: Tile) {
+  function countTrackTypes(tile: TileString) {
     const counts = {D: 0, L: 0, _: 0}
-    counts[tile[0] ?? "_"]++
-    counts[tile[1] ?? "_"]++
-    counts[tile[2] ?? "_"]++
-    counts[tile[3] ?? "_"]++
+    counts[tile[0] as MaybeTrackType]++
+    counts[tile[1] as MaybeTrackType]++
+    counts[tile[2] as MaybeTrackType]++
+    counts[tile[3] as MaybeTrackType]++
     return counts
   }
 
-  function hasRailCross(tile: Tile) {
+  function hasRailCross(tile: TileString) {
     const counts = countTrackTypes(tile)
     return counts.L === 4 || (counts.L === 3 && counts._ === 1)
   }
 
-  function hasHorizontalStraightRail(tile: Tile) {
+  function hasHorizontalStraightRail(tile: TileString) {
     return (
-      tile[0] === undefined &&
-      tile[1] === "L" &&
-      tile[2] === undefined &&
-      tile[3] === "L"
+      tile[0] === "_" && tile[1] === "L" && tile[2] === "_" && tile[3] === "L"
     )
   }
 
-  function hasVerticalStraightRail(tile: Tile) {
+  function hasVerticalStraightRail(tile: TileString) {
     return (
-      tile[0] === "L" &&
-      tile[1] === undefined &&
-      tile[2] === "L" &&
-      tile[3] === undefined
+      tile[0] === "L" && tile[1] === "_" && tile[2] === "L" && tile[3] === "_"
     )
   }
 </script>

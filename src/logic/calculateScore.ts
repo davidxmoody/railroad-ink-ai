@@ -1,5 +1,5 @@
 import {Board} from "./Board"
-import {hasOverpass, rotations} from "./helpers"
+import {hasOverpass, hasTrackType} from "./helpers"
 import type {Exit, Position, TrackPosition, TrackType} from "./types"
 
 export default function calculateScore(board: Board) {
@@ -59,7 +59,7 @@ function calculateExitsScore(board: Board) {
 
 function findConnectedExits(board: Board, startingExit: Exit) {
   const tileAtExit = board.get(startingExit)
-  if (!tileAtExit?.[startingExit.r]) return [startingExit]
+  if (!tileAtExit || tileAtExit[startingExit.r] === "_") return [startingExit]
 
   const visitedExits: Exit[] = []
   const visitedTileKeys: Record<string, boolean> = {}
@@ -77,7 +77,7 @@ function findConnectedExits(board: Board, startingExit: Exit) {
       (e) =>
         e.y === tp.y &&
         e.x === tp.x &&
-        tile[e.r] &&
+        tile[e.r] !== "_" &&
         (!hasOverpass(tile) || tile[e.r] === tp.t),
     )
     if (connectedExit) visitedExits.push(connectedExit)
@@ -92,7 +92,7 @@ function calculateLongestRouteScore(board: Board, trackType: TrackType) {
   let longestRoute = 0
 
   board.forEachTile(({y, x}, tile) => {
-    if (rotations.some((r) => tile[r] === trackType)) {
+    if (hasTrackType(tile, trackType)) {
       traverseAllRoutes(
         board,
         trackType,

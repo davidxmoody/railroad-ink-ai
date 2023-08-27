@@ -1,10 +1,10 @@
 <script lang="ts">
   import {Board} from "../logic/Board"
-  import type {Tile} from "../logic/types"
+  import type {TileString} from "../logic/types"
   import DrawnTile from "./DrawnTile.svelte"
 
   export let board: Board
-  export let selectedTile: Tile | undefined
+  export let selectedTile: TileString | undefined
   export let onClickSquare: (y: number, x: number) => void
 
   function isCenterSquare(y: number, x: number) {

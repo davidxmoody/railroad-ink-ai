@@ -1,5 +1,5 @@
 import {Board} from "./Board"
-import type {Position, Rotation, Tile} from "./types"
+import type {Position, Rotation, TileString, TrackType} from "./types"
 
 export function step(p: Position, r: Rotation): Position | undefined {
   const p2 = {
@@ -19,6 +19,18 @@ export function flipRotation(r: Rotation) {
 
 export const rotations: Rotation[] = [0, 1, 2, 3]
 
-export function hasOverpass(tile: Tile) {
-  return tile.overpass
+export function hasOverpass(tile: TileString) {
+  return tile[4] === "o"
+}
+
+export function hasTrackType(tile: TileString, trackType: TrackType) {
+  return rotations.some((r) => tile[r] === trackType)
+}
+
+export function rotateTile(tile: TileString) {
+  return `${tile[3]}${tile[0]}${tile[1]}${tile[2]}${tile[4]}` as TileString
+}
+
+export function flipTile(tile: TileString) {
+  return `${tile[0]}${tile[3]}${tile[2]}${tile[1]}${tile[4]}` as TileString
 }

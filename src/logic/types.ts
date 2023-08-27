@@ -1,14 +1,13 @@
 export type TrackType = "D" | "L"
 
-export type Rotation = 0 | 1 | 2 | 3
+export type MaybeTrackType = TrackType | "_"
 
-export interface Tile {
-  0?: TrackType // North
-  1?: TrackType // East
-  2?: TrackType // South
-  3?: TrackType // West
-  overpass?: boolean
-}
+export type TileString =
+  `${MaybeTrackType}${MaybeTrackType}${MaybeTrackType}${MaybeTrackType}${
+    | "o"
+    | ""}`
+
+export type Rotation = 0 | 1 | 2 | 3
 
 export type Position = {y: number; x: number}
 

@@ -1,10 +1,10 @@
 import {describe, test, expect} from "vitest"
 import {Board} from "./Board"
-import type {Tile} from "./types"
+import type {TileString} from "./types"
 
 describe("tile placement", () => {
   function tryPlacement(
-    placements: Array<{y: number; x: number; tile: Tile}>,
+    placements: Array<{y: number; x: number; tile: TileString}>,
     finalExpectation: boolean,
   ) {
     let board = new Board()
@@ -20,26 +20,26 @@ describe("tile placement", () => {
   }
 
   test("exit connection", () => {
-    tryPlacement([{y: 3, x: 6, tile: {1: "D", 3: "D"}}], true)
+    tryPlacement([{y: 3, x: 6, tile: "_D_D"}], true)
   })
 
   test("exit connection invalid track type", () => {
-    tryPlacement([{y: 3, x: 6, tile: {1: "L", 3: "L"}}], false)
+    tryPlacement([{y: 3, x: 6, tile: "_L_L"}], false)
   })
 
   test("exit connection invalid rotation", () => {
-    tryPlacement([{y: 3, x: 6, tile: {0: "D", 2: "D"}}], false)
+    tryPlacement([{y: 3, x: 6, tile: "D_D_"}], false)
   })
 
   test("not connected to anything", () => {
-    tryPlacement([{y: 3, x: 3, tile: {1: "D", 3: "D"}}], false)
+    tryPlacement([{y: 3, x: 3, tile: "_D_D"}], false)
   })
 
   test("space already filled", () => {
     tryPlacement(
       [
-        {y: 3, x: 6, tile: {1: "D", 3: "D"}},
-        {y: 3, x: 6, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 6, tile: "_D_D"},
+        {y: 3, x: 6, tile: "_D_D"},
       ],
       false,
     )
@@ -48,8 +48,8 @@ describe("tile placement", () => {
   test("existing tile connection", () => {
     tryPlacement(
       [
-        {y: 3, x: 6, tile: {1: "D", 2: "D"}},
-        {y: 4, x: 6, tile: {0: "D", 3: "D"}},
+        {y: 3, x: 6, tile: "_DD_"},
+        {y: 4, x: 6, tile: "D__D"},
       ],
       true,
     )
@@ -58,8 +58,8 @@ describe("tile placement", () => {
   test("existing tile connection invalid track type", () => {
     tryPlacement(
       [
-        {y: 3, x: 6, tile: {1: "D", 2: "D"}},
-        {y: 4, x: 6, tile: {0: "L", 3: "L"}},
+        {y: 3, x: 6, tile: "_DD_"},
+        {y: 4, x: 6, tile: "L__L"},
       ],
       false,
     )
@@ -68,8 +68,8 @@ describe("tile placement", () => {
   test("existing tile invalid rotation", () => {
     tryPlacement(
       [
-        {y: 3, x: 6, tile: {1: "D", 2: "D"}},
-        {y: 4, x: 6, tile: {1: "D", 3: "D"}},
+        {y: 3, x: 6, tile: "_DD_"},
+        {y: 4, x: 6, tile: "_D_D"},
       ],
       false,
     )
@@ -78,8 +78,8 @@ describe("tile placement", () => {
   test("existing tile no connection", () => {
     tryPlacement(
       [
-        {y: 5, x: 0, tile: {1: "L", 3: "L"}},
-        {y: 6, x: 0, tile: {1: "D", 3: "D"}},
+        {y: 5, x: 0, tile: "_L_L"},
+        {y: 6, x: 0, tile: "_D_D"},
       ],
       false,
     )
@@ -88,9 +88,9 @@ describe("tile placement", () => {
   test("existing tile ignoring exit", () => {
     tryPlacement(
       [
-        {y: 5, x: 0, tile: {2: "D", 3: "L"}},
-        {y: 6, x: 0, tile: {0: "D", 1: "D"}},
-        {y: 6, x: 1, tile: {0: "D", 3: "D"}},
+        {y: 5, x: 0, tile: "__DL"},
+        {y: 6, x: 0, tile: "DD__"},
+        {y: 6, x: 1, tile: "D__D"},
       ],
       true,
     )
