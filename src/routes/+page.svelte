@@ -4,7 +4,7 @@
   import ScoreTable from "../components/ScoreTable.svelte"
   import {Board} from "../logic/Board"
   import {specialRouteTiles} from "../logic/dice"
-  import {flipTile, rotateTile} from "../logic/helpers"
+  import {flipTile, isCenterSquare, rotateTile} from "../logic/helpers"
   import type {Position, TileString} from "../logic/types"
   import gameState from "../stores/gameState"
 
@@ -27,11 +27,6 @@
         ? specialRouteTiles[selectionState.index]
         : $gameState.availableTiles[selectionState.index]
       : undefined
-
-  // TODO move to helpers and maybe share with scoring logic also change to Position type
-  function isCenterSquare(y: number, x: number) {
-    return y >= 2 && y <= 4 && x >= 2 && x <= 4
-  }
 </script>
 
 <div style:margin="24px">
@@ -64,7 +59,7 @@
           {#each {length: Board.size} as _, x}
             <button
               class="cell"
-              class:center-square={isCenterSquare(y, x)}
+              class:center-square={isCenterSquare({y, x})}
               class:valid-placement={selectedTile &&
                 $gameState.board.isValidWithTransform({y, x}, selectedTile)}
               class:pending={selectionState.type ===

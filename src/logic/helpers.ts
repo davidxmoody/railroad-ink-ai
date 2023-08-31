@@ -51,3 +51,7 @@ export function getAllTransforms(tile: TileString) {
   }
   return transforms.values()
 }
+
+export function isCenterSquare(p: Position) {
+  return p.y >= 2 && p.y <= 4 && p.x >= 2 && p.x <= 4
+}

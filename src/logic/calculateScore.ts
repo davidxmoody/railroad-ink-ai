@@ -1,5 +1,5 @@
 import {Board} from "./Board"
-import {hasOverpass, hasTrackType} from "./helpers"
+import {hasOverpass, hasTrackType, isCenterSquare} from "./helpers"
 import type {Exit, Position, TrackPosition, TrackType} from "./types"
 
 export default function calculateScore(board: Board) {
@@ -18,9 +18,11 @@ function calculateErrorsScore(board: Board) {
 
 function calculateCenterScore(board: Board) {
   let centerScore = 0
-  for (let y = 2; y <= 4; y++) {
-    for (let x = 2; x <= 4; x++) {
-      if (board.get({y, x})) centerScore++
+  for (let y = 0; y <= Board.size; y++) {
+    for (let x = 0; x <= Board.size; x++) {
+      if (isCenterSquare({y, x}) && board.get({y, x})) {
+        centerScore++
+      }
     }
   }
   return centerScore
