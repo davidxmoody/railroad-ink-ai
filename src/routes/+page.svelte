@@ -1,76 +1,202 @@
 <script lang="ts">
+  import DiceSelection from "../components/DiceSelection.svelte"
   import DrawnTile from "../components/DrawnTile.svelte"
-  import InteractiveBoard from "../components/InteractiveBoard.svelte"
   import ScoreTable from "../components/ScoreTable.svelte"
   import {Board} from "../logic/Board"
-  import {routeDieA, routeDieB, specialRouteTiles} from "../logic/dice"
-  import {rotateTile, flipTile} from "../logic/helpers"
+  import {specialRouteTiles} from "../logic/dice"
+  import {flipTile, rotateTile} from "../logic/helpers"
+  import type {Position, TileString} from "../logic/types"
+  import gameState from "../stores/gameState"
 
-  let allTiles = [...routeDieA, ...routeDieB, ...specialRouteTiles]
-  let selectedTileIndex = 0
-  let board = new Board()
+  type SelectionState =
+    | {type: "noSelection"}
+    | {type: "tileSelected"; special: boolean; index: number}
+    | {
+        type: "tileAndPositionSelected"
+        special: boolean
+        index: number
+        position: Position
+        tile: TileString
+      }
 
-  function onClickSquare(y: number, x: number) {
-    if (
-      allTiles[selectedTileIndex] &&
-      board.isValid({y, x}, allTiles[selectedTileIndex])
-    ) {
-      board = board.set({y, x}, allTiles[selectedTileIndex])
-    }
+  let selectionState: SelectionState = {type: "noSelection"}
+
+  $: selectedTile =
+    selectionState.type !== "noSelection"
+      ? selectionState.special
+        ? specialRouteTiles[selectionState.index]
+        : $gameState.availableTiles[selectionState.index]
+      : undefined
+
+  // TODO move to helpers and maybe share with scoring logic also change to Position type
+  function isCenterSquare(y: number, x: number) {
+    return y >= 2 && y <= 4 && x >= 2 && x <= 4
   }
 </script>
 
 <div style:margin="24px">
+  <DiceSelection
+    tiles={specialRouteTiles}
+    usedTileIndexes={$gameState.usedSpecialTileIndexes}
+    selectedTileIndex={selectionState.type !== "noSelection" &&
+    selectionState.special
+      ? selectionState.index
+      : undefined}
+    onSelectTile={(index) =>
+      (selectionState = {type: "tileSelected", special: true, index})}
+  />
+
+  <DiceSelection
+    tiles={$gameState.availableTiles}
+    usedTileIndexes={$gameState.usedTileIndexes}
+    selectedTileIndex={selectionState.type !== "noSelection" &&
+    !selectionState.special
+      ? selectionState.index
+      : undefined}
+    onSelectTile={(index) =>
+      (selectionState = {type: "tileSelected", special: false, index})}
+  />
+
   <div style:display="flex">
-    <InteractiveBoard
-      {board}
-      selectedTile={allTiles[selectedTileIndex]}
-      {onClickSquare}
-    />
-    <div style:margin-left="24px">
-      <ScoreTable {board} />
-    </div>
-  </div>
+    <div>
+      {#each {length: Board.size} as _, y}
+        <div style:display="flex">
+          {#each {length: Board.size} as _, x}
+            <button
+              class="cell"
+              class:center-square={isCenterSquare(y, x)}
+              class:valid-placement={selectedTile &&
+                $gameState.board.isValidWithTransform({y, x}, selectedTile)}
+              class:pending={selectionState.type ===
+                "tileAndPositionSelected" &&
+                selectionState.position.y === y &&
+                selectionState.position.x === x}
+              on:click={() => {
+                if (selectedTile && selectionState.type !== "noSelection") {
+                  selectionState = {
+                    type: "tileAndPositionSelected",
+                    special: selectionState.special,
+                    index: selectionState.index,
+                    position: {y, x},
+                    tile: selectedTile,
+                  }
+                }
+              }}
+            >
+              <DrawnTile
+                tile={selectionState.type === "tileAndPositionSelected" &&
+                selectionState.position.y === y &&
+                selectionState.position.x === x
+                  ? selectionState.tile
+                  : $gameState.board.get({y, x})}
+                size={60}
+              />
 
-  <div style:margin-top="24px">
-    <button
-      on:click={() => {
-        allTiles = allTiles.map(rotateTile)
-      }}>Rotate</button
-    >
-    <button
-      style:margin-left="8px"
-      on:click={() => {
-        allTiles = allTiles.map(flipTile)
-      }}>Flip</button
-    >
-  </div>
+              {#each Board.exits.filter((e) => e.y === y && e.x === x) as exit}
+                <div
+                  class="exit"
+                  style:background={exit.t === "L" ? "red" : "blue"}
+                  style:transform={`rotate(${90 * exit.r}deg)`}
+                />
+              {/each}
+            </button>
+          {/each}
+        </div>
+      {/each}
 
-  <div style:display="flex" style:flex-wrap="wrap" style:margin-top="24px">
-    {#each allTiles as tile, i}
-      <div
-        class="tile-container"
-        class:selected={selectedTileIndex === i}
-        on:click={() => (selectedTileIndex = i)}
-        on:keypress={() => (selectedTileIndex = i)}
-        role="button"
-        tabindex="0"
-      >
-        <DrawnTile {tile} />
+      <div style:margin-top="24px">
+        <button
+          on:click={() => {
+            if (selectionState.type === "tileAndPositionSelected") {
+              selectionState = {
+                ...selectionState,
+                tile: rotateTile(selectionState.tile),
+              }
+            }
+          }}>Rotate</button
+        >
+        <button
+          style:margin-left="8px"
+          on:click={() => {
+            if (selectionState.type === "tileAndPositionSelected") {
+              selectionState = {
+                ...selectionState,
+                tile: flipTile(selectionState.tile),
+              }
+            }
+          }}>Flip</button
+        >
+        <button
+          style:margin-left="8px"
+          on:click={() => {
+            if (
+              selectionState.type === "tileAndPositionSelected" &&
+              $gameState.board.isValid(
+                selectionState.position,
+                selectionState.tile,
+              )
+            ) {
+              gameState.placeTile(
+                selectionState.index,
+                selectionState.special,
+                $gameState.board.set(
+                  selectionState.position,
+                  selectionState.tile,
+                ),
+              )
+              selectionState = {type: "noSelection"}
+            }
+          }}>Confirm</button
+        >
+        <button
+          style:margin-left="8px"
+          on:click={() => {
+            gameState.endRound()
+          }}>End round</button
+        >
       </div>
-    {/each}
+    </div>
+
+    <div style:margin-left="24px">
+      <ScoreTable board={$gameState.board} />
+    </div>
   </div>
 </div>
 
 <style>
-  .tile-container {
-    margin-right: 16px;
-    margin-bottom: 16px;
-    border: 1px solid lightgrey;
+  .cell {
+    box-sizing: content-box;
+    width: 60px;
+    height: 60px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: lightgrey;
+    color: lightgrey;
+    margin: 1px;
     cursor: pointer;
+    position: relative;
+    background-color: transparent;
+    padding: 0;
   }
 
-  .selected {
+  .center-square {
+    border-color: grey;
+  }
+
+  .valid-placement {
     background-color: rgba(0, 200, 0, 0.3);
+  }
+
+  .pending {
+    opacity: 0.5;
+  }
+
+  .exit {
+    position: absolute;
+    width: 20px;
+    height: 5px;
+    top: 0;
+    left: 20px;
+    transform-origin: center 30px;
   }
 </style>

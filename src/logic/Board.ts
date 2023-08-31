@@ -6,7 +6,13 @@ import type {
   Exit,
   MaybeTrackType,
 } from "./types"
-import {flipRotation, hasOverpass, rotations, step} from "./helpers"
+import {
+  flipRotation,
+  hasOverpass,
+  rotations,
+  step,
+  getAllTransforms,
+} from "./helpers"
 
 export class Board {
   public static size = 7
@@ -100,6 +106,13 @@ export class Board {
     }
 
     return numMatchingConnections >= 1
+  }
+
+  public isValidWithTransform(p: Position, tile: TileString) {
+    for (const t of getAllTransforms(tile)) {
+      if (this.isValid(p, t)) return true
+    }
+    return false
   }
 
   public getConnectedTiles(

@@ -19,3 +19,17 @@ export const specialRouteTiles: TileString[] = [
   "DLLD",
   "DLDL",
 ]
+
+function randomPick<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)]
+}
+
+export function rollDice(): TileString[] {
+  console.log("rolling")
+  return [
+    randomPick(routeDieA),
+    randomPick(routeDieA),
+    randomPick(routeDieA),
+    randomPick(routeDieB),
+  ]
+}
