@@ -4,8 +4,8 @@
   import ScoreTable from "./ScoreTable.svelte"
   import {Board} from "../logic/Board"
   import {specialRouteTiles} from "../logic/dice"
-  import {flipTile, isCenterSquare, rotateTile} from "../logic/helpers"
-  import type {Position, TileString} from "../logic/types"
+  import {addRotation, isCenterSquare, transformTile} from "../logic/helpers"
+  import type {Position, Transform} from "../logic/types"
   import gameState from "../stores/gameState"
 
   type SelectionState =
@@ -16,16 +16,21 @@
         special: boolean
         index: number
         position: Position
-        tile: TileString
+        transform: Transform
       }
 
   let selectionState: SelectionState = {type: "noSelection"}
 
   $: selectedTile =
     selectionState.type !== "noSelection"
-      ? selectionState.special
-        ? specialRouteTiles[selectionState.index]
-        : $gameState.availableTiles[selectionState.index]
+      ? transformTile(
+          selectionState.special
+            ? specialRouteTiles[selectionState.index]
+            : $gameState.availableTiles[selectionState.index],
+          selectionState.type === "tileAndPositionSelected"
+            ? selectionState.transform
+            : {},
+        )
       : undefined
 </script>
 
@@ -71,13 +76,13 @@
                 selectionState.position.y === y &&
                 selectionState.position.x === x}
               on:click={() => {
-                if (selectedTile && selectionState.type !== "noSelection") {
+                if (selectionState.type !== "noSelection") {
                   selectionState = {
                     type: "tileAndPositionSelected",
                     special: selectionState.special,
                     index: selectionState.index,
                     position: {y, x},
-                    tile: selectedTile,
+                    transform: {rotation: 0},
                   }
                 }
               }}
@@ -86,7 +91,7 @@
                 tile={selectionState.type === "tileAndPositionSelected" &&
                 selectionState.position.y === y &&
                 selectionState.position.x === x
-                  ? selectionState.tile
+                  ? selectedTile
                   : $gameState.board.get({y, x})}
                 size={60}
               />
@@ -109,7 +114,13 @@
             if (selectionState.type === "tileAndPositionSelected") {
               selectionState = {
                 ...selectionState,
-                tile: rotateTile(selectionState.tile),
+                transform: {
+                  ...selectionState.transform,
+                  rotation: addRotation(
+                    selectionState.transform.rotation ?? 0,
+                    1,
+                  ),
+                },
               }
             }
           }}>Rotate</button
@@ -120,7 +131,10 @@
             if (selectionState.type === "tileAndPositionSelected") {
               selectionState = {
                 ...selectionState,
-                tile: flipTile(selectionState.tile),
+                transform: {
+                  ...selectionState.transform,
+                  flip: !selectionState.transform.flip,
+                },
               }
             }
           }}>Flip</button
@@ -129,19 +143,14 @@
           style:margin-left="8px"
           on:click={() => {
             if (
+              selectedTile &&
               selectionState.type === "tileAndPositionSelected" &&
-              $gameState.board.isValid(
-                selectionState.position,
-                selectionState.tile,
-              )
+              $gameState.board.isValid(selectionState.position, selectedTile)
             ) {
               gameState.placeTile(
                 selectionState.index,
                 selectionState.special,
-                $gameState.board.set(
-                  selectionState.position,
-                  selectionState.tile,
-                ),
+                $gameState.board.set(selectionState.position, selectedTile),
               )
               selectionState = {type: "noSelection"}
             }

@@ -9,6 +9,8 @@ export type TileString =
 
 export type Rotation = 0 | 1 | 2 | 3
 
+export type Transform = {flip?: boolean; rotation?: Rotation}
+
 export type Position = {y: number; x: number}
 
 export type TrackPosition = Position & {t: TrackType}

@@ -1,5 +1,11 @@
 import {Board} from "./Board"
-import type {Position, Rotation, TileString, TrackType} from "./types"
+import type {
+  Position,
+  Rotation,
+  TileString,
+  TrackType,
+  Transform,
+} from "./types"
 
 export function step(p: Position, r: Rotation): Position | undefined {
   const p2 = {
@@ -50,6 +56,11 @@ export function getAllTransforms(tile: TileString) {
     transforms.add(rotateTile(flipTile(tile), r))
   }
   return transforms.values()
+}
+
+export function transformTile(tile: TileString, transform: Transform) {
+  const rotated = rotateTile(tile, transform.rotation ?? 0)
+  return transform.flip ? flipTile(rotated) : rotated
 }
 
 export function isCenterSquare(p: Position) {
