@@ -168,6 +168,8 @@
     width: calc(62px * 7);
     position: relative;
     border: 3px solid black;
+    margin-top: 40px;
+    margin-bottom: 40px;
   }
 
   .board-row {

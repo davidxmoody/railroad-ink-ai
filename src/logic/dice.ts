@@ -25,7 +25,6 @@ function randomPick<T>(array: T[]): T {
 }
 
 export function rollDice(): TileString[] {
-  console.log("rolling")
   return [
     randomPick(routeDieA),
     randomPick(routeDieA),
