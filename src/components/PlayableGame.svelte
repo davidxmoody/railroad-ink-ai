@@ -87,35 +87,96 @@
     {#each {length: Board.size} as _, y}
       <div class="boardRow">
         {#each {length: Board.size} as _, x}
-          <button
-            class="cell"
-            class:centerSquare={isCenterSquare({y, x})}
-            class:validPlacement={selectedTile &&
-              gameState.board.isValidWithTransform({y, x}, selectedTile)}
-            class:pending={selectionState.type === "tileAndPositionSelected" &&
-              selectionState.position.y === y &&
-              selectionState.position.x === x}
-            on:click={() => {
-              if (selectionState.type !== "noSelection") {
-                selectionState = {
-                  type: "tileAndPositionSelected",
-                  special: selectionState.special,
-                  index: selectionState.index,
-                  position: {y, x},
-                  transform: {rotation: 0},
-                }
-              }
-            }}
-          >
-            <DrawnTile
-              tile={selectionState.type === "tileAndPositionSelected" &&
-              selectionState.position.y === y &&
-              selectionState.position.x === x
-                ? selectedTile
-                : gameState.board.get({y, x})}
-              size={60}
-            />
-          </button>
+          <div class="cell" class:centerSquare={isCenterSquare({y, x})}>
+            {#if selectedTile && selectionState.type === "tileSelected" && gameState.board.isValidWithTransform({y, x}, selectedTile)}
+              <button
+                class="cellSelectionHighlight"
+                on:click={() => {
+                  if (selectionState.type !== "noSelection") {
+                    selectionState = {
+                      type: "tileAndPositionSelected",
+                      special: selectionState.special,
+                      index: selectionState.index,
+                      position: {y, x},
+                      transform: {rotation: 0}, // TODO select first valid transform
+                    }
+                  }
+                }}
+              />
+            {/if}
+
+            <div
+              class:pending={selectionState.type ===
+                "tileAndPositionSelected" &&
+                selectionState.position.y === y &&
+                selectionState.position.x === x}
+            >
+              <DrawnTile
+                tile={selectionState.type === "tileAndPositionSelected" &&
+                selectionState.position.y === y &&
+                selectionState.position.x === x
+                  ? selectedTile
+                  : gameState.board.get({y, x})}
+                size={60}
+              />
+            </div>
+
+            {#if selectionState.type === "tileAndPositionSelected" && selectionState.position.y === y && selectionState.position.x === x}
+              <div class="cellButtonContainer">
+                <button
+                  on:click={() => {
+                    if (selectionState.type === "tileAndPositionSelected") {
+                      selectionState = {
+                        ...selectionState,
+                        transform: {
+                          ...selectionState.transform,
+                          rotation: addRotation(
+                            selectionState.transform.rotation ?? 0,
+                            1,
+                          ),
+                        },
+                      }
+                    }
+                  }}>↻</button
+                >
+                <button
+                  style:margin-left="8px"
+                  on:click={() => {
+                    if (selectionState.type === "tileAndPositionSelected") {
+                      selectionState = {
+                        ...selectionState,
+                        transform: {
+                          ...selectionState.transform,
+                          flip: !selectionState.transform.flip,
+                        },
+                      }
+                    }
+                  }}>Flip</button
+                >
+                <button
+                  style:margin-left="8px"
+                  on:click={() => {
+                    if (
+                      selectedTile &&
+                      selectionState.type === "tileAndPositionSelected" &&
+                      gameState.board.isValid(
+                        selectionState.position,
+                        selectedTile,
+                      )
+                    ) {
+                      gameState = gameState.placeTile(
+                        selectionState.index,
+                        selectionState.special,
+                        selectionState.position,
+                        selectedTile,
+                      )
+                      selectionState = {type: "noSelection"}
+                    }
+                  }}>✓</button
+                >
+              </div>
+            {/if}
+          </div>
         {/each}
       </div>
     {/each}
@@ -123,54 +184,6 @@
     {#each Board.exits as exit}
       <DrawnExit {exit} cellSize={60} cellBorderSize={1} />
     {/each}
-  </div>
-
-  <div style:margin-top="24px">
-    <button
-      on:click={() => {
-        if (selectionState.type === "tileAndPositionSelected") {
-          selectionState = {
-            ...selectionState,
-            transform: {
-              ...selectionState.transform,
-              rotation: addRotation(selectionState.transform.rotation ?? 0, 1),
-            },
-          }
-        }
-      }}>Rotate</button
-    >
-    <button
-      style:margin-left="8px"
-      on:click={() => {
-        if (selectionState.type === "tileAndPositionSelected") {
-          selectionState = {
-            ...selectionState,
-            transform: {
-              ...selectionState.transform,
-              flip: !selectionState.transform.flip,
-            },
-          }
-        }
-      }}>Flip</button
-    >
-    <button
-      style:margin-left="8px"
-      on:click={() => {
-        if (
-          selectedTile &&
-          selectionState.type === "tileAndPositionSelected" &&
-          gameState.board.isValid(selectionState.position, selectedTile)
-        ) {
-          gameState = gameState.placeTile(
-            selectionState.index,
-            selectionState.special,
-            selectionState.position,
-            selectedTile,
-          )
-          selectionState = {type: "noSelection"}
-        }
-      }}>Confirm</button
-    >
   </div>
 </div>
 
@@ -200,21 +213,37 @@
     border-width: 1px;
     border-style: solid;
     border-color: black;
-    cursor: pointer;
     background-color: transparent;
     padding: 0;
+    position: relative;
   }
 
   .centerSquare {
     background: lightgrey;
   }
 
-  .validPlacement {
-    background-color: rgba(0, 200, 0, 0.3);
-  }
-
   .pending {
     opacity: 0.5;
+  }
+
+  .cellSelectionHighlight {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border: 0;
+    background-color: rgba(0, 200, 0, 0.3);
+    cursor: pointer;
+  }
+
+  .cellButtonContainer {
+    position: absolute;
+    top: 70px;
+    display: flex;
+    left: -20px;
+    right: -20px;
+    z-index: 2000;
   }
 
   .endRoundButtonContainer {
