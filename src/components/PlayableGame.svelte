@@ -64,12 +64,12 @@
 
   <div class="board">
     {#each {length: Board.size} as _, y}
-      <div class="board-row">
+      <div class="boardRow">
         {#each {length: Board.size} as _, x}
           <button
             class="cell"
-            class:center-square={isCenterSquare({y, x})}
-            class:valid-placement={selectedTile &&
+            class:centerSquare={isCenterSquare({y, x})}
+            class:validPlacement={selectedTile &&
               $gameState.board.isValidWithTransform({y, x}, selectedTile)}
             class:pending={selectionState.type === "tileAndPositionSelected" &&
               selectionState.position.y === y &&
@@ -100,7 +100,7 @@
     {/each}
 
     {#each Board.exits as exit}
-      <DrawnExit {exit} cellSize={60} cellBorderSize={1}/>
+      <DrawnExit {exit} cellSize={60} cellBorderSize={1} />
     {/each}
   </div>
 
@@ -172,7 +172,7 @@
     margin-bottom: 40px;
   }
 
-  .board-row {
+  .boardRow {
     display: flex;
   }
 
@@ -189,11 +189,11 @@
     padding: 0;
   }
 
-  .center-square {
+  .centerSquare {
     background: lightgrey;
   }
 
-  .valid-placement {
+  .validPlacement {
     background-color: rgba(0, 200, 0, 0.3);
   }
 

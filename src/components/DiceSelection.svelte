@@ -11,7 +11,7 @@
 <div class="container">
   {#each tiles as tile, index}
     <button
-      class="tile-container"
+      class="tileContainer"
       class:selected={selectedTileIndex === index}
       disabled={usedTileIndexes.includes(index)}
       on:click={() => usedTileIndexes.includes(index) || onSelectTile(index)}
@@ -27,7 +27,7 @@
     justify-content: space-between;
   }
 
-  .tile-container {
+  .tileContainer {
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
@@ -36,12 +36,12 @@
     margin: 1px;
   }
 
-  .tile-container:disabled {
+  .tileContainer:disabled {
     opacity: 0.2;
     cursor: unset;
   }
 
-  .tile-container.selected {
+  .tileContainer.selected {
     background-color: rgba(0, 200, 0, 0.3);
   }
 </style>
