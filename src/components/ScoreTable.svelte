@@ -27,7 +27,7 @@
     flex-basis: 1px;
     flex: 1;
     text-align: center;
-    border: 1px solid grey;
+    border: 1px solid black;
     margin: 1px;
     padding: 1px;
   }

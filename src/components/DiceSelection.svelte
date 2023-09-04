@@ -8,32 +8,40 @@
   export let onSelectTile: (index: number) => void
 </script>
 
-<div style:display="flex">
+<div class="container">
   {#each tiles as tile, index}
-    <div style:opacity={usedTileIndexes.includes(index) ? 0.2 : 1}>
-      <button
-        class="tile-container"
-        class:selected={selectedTileIndex === index}
-        disabled={usedTileIndexes.includes(index)}
-        on:click={() => usedTileIndexes.includes(index) || onSelectTile(index)}
-      >
-        <DrawnTile {tile} size={60} />
-      </button>
-    </div>
+    <button
+      class="tile-container"
+      class:selected={selectedTileIndex === index}
+      disabled={usedTileIndexes.includes(index)}
+      on:click={() => usedTileIndexes.includes(index) || onSelectTile(index)}
+    >
+      <DrawnTile {tile} size={60} />
+    </button>
   {/each}
 </div>
 
 <style>
+  .container {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .tile-container {
-    margin-right: 16px;
-    margin-bottom: 16px;
-    border: 1px solid lightgrey;
+    border: 2px solid black;
+    border-radius: 10px;
     cursor: pointer;
     background: transparent;
     padding: 0;
+    margin: 1px;
   }
 
-  .selected {
+  .tile-container:disabled {
+    opacity: 0.2;
+    cursor: unset;
+  }
+
+  .tile-container.selected {
     background-color: rgba(0, 200, 0, 0.3);
   }
 </style>
