@@ -64,10 +64,15 @@
     />
 
     <div class="endRoundButtonContainer">
+      {#if gameState.gameEnded}
+        <div>Game ended</div>
+      {:else}
+        <div>Round {gameState.roundNumber}/{GameState.numRounds}</div>
+      {/if}
       <button
         class="endRoundButton"
         disabled={!gameState.canEndRound}
-        on:click={() => (gameState = gameState.endRound())}>End round</button
+        on:click={() => (gameState = gameState.endRound())}>Next round</button
       >
     </div>
   </div>
@@ -173,6 +178,8 @@
   .container {
     margin: 32px;
     width: 440px;
+    font-size: 14px;
+    font-family: sans-serif;
   }
 
   .board {
@@ -214,13 +221,17 @@
     flex: 1;
     margin-left: 11px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
   }
 
   .endRoundButton {
     cursor: pointer;
-    padding: 10px;
+    padding: 4px;
+    margin-top: 4px;
+    font-size: inherit;
+    font-family: inherit;
   }
 
   .endRoundButton:disabled {
