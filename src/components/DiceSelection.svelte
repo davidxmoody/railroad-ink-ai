@@ -24,7 +24,6 @@
 <style>
   .container {
     display: flex;
-    justify-content: space-between;
   }
 
   .tileContainer {
@@ -33,7 +32,7 @@
     cursor: pointer;
     background: transparent;
     padding: 0;
-    margin: 1px;
+    margin-right: 11px;
   }
 
   .tileContainer:disabled {
@@ -43,5 +42,9 @@
 
   .tileContainer.selected {
     background-color: rgba(0, 200, 0, 0.3);
+  }
+
+  .tileContainer:last-child {
+    margin-right: 0;
   }
 </style>

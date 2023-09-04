@@ -49,20 +49,34 @@
       (selectionState = {type: "tileSelected", special: true, index})}
   />
 
-  <DiceSelection
-    tiles={gameState.availableTiles}
-    usedTileIndexes={gameState.usedTileIndexes}
-    selectedTileIndex={selectionState.type !== "noSelection" &&
-    !selectionState.special
-      ? selectionState.index
-      : undefined}
-    onSelectTile={(index) =>
-      (selectionState = {type: "tileSelected", special: false, index})}
-  />
+  <div style:height="20px" />
 
-  <div style:margin-bottom="16px">
-    <ScoreTable board={gameState.board} />
+  <div style:display="flex">
+    <DiceSelection
+      tiles={gameState.availableTiles}
+      usedTileIndexes={gameState.usedTileIndexes}
+      selectedTileIndex={selectionState.type !== "noSelection" &&
+      !selectionState.special
+        ? selectionState.index
+        : undefined}
+      onSelectTile={(index) =>
+        (selectionState = {type: "tileSelected", special: false, index})}
+    />
+
+    <div class="endRoundButtonContainer">
+      <button
+        class="endRoundButton"
+        disabled={!gameState.canEndRound}
+        on:click={() => (gameState = gameState.endRound())}>End round</button
+      >
+    </div>
   </div>
+
+  <div style:height="20px" />
+
+  <ScoreTable board={gameState.board} />
+
+  <div style:height="40px" />
 
   <div class="board">
     {#each {length: Board.size} as _, y}
@@ -152,27 +166,19 @@
         }
       }}>Confirm</button
     >
-    <button
-      style:margin-left="8px"
-      on:click={() => {
-        gameState = gameState.endRound()
-      }}>End round</button
-    >
   </div>
 </div>
 
 <style>
   .container {
-    margin: 24px;
-    width: 448px;
+    margin: 32px;
+    width: 440px;
   }
 
   .board {
     width: calc(62px * 7);
     position: relative;
     border: 3px solid black;
-    margin-top: 40px;
-    margin-bottom: 40px;
   }
 
   .boardRow {
@@ -202,5 +208,22 @@
 
   .pending {
     opacity: 0.5;
+  }
+
+  .endRoundButtonContainer {
+    flex: 1;
+    margin-left: 11px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .endRoundButton {
+    cursor: pointer;
+    padding: 10px;
+  }
+
+  .endRoundButton:disabled {
+    cursor: unset;
   }
 </style>
