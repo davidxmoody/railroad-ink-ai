@@ -35,5 +35,6 @@
     display: block;
     stroke: black;
     stroke-width: 3px;
+    pointer-events: none;
   }
 </style>

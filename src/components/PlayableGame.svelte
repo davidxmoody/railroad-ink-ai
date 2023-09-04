@@ -6,8 +6,10 @@
   import {specialRouteTiles} from "../logic/dice"
   import {addRotation, isCenterSquare, transformTile} from "../logic/helpers"
   import type {Position, Transform} from "../logic/types"
-  import gameState from "../stores/gameState"
   import DrawnExit from "./DrawnExit.svelte"
+  import GameState from "../logic/GameState"
+
+  let gameState = new GameState()
 
   type SelectionState =
     | {type: "noSelection"}
@@ -27,7 +29,7 @@
       ? transformTile(
           selectionState.special
             ? specialRouteTiles[selectionState.index]
-            : $gameState.availableTiles[selectionState.index],
+            : gameState.availableTiles[selectionState.index],
           selectionState.type === "tileAndPositionSelected"
             ? selectionState.transform
             : {},
@@ -38,7 +40,7 @@
 <div class="container">
   <DiceSelection
     tiles={specialRouteTiles}
-    usedTileIndexes={$gameState.usedSpecialTileIndexes}
+    usedTileIndexes={gameState.usedSpecialTileIndexes}
     selectedTileIndex={selectionState.type !== "noSelection" &&
     selectionState.special
       ? selectionState.index
@@ -48,8 +50,8 @@
   />
 
   <DiceSelection
-    tiles={$gameState.availableTiles}
-    usedTileIndexes={$gameState.usedTileIndexes}
+    tiles={gameState.availableTiles}
+    usedTileIndexes={gameState.usedTileIndexes}
     selectedTileIndex={selectionState.type !== "noSelection" &&
     !selectionState.special
       ? selectionState.index
@@ -59,7 +61,7 @@
   />
 
   <div style:margin-bottom="16px">
-    <ScoreTable board={$gameState.board} />
+    <ScoreTable board={gameState.board} />
   </div>
 
   <div class="board">
@@ -70,7 +72,7 @@
             class="cell"
             class:centerSquare={isCenterSquare({y, x})}
             class:validPlacement={selectedTile &&
-              $gameState.board.isValidWithTransform({y, x}, selectedTile)}
+              gameState.board.isValidWithTransform({y, x}, selectedTile)}
             class:pending={selectionState.type === "tileAndPositionSelected" &&
               selectionState.position.y === y &&
               selectionState.position.x === x}
@@ -91,7 +93,7 @@
               selectionState.position.y === y &&
               selectionState.position.x === x
                 ? selectedTile
-                : $gameState.board.get({y, x})}
+                : gameState.board.get({y, x})}
               size={60}
             />
           </button>
@@ -138,12 +140,13 @@
         if (
           selectedTile &&
           selectionState.type === "tileAndPositionSelected" &&
-          $gameState.board.isValid(selectionState.position, selectedTile)
+          gameState.board.isValid(selectionState.position, selectedTile)
         ) {
-          gameState.placeTile(
+          gameState = gameState.placeTile(
             selectionState.index,
             selectionState.special,
-            $gameState.board.set(selectionState.position, selectedTile),
+            selectionState.position,
+            selectedTile,
           )
           selectionState = {type: "noSelection"}
         }
@@ -152,7 +155,7 @@
     <button
       style:margin-left="8px"
       on:click={() => {
-        gameState.endRound()
+        gameState = gameState.endRound()
       }}>End round</button
     >
   </div>
