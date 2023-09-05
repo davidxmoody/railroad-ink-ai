@@ -4,8 +4,8 @@
   import ScoreTable from "./ScoreTable.svelte"
   import {Board} from "../logic/Board"
   import {specialRouteTiles} from "../logic/dice"
-  import {addRotation, isCenterSquare, transformTile} from "../logic/helpers"
-  import type {Position, Transform} from "../logic/types"
+  import {allTransforms, isCenterSquare, transformTile} from "../logic/helpers"
+  import type {Position, TileString, Transform} from "../logic/types"
   import DrawnExit from "./DrawnExit.svelte"
   import GameState from "../logic/GameState"
 
@@ -13,28 +13,84 @@
 
   type SelectionState =
     | {type: "noSelection"}
-    | {type: "tileSelected"; special: boolean; index: number}
+    | {
+        type: "tileSelected"
+        special: boolean
+        index: number
+        selectedTile: TileString
+      }
     | {
         type: "tileAndPositionSelected"
         special: boolean
         index: number
         position: Position
-        transform: Transform
+        validTransformedTiles: TileString[]
+        transformedTileIndex: number
+        transformedTile: TileString
       }
 
   let selectionState: SelectionState = {type: "noSelection"}
 
-  $: selectedTile =
-    selectionState.type !== "noSelection"
-      ? transformTile(
-          selectionState.special
-            ? specialRouteTiles[selectionState.index]
-            : gameState.availableTiles[selectionState.index],
-          selectionState.type === "tileAndPositionSelected"
-            ? selectionState.transform
-            : {},
-        )
-      : undefined
+  function selectTile(special: boolean, index: number) {
+    selectionState = {
+      type: "tileSelected",
+      special,
+      index,
+      selectedTile: special
+        ? specialRouteTiles[index]
+        : gameState.availableTiles[index],
+    }
+  }
+
+  function selectPosition(position: Position) {
+    if (selectionState.type === "tileSelected") {
+      const validTransformedTiles = gameState.board.getAllValidTransformedTiles(
+        position,
+        selectionState.selectedTile,
+      )
+      console.log("selectPosition", position, validTransformedTiles)
+      if (validTransformedTiles.length) {
+        selectionState = {
+          type: "tileAndPositionSelected",
+          special: selectionState.special,
+          index: selectionState.index,
+          position,
+          validTransformedTiles,
+          transformedTileIndex: 0,
+          transformedTile: validTransformedTiles[0],
+        }
+      }
+    }
+  }
+
+  function transformPendingTile() {
+    if (selectionState.type === "tileAndPositionSelected") {
+      const transformedTileIndex =
+        (selectionState.transformedTileIndex + 1) %
+        selectionState.validTransformedTiles.length
+
+      selectionState = {
+        ...selectionState,
+        transformedTileIndex,
+        transformedTile:
+          selectionState.validTransformedTiles[transformedTileIndex],
+      }
+    }
+  }
+
+  function commitPendingTile() {
+    if (selectionState.type === "tileAndPositionSelected") {
+      gameState = gameState.placeTile(
+        selectionState.index,
+        selectionState.special,
+        selectionState.position,
+        selectionState.validTransformedTiles[
+          selectionState.transformedTileIndex
+        ],
+      )
+      selectionState = {type: "noSelection"}
+    }
+  }
 </script>
 
 <div class="container">
@@ -45,8 +101,7 @@
     selectionState.special
       ? selectionState.index
       : undefined}
-    onSelectTile={(index) =>
-      (selectionState = {type: "tileSelected", special: true, index})}
+    onSelectTile={(index) => selectTile(true, index)}
   />
 
   <div style:height="20px" />
@@ -59,8 +114,7 @@
       !selectionState.special
         ? selectionState.index
         : undefined}
-      onSelectTile={(index) =>
-        (selectionState = {type: "tileSelected", special: false, index})}
+      onSelectTile={(index) => selectTile(false, index)}
     />
 
     <div class="endRoundButtonContainer">
@@ -85,94 +139,33 @@
 
   <div class="board">
     {#each {length: Board.size} as _, y}
-      <div class="boardRow">
+      <div style:display="flex">
         {#each {length: Board.size} as _, x}
           <div class="cell" class:centerSquare={isCenterSquare({y, x})}>
-            {#if selectedTile && selectionState.type === "tileSelected" && gameState.board.isValidWithTransform({y, x}, selectedTile)}
-              <button
-                class="cellSelectionHighlight"
-                on:click={() => {
-                  if (selectionState.type !== "noSelection") {
-                    selectionState = {
-                      type: "tileAndPositionSelected",
-                      special: selectionState.special,
-                      index: selectionState.index,
-                      position: {y, x},
-                      transform: {rotation: 0}, // TODO select first valid transform
-                    }
-                  }
-                }}
-              />
-            {/if}
+            {#if gameState.board.get({y, x})}
+              <DrawnTile tile={gameState.board.get({y, x})} />
+            {:else if selectionState.type === "tileSelected"}
+              {#if gameState.board.isValidWithTransform({y, x}, selectionState.selectedTile)}
+                <button
+                  class="cellSelectionHighlight"
+                  on:click={() => selectPosition({y, x})}
+                />
+              {/if}
+            {:else if selectionState.type === "tileAndPositionSelected" && selectionState.position.y === y && selectionState.position.x === x}
+              <div class="pending">
+                <DrawnTile tile={selectionState.transformedTile} />
+              </div>
 
-            <div
-              class:pending={selectionState.type ===
-                "tileAndPositionSelected" &&
-                selectionState.position.y === y &&
-                selectionState.position.x === x}
-            >
-              <DrawnTile
-                tile={selectionState.type === "tileAndPositionSelected" &&
-                selectionState.position.y === y &&
-                selectionState.position.x === x
-                  ? selectedTile
-                  : gameState.board.get({y, x})}
-                size={60}
-              />
-            </div>
-
-            {#if selectionState.type === "tileAndPositionSelected" && selectionState.position.y === y && selectionState.position.x === x}
               <div class="cellButtonContainer">
-                <button
-                  on:click={() => {
-                    if (selectionState.type === "tileAndPositionSelected") {
-                      selectionState = {
-                        ...selectionState,
-                        transform: {
-                          ...selectionState.transform,
-                          rotation: addRotation(
-                            selectionState.transform.rotation ?? 0,
-                            1,
-                          ),
-                        },
-                      }
-                    }
-                  }}>↻</button
-                >
-                <button
-                  style:margin-left="8px"
-                  on:click={() => {
-                    if (selectionState.type === "tileAndPositionSelected") {
-                      selectionState = {
-                        ...selectionState,
-                        transform: {
-                          ...selectionState.transform,
-                          flip: !selectionState.transform.flip,
-                        },
-                      }
-                    }
-                  }}>Flip</button
-                >
-                <button
-                  style:margin-left="8px"
-                  on:click={() => {
-                    if (
-                      selectedTile &&
-                      selectionState.type === "tileAndPositionSelected" &&
-                      gameState.board.isValid(
-                        selectionState.position,
-                        selectedTile,
-                      )
-                    ) {
-                      gameState = gameState.placeTile(
-                        selectionState.index,
-                        selectionState.special,
-                        selectionState.position,
-                        selectedTile,
-                      )
-                      selectionState = {type: "noSelection"}
-                    }
-                  }}>✓</button
+                <div style:background="white">
+                  <button
+                    class="cellButton"
+                    disabled={selectionState.validTransformedTiles.length <= 1}
+                    on:click={transformPendingTile}>↻</button
+                  >
+                </div>
+                <button class="cellButton" on:click={commitPendingTile}
+                  >✓</button
                 >
               </div>
             {/if}
@@ -199,10 +192,6 @@
     width: calc(62px * 7);
     position: relative;
     border: 3px solid black;
-  }
-
-  .boardRow {
-    display: flex;
   }
 
   .cell {
@@ -234,16 +223,23 @@
     right: 0;
     border: 0;
     background-color: rgba(0, 200, 0, 0.3);
-    cursor: pointer;
   }
 
   .cellButtonContainer {
     position: absolute;
+    display: flex;
+    justify-content: space-around;
     top: 70px;
     display: flex;
     left: -20px;
     right: -20px;
-    z-index: 2000;
+    z-index: 100;
+  }
+
+  .cellButton {
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
   }
 
   .endRoundButtonContainer {
@@ -256,14 +252,17 @@
   }
 
   .endRoundButton {
-    cursor: pointer;
     padding: 4px;
     margin-top: 4px;
     font-size: inherit;
     font-family: inherit;
   }
 
-  .endRoundButton:disabled {
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
     cursor: unset;
   }
 </style>

@@ -11,7 +11,8 @@ import {
   hasOverpass,
   rotations,
   step,
-  getAllTransforms,
+  allTransforms,
+  transformTile,
 } from "./helpers"
 
 export class Board {
@@ -109,10 +110,17 @@ export class Board {
   }
 
   public isValidWithTransform(p: Position, tile: TileString) {
-    for (const t of getAllTransforms(tile)) {
-      if (this.isValid(p, t)) return true
+    return allTransforms.some((t) => this.isValid(p, transformTile(tile, t)))
+  }
+
+  public getAllValidTransformedTiles(p: Position, tile: TileString) {
+    const validTransformedTiles: TileString[] = []
+    for (const tTile of allTransforms.map((t) => transformTile(tile, t))) {
+      if (this.isValid(p, tTile) && !validTransformedTiles.includes(tTile)) {
+        validTransformedTiles.push(tTile)
+      }
     }
-    return false
+    return validTransformedTiles
   }
 
   public getConnectedTiles(

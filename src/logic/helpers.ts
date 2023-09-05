@@ -41,22 +41,25 @@ export function hasTrackType(tile: TileString, trackType: TrackType) {
 export function rotateTile(tile: TileString, r: Rotation = 1) {
   return `${tile[addRotation(0, r, false)]}${tile[addRotation(1, r, false)]}${
     tile[addRotation(2, r, false)]
-  }${tile[addRotation(3, r, false)]}${tile[4]}` as TileString
+  }${tile[addRotation(3, r, false)]}${tile[4] ?? ""}` as TileString
 }
 
 export function flipTile(tile: TileString) {
-  return `${tile[0]}${tile[3]}${tile[2]}${tile[1]}${tile[4]}` as TileString
+  return `${tile[0]}${tile[3]}${tile[2]}${tile[1]}${
+    tile[4] ?? ""
+  }` as TileString
 }
 
-export function getAllTransforms(tile: TileString) {
-  // TODO memoize/cache this because it's called a lot
-  const transforms = new Set<TileString>()
-  for (const r of rotations) {
-    transforms.add(rotateTile(tile, r))
-    transforms.add(rotateTile(flipTile(tile), r))
-  }
-  return transforms.values()
-}
+export const allTransforms: Transform[] = [
+  {rotation: 0, flip: false},
+  {rotation: 1, flip: false},
+  {rotation: 2, flip: false},
+  {rotation: 3, flip: false},
+  {rotation: 0, flip: true},
+  {rotation: 1, flip: true},
+  {rotation: 2, flip: true},
+  {rotation: 3, flip: true},
+]
 
 export function transformTile(tile: TileString, transform: Transform) {
   const rotated = rotateTile(tile, transform.rotation ?? 0)

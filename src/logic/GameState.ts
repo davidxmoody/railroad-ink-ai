@@ -20,6 +20,7 @@ export default class GameState {
     usedSpecialTileIndexes: number[]
     board: Board
   }) {
+    // TODO track if special tile has been used in the current round
     this.gameEnded = data?.gameEnded ?? false
     this.roundNumber = data?.roundNumber ?? 1
     this.availableTiles = data?.availableTiles ?? rollDice()

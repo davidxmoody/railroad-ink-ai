@@ -3,7 +3,7 @@
   import type {Rotation, TileString, MaybeTrackType} from "../logic/types"
 
   export let tile: TileString | undefined
-  export let size = 100
+  export let size = 60
 
   function hasStation(tile: TileString) {
     return (
