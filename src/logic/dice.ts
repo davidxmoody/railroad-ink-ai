@@ -1,4 +1,5 @@
 import type {TileString} from "./types"
+import seedrandom from "seedrandom"
 
 export const routeDieA: TileString[] = [
   "_D_D",
@@ -20,15 +21,20 @@ export const specialRouteTiles: TileString[] = [
   "DLDL",
 ]
 
-function randomPick<T>(array: T[]): T {
-  return array[Math.floor(Math.random() * array.length)]
+function randomPick<T>(array: T[], rand: () => number): T {
+  return array[Math.floor(rand() * array.length)]
 }
 
-export function rollDice(): TileString[] {
+export function rollRoundDice(rand = Math.random): TileString[] {
   return [
-    randomPick(routeDieA),
-    randomPick(routeDieA),
-    randomPick(routeDieA),
-    randomPick(routeDieB),
+    randomPick(routeDieA, rand),
+    randomPick(routeDieA, rand),
+    randomPick(routeDieA, rand),
+    randomPick(routeDieB, rand),
   ]
+}
+
+export function rollGameDice(seed?: string): TileString[][] {
+  const rand = seedrandom(seed)
+  return Array.from({length: 7}, () => rollRoundDice(rand))
 }

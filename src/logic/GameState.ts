@@ -1,5 +1,5 @@
 import {Board} from "./Board"
-import {rollDice} from "./dice"
+import {rollRoundDice} from "./dice"
 import type {Position, TileString} from "./types"
 
 export default class GameState {
@@ -23,7 +23,7 @@ export default class GameState {
     // TODO track if special tile has been used in the current round
     this.gameEnded = data?.gameEnded ?? false
     this.roundNumber = data?.roundNumber ?? 1
-    this.availableTiles = data?.availableTiles ?? rollDice()
+    this.availableTiles = data?.availableTiles ?? rollRoundDice()
     this.usedTileIndexes = data?.usedTileIndexes ?? []
     this.usedSpecialTileIndexes = data?.usedSpecialTileIndexes ?? []
     this.board = data?.board ?? new Board()
@@ -81,7 +81,7 @@ export default class GameState {
     return new GameState({
       ...this,
       roundNumber: this.roundNumber + 1,
-      availableTiles: rollDice(),
+      availableTiles: rollRoundDice(),
       usedTileIndexes: [],
     })
   }
