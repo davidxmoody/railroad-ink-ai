@@ -4,12 +4,14 @@
   import ScoreTable from "./ScoreTable.svelte"
   import {Board} from "../logic/Board"
   import {specialRouteTiles} from "../logic/dice"
-  import {allTransforms, isCenterSquare, transformTile} from "../logic/helpers"
-  import type {Position, TileString, Transform} from "../logic/types"
+  import {isCenterSquare} from "../logic/helpers"
+  import type {Position, TileString} from "../logic/types"
   import DrawnExit from "./DrawnExit.svelte"
   import GameState from "../logic/GameState"
+  import {solve} from "../ai/basic"
 
   let gameState = new GameState()
+      gameState = solve(gameState)
 
   type SelectionState =
     | {type: "noSelection"}

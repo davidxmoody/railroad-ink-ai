@@ -1,5 +1,5 @@
 import {Board} from "./Board"
-import {rollRoundDice} from "./dice"
+import {rollGameDice, rollRoundDice} from "./dice"
 import type {Position, TileString} from "./types"
 
 export default class GameState {
@@ -7,15 +7,16 @@ export default class GameState {
 
   public readonly gameEnded: boolean
   public readonly roundNumber: number
-  public readonly availableTiles: TileString[]
   public readonly usedTileIndexes: number[]
   public readonly usedSpecialTileIndexes: number[]
   public readonly board: Board
 
+  private readonly diceRolls: TileString[][]
+
   public constructor(data?: {
     gameEnded: boolean
     roundNumber: number
-    availableTiles: TileString[]
+    diceRolls: TileString[][]
     usedTileIndexes: number[]
     usedSpecialTileIndexes: number[]
     board: Board
@@ -23,10 +24,14 @@ export default class GameState {
     // TODO track if special tile has been used in the current round
     this.gameEnded = data?.gameEnded ?? false
     this.roundNumber = data?.roundNumber ?? 1
-    this.availableTiles = data?.availableTiles ?? rollRoundDice()
+    this.diceRolls = data?.diceRolls ?? rollGameDice()
     this.usedTileIndexes = data?.usedTileIndexes ?? []
     this.usedSpecialTileIndexes = data?.usedSpecialTileIndexes ?? []
     this.board = data?.board ?? new Board()
+  }
+
+  public get availableTiles() {
+    return this.diceRolls[this.roundNumber - 1]
   }
 
   public placeTile(
@@ -40,6 +45,7 @@ export default class GameState {
     if (special) {
       return new GameState({
         ...this,
+        diceRolls: this.diceRolls,
         usedSpecialTileIndexes: [...this.usedSpecialTileIndexes, tileIndex],
         board,
       })
@@ -47,6 +53,7 @@ export default class GameState {
 
     return new GameState({
       ...this,
+      diceRolls: this.diceRolls,
       usedTileIndexes: [...this.usedTileIndexes, tileIndex],
       board,
     })
@@ -74,12 +81,14 @@ export default class GameState {
     if (this.roundNumber === GameState.numRounds) {
       return new GameState({
         ...this,
+        diceRolls: this.diceRolls,
         gameEnded: true,
       })
     }
 
     return new GameState({
       ...this,
+      diceRolls: this.diceRolls,
       roundNumber: this.roundNumber + 1,
       availableTiles: rollRoundDice(),
       usedTileIndexes: [],
