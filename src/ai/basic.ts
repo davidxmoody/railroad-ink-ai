@@ -1,6 +1,8 @@
 import {Board} from "../logic/Board"
 import type GameState from "../logic/GameState"
 
+// Scores 2.466 average over 1000 runs
+
 export function solve(gs: GameState) {
   while (!gs.gameEnded) {
     while (!gs.canEndRound) {
@@ -24,6 +26,5 @@ export function solve(gs: GameState) {
     }
     gs = gs.endRound()
   }
-
   return gs
 }

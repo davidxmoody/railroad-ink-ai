@@ -13,18 +13,21 @@ export default class GameState {
 
   private readonly diceRolls: TileString[][]
 
-  public constructor(data?: {
-    gameEnded: boolean
-    roundNumber: number
-    diceRolls: TileString[][]
-    usedTileIndexes: number[]
-    usedSpecialTileIndexes: number[]
-    board: Board
-  }) {
+  public constructor(
+    data?: {
+      gameEnded: boolean
+      roundNumber: number
+      diceRolls: TileString[][]
+      usedTileIndexes: number[]
+      usedSpecialTileIndexes: number[]
+      board: Board
+    },
+    seed?: string | number,
+  ) {
     // TODO track if special tile has been used in the current round
     this.gameEnded = data?.gameEnded ?? false
     this.roundNumber = data?.roundNumber ?? 1
-    this.diceRolls = data?.diceRolls ?? rollGameDice()
+    this.diceRolls = data?.diceRolls ?? rollGameDice(seed)
     this.usedTileIndexes = data?.usedTileIndexes ?? []
     this.usedSpecialTileIndexes = data?.usedSpecialTileIndexes ?? []
     this.board = data?.board ?? new Board()

@@ -34,7 +34,7 @@ export function rollRoundDice(rand = Math.random): TileString[] {
   ]
 }
 
-export function rollGameDice(seed?: string): TileString[][] {
-  const rand = seedrandom(seed)
+export function rollGameDice(seed?: string | number): TileString[][] {
+  const rand = seedrandom(seed?.toString())
   return Array.from({length: 7}, () => rollRoundDice(rand))
 }
