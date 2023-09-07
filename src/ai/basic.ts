@@ -1,12 +1,12 @@
 import {Board} from "../logic/Board"
 import type GameState from "../logic/GameState"
 
-// Scores 2.466 average over 1000 runs
+// Scores 2.466 average over 1000 runs in 2 seconds
 
 export function solve(gs: GameState) {
   while (!gs.gameEnded) {
     while (!gs.canEndRound) {
-      gs.availableTiles.forEach((tile, tileIndex) => {
+      gs.roundTiles.forEach((tile, tileIndex) => {
         if (gs.usedTileIndexes.includes(tileIndex)) return
 
         for (let y = 0; y < Board.size; y++) {

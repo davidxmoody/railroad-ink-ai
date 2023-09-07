@@ -8,10 +8,10 @@
   import type {Position, TileString} from "../logic/types"
   import DrawnExit from "./DrawnExit.svelte"
   import GameState from "../logic/GameState"
-  import {solve} from "../ai/basic"
+  import {solve} from "../ai/optimiseNextTileScore"
 
   let gameState = new GameState()
-      gameState = solve(gameState)
+  gameState = solve(gameState)
 
   type SelectionState =
     | {type: "noSelection"}
@@ -40,7 +40,7 @@
       index,
       selectedTile: special
         ? specialRouteTiles[index]
-        : gameState.availableTiles[index],
+        : gameState.roundTiles[index],
     }
   }
 
@@ -110,7 +110,7 @@
 
   <div style:display="flex">
     <DiceSelection
-      tiles={gameState.availableTiles}
+      tiles={gameState.roundTiles}
       usedTileIndexes={gameState.usedTileIndexes}
       selectedTileIndex={selectionState.type !== "noSelection" &&
       !selectionState.special
