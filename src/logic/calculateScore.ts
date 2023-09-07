@@ -3,13 +3,13 @@ import {hasOverpass, hasTrackType, isCenterSquare} from "./helpers"
 import type {Exit, Position, TrackPosition, TrackType} from "./types"
 
 export default function calculateScore(board: Board) {
-  return {
-    exits: calculateExitsScore(board),
-    road: calculateLongestRouteScore(board, "D"),
-    rail: calculateLongestRouteScore(board, "L"),
-    center: calculateCenterScore(board),
-    errors: calculateErrorsScore(board),
-  }
+  const exits = calculateExitsScore(board)
+  const road = calculateLongestRouteScore(board, "D")
+  const rail = calculateLongestRouteScore(board, "L")
+  const center = calculateCenterScore(board)
+  const errors = calculateErrorsScore(board)
+  const total = exits + road + rail + center + errors
+  return {exits, road, rail, center, errors, total}
 }
 
 function calculateErrorsScore(board: Board) {

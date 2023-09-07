@@ -4,8 +4,6 @@
 
   export let board: Board
   $: score = calculateScore(board)
-  $: totalScore =
-    score.exits + score.rail + score.road + score.center + score.errors
 </script>
 
 <div class="container">
@@ -14,7 +12,7 @@
   <span class="item">Rail: {score.rail}</span>
   <span class="item">Center: {score.center}</span>
   <span class="item">Errors: {score.errors}</span>
-  <span class="item"><strong>Total: {totalScore}</strong></span>
+  <span class="item"><strong>Total: {score.total}</strong></span>
 </div>
 
 <style>

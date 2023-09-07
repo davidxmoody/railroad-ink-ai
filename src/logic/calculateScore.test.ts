@@ -23,6 +23,7 @@ describe("scoring", () => {
       rail: 0,
       center: 0,
       errors: 0,
+      total: 0,
     })
   })
 
