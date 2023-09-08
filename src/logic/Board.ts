@@ -130,21 +130,25 @@ export class Board {
     const tile = this.get(tp)
     if (!tile) throw new Error("No tile at coordinates")
 
-    return rotations.flatMap((r) => {
+    const connectedTiles: TrackPosition[] = []
+
+    for (const r of rotations) {
       const newT = tile[r] as MaybeTrackType
-      if (newT === "_") return []
-      if (onlyConsiderTrackType && newT !== onlyConsiderTrackType) return []
-      if (hasOverpass(tile) && newT !== tp.t) return []
+      if (newT === "_") continue
+      if (onlyConsiderTrackType && newT !== onlyConsiderTrackType) continue
+      if (hasOverpass(tile) && newT !== tp.t) continue
 
       const newPos = step(tp, r)
-      if (!newPos) return []
+      if (!newPos) continue
 
       const connectedTile = this.get(newPos)
-      if (!connectedTile) return []
-      if (connectedTile[flipRotation(r)] !== newT) return []
+      if (!connectedTile) continue
+      if (connectedTile[flipRotation(r)] !== newT) continue
 
-      return {y: newPos.y, x: newPos.x, t: newT}
-    })
+      connectedTiles.push({y: newPos.y, x: newPos.x, t: newT})
+    }
+
+    return connectedTiles
   }
 
   public set(p: Position, tile: TileString) {
