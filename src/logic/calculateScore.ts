@@ -90,24 +90,37 @@ function findConnectedExits(board: Board, startingExit: Exit) {
   return visitedExits
 }
 
+function getConnectionKey(p1: Position, p2: Position) {
+  const p1Size = p1.y * Board.size + p1.x
+  const p2Size = p2.y * Board.size + p2.x
+  return p1Size < p2Size
+    ? `${p1.y},${p1.x}-${p2.y},${p2.x}`
+    : `${p2.y},${p2.x}-${p1.y},${p1.x}`
+}
+
 function calculateLongestRouteScore(board: Board, trackType: TrackType) {
   let longestRoute = 0
 
-  const nodes: Array<{p: Position; c: Position[]}> = []
+  const nodes: Array<{
+    p: Position
+    c: Array<{p: Position; d: number; k: string}>
+  }> = []
 
   board.forEachTile((p, tile) => {
     if (hasTrackType(tile, trackType)) {
       nodes[p.y * Board.size + p.x] = {
         p,
-        c: board.getConnectedTiles({...p, t: trackType}, trackType),
+        c: board
+          .getConnectedTiles({...p, t: trackType}, trackType)
+          .map((pc) => ({p: pc, d: 1, k: getConnectionKey(p, pc)})),
       }
     }
   })
 
   for (const node of nodes) {
     if (node && node.c.length === 2) {
-      const left = nodes[node.c[0].y * Board.size + node.c[0].x]
-      const right = nodes[node.c[1].y * Board.size + node.c[1].x]
+      const left = nodes[node.c[0].p.y * Board.size + node.c[0].p.x]
+      const right = nodes[node.c[1].p.y * Board.size + node.c[1].p.x]
 
       if (pEqual(node.p, left.p) || pEqual(node.p, right.p)) {
         continue
@@ -115,57 +128,54 @@ function calculateLongestRouteScore(board: Board, trackType: TrackType) {
 
       delete nodes[node.p.y * Board.size + node.p.x]
 
-      left.c = left.c.map((p2) => {
-        if (p2.y === node.p.y && p2.x === node.p.x) {
-          return right.p
+      const key = node.c[0].k
+      const newD = node.c[0].d + node.c[1].d
+
+      left.c = left.c.map((leftC) => {
+        if (pEqual(node.p, leftC.p)) {
+          return {p: right.p, d: newD, k: key}
         }
-        return p2
+        return leftC
       })
 
-      right.c = right.c.map((p2) => {
-        if (p2.y === node.p.y && p2.x === node.p.x) {
-          return left.p
+      right.c = right.c.map((rightC) => {
+        if (pEqual(node.p, rightC.p)) {
+          return {p: left.p, d: newD, k: key}
         }
-        return p2
+        return rightC
       })
     }
   }
 
   for (const {p} of nodes.filter((p) => p)) {
-    traverseAllRoutes(board, trackType, p, [p], [], (routeLength) => {
-      if (routeLength > longestRoute) longestRoute = routeLength
-    })
+    traverseAllRoutes(
+      (routeLength) => {
+        if (routeLength > longestRoute) longestRoute = routeLength
+      },
+      nodes,
+      p,
+    )
   }
 
   return longestRoute
 }
 
 function traverseAllRoutes(
-  board: Board,
-  trackType: TrackType,
-  p: Position,
-  visitedPositions: Position[],
-  visitedConnections: string[],
   onRouteLength: (routeLength: number) => void,
+  nodes: Array<{p: Position; c: Array<{p: Position; d: number; k: string}>}>,
+  p: Position,
+  routeLength = 0,
+  visitedConnections: Record<string, boolean> = {},
 ) {
-  onRouteLength(visitedPositions.length)
+  onRouteLength(routeLength + 1)
 
-  const connectedTiles = board.getConnectedTiles(
-    {...p, t: trackType},
-    trackType,
-  )
-
-  for (const p2 of connectedTiles) {
-    const c = `${(p.y + p2.y) / 2},${(p.x + p2.x) / 2}`
-    if (visitedConnections.includes(c)) continue
-
-    traverseAllRoutes(
-      board,
-      trackType,
-      p2,
-      [...visitedPositions, p2],
-      [...visitedConnections, c],
-      onRouteLength,
-    )
+  for (const nextC of nodes[p.y * Board.size + p.x].c) {
+    if (visitedConnections[nextC.k]) {
+      continue
+    }
+    traverseAllRoutes(onRouteLength, nodes, nextC.p, routeLength + nextC.d, {
+      ...visitedConnections,
+      [nextC.k]: true,
+    })
   }
 }

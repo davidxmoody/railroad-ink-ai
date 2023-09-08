@@ -10,7 +10,7 @@ function runOne(solveFn: (gs: GameState) => GameState, seed: number) {
   return {score, duration}
 }
 
-function runMany(solveFn: (gs: GameState) => GameState, numTests = 1000) {
+function runMany(solveFn: (gs: GameState) => GameState, numTests: number) {
   const results: Array<ReturnType<typeof runOne>> = []
   for (let seed = 0; seed < numTests; seed++) {
     results.push(runOne(solveFn, seed))
@@ -30,4 +30,4 @@ function runMany(solveFn: (gs: GameState) => GameState, numTests = 1000) {
   console.log("")
 }
 
-runMany(solve)
+runMany(solve, 100)

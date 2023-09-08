@@ -9,9 +9,13 @@
   import DrawnExit from "./DrawnExit.svelte"
   import GameState from "../logic/GameState"
   import {solve} from "../ai/optimiseNextTileScore"
+  import {onMount} from "svelte"
 
   let gameState = new GameState()
-  gameState = solve(gameState)
+
+  onMount(() => {
+    gameState = solve(gameState)
+  })
 
   type SelectionState =
     | {type: "noSelection"}
@@ -110,7 +114,7 @@
 
   <div style:display="flex">
     <DiceSelection
-    disabled={gameState.gameEnded}
+      disabled={gameState.gameEnded}
       tiles={gameState.roundTiles}
       usedTileIndexes={gameState.usedTileIndexes}
       selectedTileIndex={selectionState.type !== "noSelection" &&
