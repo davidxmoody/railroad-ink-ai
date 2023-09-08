@@ -2,6 +2,7 @@
   import type {TileString} from "../logic/types"
   import DrawnTile from "./DrawnTile.svelte"
 
+  export let disabled = false
   export let tiles: TileString[]
   export let usedTileIndexes: number[]
   export let selectedTileIndex: number | undefined
@@ -13,7 +14,8 @@
     <button
       class="tileContainer"
       class:selected={selectedTileIndex === index}
-      disabled={usedTileIndexes.includes(index)}
+      class:used={usedTileIndexes.includes(index)}
+      disabled={usedTileIndexes.includes(index) || disabled}
       on:click={() => usedTileIndexes.includes(index) || onSelectTile(index)}
     >
       <DrawnTile {tile} size={60} />
@@ -36,8 +38,11 @@
   }
 
   .tileContainer:disabled {
+    cursor: not-allowed;
+  }
+
+  .tileContainer.used {
     opacity: 0.2;
-    cursor: unset;
   }
 
   .tileContainer.selected {

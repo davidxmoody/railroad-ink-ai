@@ -40,6 +40,12 @@ export default class GameState {
     return this.diceRolls[this.roundNumber - 1]
   }
 
+  public get canUseSpecialTile() {
+    return (
+      this.usedSpecialTileIndexes.length < 3 && !this.usedSpecialTileThisRound
+    )
+  }
+
   public get availableTiles() {
     return [
       ...this.roundTiles
@@ -49,7 +55,7 @@ export default class GameState {
         .map((tile, index) => ({special: true, index, tile}))
         .filter(
           ({index}) =>
-            !this.usedSpecialTileThisRound &&
+            this.canUseSpecialTile &&
             !this.usedSpecialTileIndexes.includes(index),
         ),
     ]

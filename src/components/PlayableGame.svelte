@@ -50,7 +50,6 @@
         position,
         selectionState.selectedTile,
       )
-      console.log("selectPosition", position, validTransformedTiles)
       if (validTransformedTiles.length) {
         selectionState = {
           type: "tileAndPositionSelected",
@@ -97,6 +96,7 @@
 
 <div class="container">
   <DiceSelection
+    disabled={!gameState.canUseSpecialTile || gameState.gameEnded}
     tiles={specialRouteTiles}
     usedTileIndexes={gameState.usedSpecialTileIndexes}
     selectedTileIndex={selectionState.type !== "noSelection" &&
@@ -110,6 +110,7 @@
 
   <div style:display="flex">
     <DiceSelection
+    disabled={gameState.gameEnded}
       tiles={gameState.roundTiles}
       usedTileIndexes={gameState.usedTileIndexes}
       selectedTileIndex={selectionState.type !== "noSelection" &&
