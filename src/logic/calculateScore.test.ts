@@ -315,6 +315,22 @@ describe("scoring", () => {
       })
     })
 
+    test("isolated loop", () => {
+      const board = generateBoard([
+        {y: 0, x: 3, tile: "LDLDo"},
+        {y: 0, x: 4, tile: "__DD"},
+        {y: 1, x: 4, tile: "D__D"},
+        {y: 1, x: 3, tile: "_D_D"},
+        {y: 1, x: 2, tile: "DD__"},
+        {y: 0, x: 2, tile: "_DD_"},
+      ])
+
+      expect(calculateScore(board)).toMatchObject({
+        road: 7,
+        rail: 1,
+      })
+    })
+
     test("tricky loop with rail", () => {
       const board = generateBoard([
         {y: 3, x: 0, tile: "DDLD"},

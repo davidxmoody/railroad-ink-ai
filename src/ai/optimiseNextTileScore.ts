@@ -2,7 +2,7 @@ import {Board} from "../logic/Board"
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 
-// Runs: 1000, score: 25.7, duration: 191.7ms
+// Runs: 1000, score: 24.7, duration: 146.4ms
 
 export function solve(gs: GameState) {
   while (!gs.gameEnded) {

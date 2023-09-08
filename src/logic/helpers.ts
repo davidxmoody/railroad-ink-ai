@@ -69,3 +69,7 @@ export function transformTile(tile: TileString, transform: Transform) {
 export function isCenterSquare(p: Position) {
   return p.y >= 2 && p.y <= 4 && p.x >= 2 && p.x <= 4
 }
+
+export function pEqual(p1: Position, p2: Position) {
+  return p1.y === p2.y && p1.x === p2.x
+}

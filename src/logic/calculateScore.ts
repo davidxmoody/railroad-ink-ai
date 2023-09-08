@@ -1,5 +1,5 @@
 import {Board} from "./Board"
-import {hasOverpass, hasTrackType, isCenterSquare} from "./helpers"
+import {hasOverpass, hasTrackType, isCenterSquare, pEqual} from "./helpers"
 import type {Exit, Position, TrackPosition, TrackType} from "./types"
 
 export default function calculateScore(board: Board) {
@@ -93,20 +93,49 @@ function findConnectedExits(board: Board, startingExit: Exit) {
 function calculateLongestRouteScore(board: Board, trackType: TrackType) {
   let longestRoute = 0
 
-  board.forEachTile(({y, x}, tile) => {
+  const nodes: Array<{p: Position; c: Position[]}> = []
+
+  board.forEachTile((p, tile) => {
     if (hasTrackType(tile, trackType)) {
-      traverseAllRoutes(
-        board,
-        trackType,
-        {y, x},
-        [{y, x}],
-        [],
-        (routeLength) => {
-          if (routeLength > longestRoute) longestRoute = routeLength
-        },
-      )
+      nodes[p.y * Board.size + p.x] = {
+        p,
+        c: board.getConnectedTiles({...p, t: trackType}, trackType),
+      }
     }
   })
+
+  for (const node of nodes) {
+    if (node && node.c.length === 2) {
+      const left = nodes[node.c[0].y * Board.size + node.c[0].x]
+      const right = nodes[node.c[1].y * Board.size + node.c[1].x]
+
+      if (pEqual(node.p, left.p) || pEqual(node.p, right.p)) {
+        continue
+      }
+
+      delete nodes[node.p.y * Board.size + node.p.x]
+
+      left.c = left.c.map((p2) => {
+        if (p2.y === node.p.y && p2.x === node.p.x) {
+          return right.p
+        }
+        return p2
+      })
+
+      right.c = right.c.map((p2) => {
+        if (p2.y === node.p.y && p2.x === node.p.x) {
+          return left.p
+        }
+        return p2
+      })
+    }
+  }
+
+  for (const {p} of nodes.filter((p) => p)) {
+    traverseAllRoutes(board, trackType, p, [p], [], (routeLength) => {
+      if (routeLength > longestRoute) longestRoute = routeLength
+    })
+  }
 
   return longestRoute
 }
