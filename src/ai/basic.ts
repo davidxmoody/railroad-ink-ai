@@ -1,7 +1,7 @@
 import {Board} from "../logic/Board"
 import type GameState from "../logic/GameState"
 
-// Scores 2.466 average over 1000 runs in 2 seconds
+// Runs: 1000, score: 2.5, duration: 0.8ms
 
 export function solve(gs: GameState) {
   while (!gs.gameEnded) {

@@ -2,7 +2,7 @@ import {Board} from "../logic/Board"
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 
-// Scores 25.699 average over 1000 runs in 5 minutes
+// Runs: 1000, score: 25.7, duration: 191.7ms
 
 export function solve(gs: GameState) {
   while (!gs.gameEnded) {
