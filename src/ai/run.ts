@@ -1,5 +1,5 @@
 import GameState from "../logic/GameState"
-import {solve} from "./optimiseNextTileScore"
+import {solve} from "./optimiseRoundScore"
 import calculateScore from "../logic/calculateScore"
 
 function runOne(solveFn: (gs: GameState) => GameState, seed: number) {
@@ -30,4 +30,4 @@ function runMany(solveFn: (gs: GameState) => GameState, numTests: number) {
   console.log("")
 }
 
-runMany(solve, 100)
+runMany(solve, 10)

@@ -26,7 +26,6 @@ export default class GameState {
     },
     seed?: string | number,
   ) {
-    // TODO track if special tile has been used in the current round
     this.gameEnded = data?.gameEnded ?? false
     this.roundNumber = data?.roundNumber ?? 1
     this.diceRolls = data?.diceRolls ?? rollGameDice(seed)

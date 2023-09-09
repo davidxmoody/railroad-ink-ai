@@ -151,6 +151,13 @@ export class Board {
     return connectedTiles
   }
 
+  public equals(board: Board) {
+    for (let i = 0; i < Board.size * Board.size; i++) {
+      if (this.grid[i] !== board.grid[i]) return false
+    }
+    return true
+  }
+
   public set(p: Position, tile: TileString) {
     this.checkBounds(p)
     if (!this.isValid(p, tile)) throw new Error("Invalid tile placement")

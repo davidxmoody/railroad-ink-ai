@@ -8,7 +8,7 @@
   import type {Position, TileString} from "../logic/types"
   import DrawnExit from "./DrawnExit.svelte"
   import GameState from "../logic/GameState"
-  import {solve} from "../ai/optimiseNextTileScore"
+  import {solve} from "../ai/optimiseRoundScore"
   import {onMount} from "svelte"
 
   let gameState = new GameState()
