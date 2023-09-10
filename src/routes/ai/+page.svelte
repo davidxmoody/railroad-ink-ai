@@ -1,12 +1,14 @@
 <script lang="ts">
   import {solve as basic} from "../../ai/basic"
   import {solve as optimiseNextTileScore} from "../../ai/optimiseNextTileScore"
+  import {solve as randomTreeWalkV1} from "../../ai/randomTreeWalkV1"
   import GameState from "../../logic/GameState"
   import calculateScore from "../../logic/calculateScore"
 
   const algorithms = [
     {name: "Basic", fn: basic},
     {name: "Optimise next tile score", fn: optimiseNextTileScore},
+    {name: "Random tree walk V1", fn: randomTreeWalkV1},
   ]
 
   let selectedAlgorithmIndex = 0
