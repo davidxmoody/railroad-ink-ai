@@ -22,12 +22,10 @@ export function* getPossibleMoves(gs: GameState) {
 export function pickHighestScoringGameState(
   gameStates: Iterable<GameState>,
 ): GameState {
-  let count = 0
   let nextGs: GameState | undefined = undefined
   let highestScore = -Infinity
 
   for (const candidateNextGs of gameStates) {
-    count++
     const score = calculateScore(candidateNextGs.board)
     if (score.total > highestScore) {
       nextGs = candidateNextGs
@@ -36,8 +34,6 @@ export function pickHighestScoringGameState(
   }
 
   if (!nextGs) throw new Error("Could not calculate")
-
-  console.log({count})
 
   return nextGs
 }

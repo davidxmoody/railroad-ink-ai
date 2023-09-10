@@ -49,7 +49,12 @@ export default class GameState {
     return [
       ...this.roundTiles
         .map((tile, index) => ({special: false, index, tile}))
-        .filter(({index}) => !this.usedTileIndexes.includes(index)),
+        .filter(({index}) => !this.usedTileIndexes.includes(index))
+        .filter(
+          (item, index, list) =>
+            index === list.findIndex((item2) => item.tile === item2.tile),
+        ),
+
       ...specialRouteTiles
         .map((tile, index) => ({special: true, index, tile}))
         .filter(
