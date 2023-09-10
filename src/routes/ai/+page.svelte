@@ -2,10 +2,13 @@
   import {solve as basic} from "../../ai/basic"
   import {solve as optimiseNextTileScore} from "../../ai/optimiseNextTileScore"
   import {solve as randomTreeWalkV1} from "../../ai/randomTreeWalkV1"
+  import {solve as visualTreeWalk, type Node} from "../../ai/visualTreeWalk"
+  import TreeNode from "../../components/TreeNode.svelte"
   import GameState from "../../logic/GameState"
   import calculateScore from "../../logic/calculateScore"
 
   const algorithms = [
+    {name: "Visual tree walk", fn: visualTreeWalk},
     {name: "Basic", fn: basic},
     {name: "Optimise next tile score", fn: optimiseNextTileScore},
     {name: "Random tree walk V1", fn: randomTreeWalkV1},
@@ -23,13 +26,23 @@
     gameState: GameState
   }> = []
 
-  function run() {
+  let root: Node | undefined = undefined
+  let nextStep: ((value: unknown) => void) | undefined = undefined
+
+  async function run() {
     running = true
     try {
       const solve = algorithms[selectedAlgorithmIndex].fn
+      const opts = {
+        async step(newRoot: Node) {
+          root = newRoot
+          return new Promise((resolve) => (nextStep = resolve))
+        },
+      }
+
       for (let seed = startSeed; seed <= endSeed; seed++) {
         const startTime = performance.now()
-        const gameState = solve(new GameState(undefined, seed))
+        const gameState = await solve(new GameState(undefined, seed), opts)
         const duration = performance.now() - startTime
         const score = calculateScore(gameState.board).total
         results = [...results, {seed, duration, score, gameState}]
@@ -61,15 +74,23 @@
   </div>
 
   <button on:click={run} disabled={running}>Run</button>
+
+  <button on:click={nextStep} disabled={!nextStep}>Next step</button>
 </div>
 
-<div class="results">
-  {#each results as result}
-    <div class="result">
-      Seed: {result.seed}, duration: {result.duration.toFixed(1)}ms, score: {result.score}
-    </div>
-  {/each}
-</div>
+{#if results.length}
+  <div class="results">
+    {#each results as result}
+      <div class="result">
+        Seed: {result.seed}, duration: {result.duration.toFixed(1)}ms, score: {result.score}
+      </div>
+    {/each}
+  </div>
+{/if}
+
+{#if root}
+  <TreeNode node={root} />
+{/if}
 
 <style>
   .settings {

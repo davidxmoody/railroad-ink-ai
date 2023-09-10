@@ -167,4 +167,14 @@ export class Board {
 
     return new Board(newGrid)
   }
+
+  public toString() {
+    let str = ""
+
+    this.forEachTile(({y, x}, tile) => {
+      str += `${y},${x}${tile} `
+    })
+
+    return str || "Empty"
+  }
 }
