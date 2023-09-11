@@ -2,16 +2,37 @@
   import type {Node} from "../ai/visualTreeWalk"
 
   export let node: Node
+
+  let open = false
 </script>
 
-<div style:font-size="6px">
-  <div>
+<div>
+  <button
+    class="node"
+    on:click={() => (open = !open)}
+    disabled={!node.children}
+  >
     {node.gs.board.toString()}
-  </div>
+    {node.children?.length ?? ""}
+  </button>
 
-  <div style:margin-left="16px">
-    {#each node.children ?? [] as child}
-      <svelte:self node={child} />
-    {/each}
-  </div>
+  {#if open}
+    <div style:margin-left="16px">
+      {#each node.children ?? [] as child}
+        <svelte:self node={child} />
+      {/each}
+    </div>
+  {/if}
 </div>
+
+<style>
+  .node {
+    font-size: 8px;
+    margin-bottom: 2px;
+    padding: 1px;
+  }
+
+  .node:not(:disabled) {
+    cursor: pointer;
+  }
+</style>
