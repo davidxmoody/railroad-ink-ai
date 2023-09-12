@@ -168,6 +168,37 @@ export class Board {
     return new Board(newGrid)
   }
 
+  public get openPositions() {
+    // TODO consider calculating this once on setting a value
+    const openPositions: Position[] = []
+    for (let y = 0; y < Board.size; y++) {
+      for (let x = 0; x < Board.size; x++) {
+        const p = {y, x}
+        if (this.get(p)) continue
+
+        const hasExitConnection = Board.exits.some(
+          (exit) => exit.y === p.y && exit.x === p.x,
+        )
+
+        if (hasExitConnection) {
+          openPositions.push(p)
+          continue
+        }
+
+        const hasTileConnection = rotations.some((r) => {
+          const adjacent = step(p, r)
+          if (!adjacent) return false
+          const adjacentTile = this.get(adjacent)
+          if (!adjacentTile) return false
+          return adjacentTile[flipRotation(r)] !== "_"
+        })
+
+        if (hasTileConnection) openPositions.push(p)
+      }
+    }
+    return openPositions
+  }
+
   public toString() {
     let str = ""
 
