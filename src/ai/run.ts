@@ -1,5 +1,5 @@
 import GameState from "../logic/GameState"
-import {solve} from "./treeWalkV2"
+import {solve} from "./monteCarloV2"
 import calculateScore from "../logic/calculateScore"
 
 function runOne(solveFn: (gs: GameState) => GameState, seed: number) {
@@ -30,4 +30,4 @@ function runMany(solveFn: (gs: GameState) => GameState, numTests: number) {
   console.log("")
 }
 
-runMany(solve, 10)
+runMany(solve, 100)

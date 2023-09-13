@@ -77,3 +77,12 @@ export function pEqual(p1: Position, p2: Position) {
 export function randomPick<T>(array: T[], rand: () => number = Math.random): T {
   return array[Math.floor(rand() * array.length)]
 }
+
+export function shuffle<T>(array: T[]): T[] {
+  const newArray = [...array]
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
+  }
+  return newArray
+}
