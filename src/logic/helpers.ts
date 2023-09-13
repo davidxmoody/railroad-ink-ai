@@ -73,3 +73,7 @@ export function isCenterSquare(p: Position) {
 export function pEqual(p1: Position, p2: Position) {
   return p1.y === p2.y && p1.x === p2.x
 }
+
+export function randomPick<T>(array: T[], rand: () => number = Math.random): T {
+  return array[Math.floor(rand() * array.length)]
+}

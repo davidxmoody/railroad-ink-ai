@@ -1,5 +1,6 @@
 import type {TileString} from "./types"
 import seedrandom from "seedrandom"
+import {randomPick} from "./helpers"
 
 export const routeDieA: TileString[] = [
   "_D_D",
@@ -20,10 +21,6 @@ export const specialRouteTiles: TileString[] = [
   "DLLD",
   "DLDL",
 ]
-
-function randomPick<T>(array: T[], rand: () => number): T {
-  return array[Math.floor(rand() * array.length)]
-}
 
 export function rollRoundDice(rand = Math.random): TileString[] {
   return [
