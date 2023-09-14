@@ -7,6 +7,9 @@ export type TileString =
     | "o"
     | ""}`
 
+export type OpenSlot =
+  `${MaybeTrackType}${MaybeTrackType}${MaybeTrackType}${MaybeTrackType}`
+
 export type Rotation = 0 | 1 | 2 | 3
 
 export type Transform = {flip?: boolean; rotation?: Rotation}

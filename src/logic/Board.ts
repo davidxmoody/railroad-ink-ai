@@ -5,6 +5,7 @@ import type {
   TrackPosition,
   Exit,
   MaybeTrackType,
+  OpenSlot,
 } from "./types"
 import {
   flipRotation,
@@ -13,10 +14,13 @@ import {
   step,
   allTransforms,
   transformTile,
+  tileFitsInSlot,
+  updateSlot,
 } from "./helpers"
+import {Grid} from "./Grid"
 
 export class Board {
-  public static size = 7
+  public static readonly size = Grid.size
 
   public static exits: Exit[] = [
     {y: 0, x: 1, r: 0, t: "D"},
@@ -33,29 +37,38 @@ export class Board {
     {y: 1, x: 0, r: 3, t: "L"},
   ]
 
-  private grid: TileString[]
+  public static readonly exitSlots: Grid<OpenSlot> = Grid.fromList([
+    {y: 0, x: 1, v: "D___"},
+    {y: 0, x: 3, v: "L___"},
+    {y: 0, x: 5, v: "D___"},
+    {y: 1, x: 6, v: "_L__"},
+    {y: 3, x: 6, v: "_D__"},
+    {y: 5, x: 6, v: "_L__"},
+    {y: 6, x: 5, v: "__D_"},
+    {y: 6, x: 3, v: "__L_"},
+    {y: 6, x: 1, v: "__D_"},
+    {y: 5, x: 0, v: "___L"},
+    {y: 3, x: 0, v: "___D"},
+    {y: 1, x: 0, v: "___L"},
+  ])
 
-  public constructor(grid?: TileString[]) {
-    this.grid = grid ?? []
+  private tiles: Grid<TileString>
+  private openSlots: Grid<OpenSlot>
+
+  public constructor(data?: {
+    tiles: Grid<TileString>
+    openSlots: Grid<OpenSlot>
+  }) {
+    this.tiles = data?.tiles ?? Grid.fromList([])
+    this.openSlots = data?.openSlots ?? Board.exitSlots
   }
 
-  private checkBounds(p: Position) {
-    if (p.y < 0 || p.x < 0 || p.y >= Board.size || p.x >= Board.size)
-      throw new Error("Board reference out of bounds")
-  }
-
-  public get(p: Position): TileString | undefined {
-    this.checkBounds(p)
-    return this.grid[p.y * Board.size + p.x]
+  public get(p: Position) {
+    return this.tiles.get(p)
   }
 
   public forEachTile(fn: (p: Position, tile: TileString) => void) {
-    for (let y = 0; y < Board.size; y++) {
-      for (let x = 0; x < Board.size; x++) {
-        const tile: TileString | undefined = this.grid[y * Board.size + x]
-        if (tile) fn({y, x}, tile)
-      }
-    }
+    return this.tiles.forEach(fn)
   }
 
   public countErrors() {
@@ -74,39 +87,8 @@ export class Board {
   }
 
   public isValid(p: Position, tile: TileString) {
-    if (this.get(p) !== undefined) return false
-
-    let numMatchingConnections = 0
-
-    for (const r of rotations) {
-      if (tile[r] === "_") continue
-
-      const exit = Board.exits.find(
-        (e) => e.y === p.y && e.x === p.x && e.r === r,
-      )
-      if (exit) {
-        if (exit.t === tile[r]) {
-          numMatchingConnections++
-          continue
-        } else {
-          return false
-        }
-      }
-
-      const adjacent = step(p, r)
-      if (!adjacent) continue
-
-      const adjacentTile = this.get(adjacent)
-      if (!adjacentTile || adjacentTile[flipRotation(r)] === "_") continue
-
-      if (adjacentTile[flipRotation(r)] === tile[r]) {
-        numMatchingConnections++
-      } else {
-        return false
-      }
-    }
-
-    return numMatchingConnections >= 1
+    const slot = this.openSlots.get(p)
+    return !!slot && tileFitsInSlot(tile, slot)
   }
 
   public isValidWithTransform(p: Position, tile: TileString) {
@@ -151,52 +133,32 @@ export class Board {
     return connectedTiles
   }
 
-  public equals(board: Board) {
-    for (let i = 0; i < Board.size * Board.size; i++) {
-      if (this.grid[i] !== board.grid[i]) return false
-    }
-    return true
-  }
-
   public set(p: Position, tile: TileString) {
-    this.checkBounds(p)
     if (!this.isValid(p, tile)) throw new Error("Invalid tile placement")
 
-    const newGrid = [...this.grid]
-    newGrid[p.y * Board.size + p.x] = tile
+    const tiles = this.tiles.clone()
+    tiles.set(p, tile)
 
-    return new Board(newGrid)
+    const openSlots = this.openSlots.clone()
+    openSlots.delete(p)
+
+    for (const r of rotations) {
+      const adjacentP = step(p, r)
+      if (!adjacentP || this.get(adjacentP)) continue
+
+      const t = tile[r] as MaybeTrackType
+      if (t === "_") continue
+
+      openSlots.set(adjacentP, updateSlot(flipRotation(r), t))
+    }
+
+    return new Board({tiles, openSlots})
   }
 
   public get openPositions() {
-    // TODO consider calculating this once on setting a value
-    const openPositions: Position[] = []
-    for (let y = 0; y < Board.size; y++) {
-      for (let x = 0; x < Board.size; x++) {
-        const p = {y, x}
-        if (this.get(p)) continue
-
-        const hasExitConnection = Board.exits.some(
-          (exit) => exit.y === p.y && exit.x === p.x,
-        )
-
-        if (hasExitConnection) {
-          openPositions.push(p)
-          continue
-        }
-
-        const hasTileConnection = rotations.some((r) => {
-          const adjacent = step(p, r)
-          if (!adjacent) return false
-          const adjacentTile = this.get(adjacent)
-          if (!adjacentTile) return false
-          return adjacentTile[flipRotation(r)] !== "_"
-        })
-
-        if (hasTileConnection) openPositions.push(p)
-      }
-    }
-    return openPositions
+    const ps: Position[] = []
+    this.openSlots.forEach((p) => ps.push(p))
+    return ps
   }
 
   public toString() {

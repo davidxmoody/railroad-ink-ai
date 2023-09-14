@@ -1,5 +1,6 @@
 import {Board} from "./Board"
 import type {
+  OpenSlot,
   Position,
   Rotation,
   TileString,
@@ -85,4 +86,18 @@ export function shuffle<T>(array: T[]): T[] {
     ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
   }
   return newArray
+}
+
+export function tileFitsInSlot(tile: TileString, slot: OpenSlot) {
+  let numMatches = 0
+  for (const r of rotations) {
+    if (tile[r] === "_" || slot[r] === "_") continue
+    if (tile[r] !== slot[r]) return false
+    numMatches++
+  }
+  return numMatches >= 1
+}
+
+export function updateSlot(r: Rotation, t: TrackType, slot: OpenSlot = "____") {
+  return (slot.substring(0, r) + t + slot.substring(r + 1)) as OpenSlot
 }
