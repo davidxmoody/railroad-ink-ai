@@ -1,6 +1,6 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
-import {shuffle} from "../logic/helpers"
+import {getAllTransformedTiles, shuffle} from "../logic/helpers"
 import type {Position, TileString} from "../logic/types"
 
 // Runs: 20, score: 49.8, duration: 39612.0ms
@@ -97,12 +97,10 @@ function* getPossibleMoves(gs: GameState): Generator<Move> {
     for (const {tile, special} of availableTiles) {
       if (special && gs.roundNumber <= 4) continue
 
-      const validTransformedTiles = shuffle(
-        gs.board.getAllValidTransformedTiles(p, tile),
-      )
-
-      for (const tTile of validTransformedTiles) {
-        yield {p, tTile}
+      for (const tTile of shuffle(getAllTransformedTiles(tile))) {
+        if (gs.board.isValid(p, tTile)) {
+          yield {p, tTile}
+        }
       }
     }
   }

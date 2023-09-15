@@ -77,17 +77,16 @@ export class Board {
   }
 
   public isValidWithTransform(p: Position, tile: TileString) {
-    return getAllTransformedTiles(tile).some((tTile) => this.isValid(p, tTile))
+    for (const tTile of getAllTransformedTiles(tile)) {
+      if (this.isValid(p, tTile)) return true
+    }
+    return false
   }
 
   public getAllValidTransformedTiles(p: Position, tile: TileString) {
-    const validTransformedTiles: TileString[] = []
-    for (const tTile of getAllTransformedTiles(tile)) {
-      if (this.isValid(p, tTile) && !validTransformedTiles.includes(tTile)) {
-        validTransformedTiles.push(tTile)
-      }
-    }
-    return validTransformedTiles
+    return getAllTransformedTiles(tile).filter((tTile) =>
+      this.isValid(p, tTile),
+    )
   }
 
   public getConnectedTiles(

@@ -61,7 +61,8 @@ export function getAllTransformedTiles(tile: TileString) {
 
   for (const rotation of rotations) {
     for (const flip of [false, true]) {
-      results.push(transformTile(tile, {rotation, flip}))
+      const tTile = transformTile(tile, {rotation, flip})
+      if (!results.includes(tTile)) results.push(tTile)
     }
   }
 
