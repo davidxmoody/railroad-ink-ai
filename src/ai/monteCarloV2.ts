@@ -1,6 +1,6 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
-import {allTransforms, shuffle, transformTile} from "../logic/helpers"
+import {getAllTransformedTiles, shuffle} from "../logic/helpers"
 import type {Position, TileString} from "../logic/types"
 
 // Runs: 100, score: 46.5, duration: 6152.1ms
@@ -82,9 +82,6 @@ function simulate(
 
   const openPositions = shuffle(gs.board.openPositions)
   const availableTiles = shuffle(gs.availableTiles)
-  // TODO optimise tile transform finding so dont have to go through
-  // 8 transforms for no reason
-  const transforms = shuffle(allTransforms.slice(0, 4))
 
   for (const p of openPositions) {
     for (const {tile, index, special} of availableTiles) {
@@ -92,8 +89,7 @@ function simulate(
       if (special && Math.random() > 0.1) continue
       // if (special) continue
 
-      for (const transform of transforms) {
-        const tTile = transformTile(tile, transform)
+      for (const tTile of getAllTransformedTiles(tile)) {
         if (gs.board.isValid(p, tTile)) {
           const move = {index, special, p, tTile}
           const nextGs = gs.placeTile(index, special, p, tTile)
@@ -134,11 +130,9 @@ function encodeMove(move: Move) {
 
 function makeMove(gs: GameState, moveString: string) {
   const moveTTile = moveString.slice(2) as TileString
-  const allTransformedTiles = new Set(
-    allTransforms.map((t) => transformTile(moveTTile, t)),
-  )
+  const allTransformedTiles = getAllTransformedTiles(moveTTile)
   const chosenTile = gs.availableTiles.find(({tile}) =>
-    allTransformedTiles.has(tile),
+    allTransformedTiles.includes(tile),
   )
 
   if (!chosenTile) {

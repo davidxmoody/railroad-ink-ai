@@ -51,16 +51,23 @@ export function flipTile(tile: TileString) {
   }` as TileString
 }
 
-export const allTransforms: Transform[] = [
-  {rotation: 0, flip: false},
-  {rotation: 1, flip: false},
-  {rotation: 2, flip: false},
-  {rotation: 3, flip: false},
-  {rotation: 0, flip: true},
-  {rotation: 1, flip: true},
-  {rotation: 2, flip: true},
-  {rotation: 3, flip: true},
-]
+const transformedTileCache: Partial<Record<TileString, TileString[]>> = {}
+
+export function getAllTransformedTiles(tile: TileString) {
+  const cachedValue = transformedTileCache[tile]
+  if (cachedValue) return cachedValue
+
+  const results: TileString[] = []
+
+  for (const rotation of rotations) {
+    for (const flip of [false, true]) {
+      results.push(transformTile(tile, {rotation, flip}))
+    }
+  }
+
+  transformedTileCache[tile] = results
+  return results
+}
 
 export function transformTile(tile: TileString, transform: Transform) {
   const rotated = rotateTile(tile, transform.rotation ?? 0)

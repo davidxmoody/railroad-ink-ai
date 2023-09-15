@@ -12,10 +12,9 @@ import {
   hasOverpass,
   rotations,
   step,
-  allTransforms,
-  transformTile,
   tileFitsInSlot,
   updateSlot,
+  getAllTransformedTiles,
 } from "./helpers"
 import {Grid} from "./Grid"
 
@@ -72,6 +71,8 @@ export class Board {
   }
 
   public countErrors() {
+    // TODO see if this could be sped up by counting open slot connections
+    // minus exit connections...
     let numErrors = 0
     this.forEachTile(({y, x}, tile) => {
       for (const r of rotations) {
@@ -92,12 +93,12 @@ export class Board {
   }
 
   public isValidWithTransform(p: Position, tile: TileString) {
-    return allTransforms.some((t) => this.isValid(p, transformTile(tile, t)))
+    return getAllTransformedTiles(tile).some((tTile) => this.isValid(p, tTile))
   }
 
   public getAllValidTransformedTiles(p: Position, tile: TileString) {
     const validTransformedTiles: TileString[] = []
-    for (const tTile of allTransforms.map((t) => transformTile(tile, t))) {
+    for (const tTile of getAllTransformedTiles(tile)) {
       if (this.isValid(p, tTile) && !validTransformedTiles.includes(tTile)) {
         validTransformedTiles.push(tTile)
       }
