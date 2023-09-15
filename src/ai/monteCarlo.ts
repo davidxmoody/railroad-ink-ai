@@ -1,13 +1,11 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
-import {getAllTransformedTiles, shuffle} from "../logic/helpers"
+import {shuffle} from "../logic/helpers"
 import type {Position, TileString} from "../logic/types"
 
-// Runs: 20, score: 35.5, duration: 3686.1ms
+// Runs: 20, score: 47.3, duration: 4015.7ms
 
 type Move = {
-  index: number
-  special: boolean
   p: Position
   tTile: TileString
 }
@@ -23,7 +21,7 @@ export function solve(gs: GameState) {
 
 function solveRound(gs: GameState) {
   while (!gs.canEndRound) {
-    const possibleOpeningMoveLog = getPossibleMoves(gs).reduce(
+    const possibleOpeningMoveLog = [...getPossibleMoves(gs)].reduce(
       (acc, move) => {
         acc[encodeMove(move)] = {count: 0, averageScore: -1000}
         return acc
@@ -77,48 +75,30 @@ function simulate(
     return {moves, score}
   }
 
-  const openPositions = shuffle(gs.board.openPositions)
-  const availableTiles = shuffle(gs.availableTiles)
+  const move = getPossibleMoves(gs).next().value
 
-  for (const p of openPositions) {
-    for (const {tile, index, special} of availableTiles) {
-      // TODO account for choosing not to use a special tile sometimes
-      if (special && Math.random() > 0.1) continue
-      // if (special) continue
-
-      for (const tTile of getAllTransformedTiles(tile)) {
-        if (gs.board.isValid(p, tTile)) {
-          const move = {index, special, p, tTile}
-          const nextGs = gs.placeTile(p, tTile)
-          return simulate(nextGs, [...moves, move])
-        }
-      }
-    }
+  if (move) {
+    return simulate(gs.placeTile(move.p, move.tTile), [...moves, move])
   }
 
   return simulate(gs.endRound(), moves)
 }
 
-function getPossibleMoves(gs: GameState) {
-  const moves: Move[] = []
+function* getPossibleMoves(gs: GameState) {
+  const openPositions = shuffle(gs.board.openPositions)
+  const availableTiles = shuffle(gs.availableTiles)
 
-  const openPositions = gs.board.openPositions
-  const availableTiles = gs.availableTiles
-
-  for (const {special, index, tile} of availableTiles) {
-    for (const p of openPositions) {
-      const validTransformedTiles = gs.board.getAllValidTransformedTiles(
-        p,
-        tile,
+  for (const p of openPositions) {
+    for (const {tile} of availableTiles) {
+      const validTransformedTiles = shuffle(
+        gs.board.getAllValidTransformedTiles(p, tile),
       )
 
       for (const tTile of validTransformedTiles) {
-        moves.push({index, special, p, tTile})
+        yield {p, tTile}
       }
     }
   }
-
-  return moves
 }
 
 function encodeMove(move: Move) {
@@ -127,15 +107,6 @@ function encodeMove(move: Move) {
 
 function makeMove(gs: GameState, moveString: string) {
   const moveTTile = moveString.slice(2) as TileString
-  const allTransformedTiles = getAllTransformedTiles(moveTTile)
-  const chosenTile = gs.availableTiles.find(({tile}) =>
-    allTransformedTiles.includes(tile),
-  )
-
-  if (!chosenTile) {
-    throw new Error("Cannot make move")
-  }
-
   const y = parseInt(moveString[0], 10)
   const x = parseInt(moveString[1], 10)
 

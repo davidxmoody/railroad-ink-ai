@@ -1,5 +1,5 @@
 import GameState from "../logic/GameState"
-import {solve} from "./randomTreeWalk"
+import {solve} from "./monteCarlo"
 import calculateScore from "../logic/calculateScore"
 
 function runOne(solveFn: (gs: GameState) => GameState, seed: number) {
