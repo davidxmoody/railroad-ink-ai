@@ -3,7 +3,7 @@ import calculateScore from "../logic/calculateScore"
 import {shuffle} from "../logic/helpers"
 import type {Position, TileString} from "../logic/types"
 
-// Runs: 20, score: 47.0, duration: 4149.8ms
+// Runs: 20, score: 49.8, duration: 39612.0ms
 
 type Move = {
   p: Position
@@ -20,28 +20,22 @@ export function solve(gs: GameState) {
 }
 
 function solveRound(gs: GameState) {
+  let simulationResults: Array<{moveStrings: string[]; score: number}> = []
+
+  // TODO need to account for possibility of using special tile on last move
   while (!gs.canEndRound) {
-    const possibleOpeningMoveLog = [...getPossibleMoves(gs)].reduce(
-      (acc, move) => {
-        acc[encodeMove(move)] = {count: 0, averageScore: -1000}
-        return acc
-      },
-      {} as Record<
-        string,
-        {
-          count: number
-          averageScore: number
-        }
-      >,
-    )
+    for (let i = 0; i < 10000; i++) {
+      simulationResults.push(simulate(gs))
+    }
 
-    const simulationResults: Array<{moves: Move[]; score: number}> = []
+    const openingMoveLog = [...getPossibleMoves(gs)].reduce((acc, move) => {
+      acc[encodeMove(move)] = {count: 0, averageScore: -1000}
+      return acc
+    }, {} as Record<string, {count: number; averageScore: number}>)
 
-    for (let i = 0; i < 1000; i++) {
-      const simulationResult = simulate(gs)
-      simulationResults.push(simulationResult)
-      for (const move of simulationResult.moves) {
-        const logItem = possibleOpeningMoveLog[encodeMove(move)]
+    for (const simulationResult of simulationResults) {
+      for (const moveString of simulationResult.moveStrings) {
+        const logItem = openingMoveLog[moveString]
         if (logItem) {
           const newCount = logItem.count + 1
           logItem.averageScore =
@@ -52,17 +46,17 @@ function solveRound(gs: GameState) {
       }
     }
 
-    const bestOpeningMoveString = Object.keys(possibleOpeningMoveLog).reduce(
-      (a, b) =>
-        possibleOpeningMoveLog[a].averageScore >
-        possibleOpeningMoveLog[b].averageScore
-          ? a
-          : b,
+    const bestOpeningMoveString = Object.keys(openingMoveLog).reduce((a, b) =>
+      openingMoveLog[a].averageScore > openingMoveLog[b].averageScore ? a : b,
     )
 
     const bestOpeningMove = parseMove(bestOpeningMoveString)
 
     gs = gs.placeTile(bestOpeningMove.p, bestOpeningMove.tTile)
+    simulationResults = simulationResults.filter((r) =>
+      r.moveStrings.includes(bestOpeningMoveString),
+    )
+    // console.log("kept num results", simulationResults.length)
   }
 
   return gs
@@ -70,23 +64,32 @@ function solveRound(gs: GameState) {
 
 function simulate(
   gs: GameState,
-  moves: Move[] = [],
-): {moves: Move[]; score: number} {
+  moveStrings: string[] = [],
+  roundEndedOnce = false,
+) {
   if (gs.gameEnded) {
     const score = calculateScore(gs.board).total
-    return {moves, score}
+    return {moveStrings, score}
   }
 
   const move = getPossibleMoves(gs).next().value
 
   if (move) {
-    return simulate(gs.placeTile(move.p, move.tTile), [...moves, move])
+    const newMoveStrings = roundEndedOnce
+      ? moveStrings
+      : [...moveStrings, encodeMove(move)]
+    return simulate(
+      gs.placeTile(move.p, move.tTile),
+      newMoveStrings,
+      roundEndedOnce,
+    )
   }
 
-  return simulate(gs.endRound(), moves)
+  // TODO stop cheating and use random tiles instead of seeded ones
+  return simulate(gs.endRound(), moveStrings, true)
 }
 
-function* getPossibleMoves(gs: GameState) {
+function* getPossibleMoves(gs: GameState): Generator<Move> {
   const openPositions = shuffle(gs.board.openPositions)
   const availableTiles = shuffle(gs.availableTiles)
 
