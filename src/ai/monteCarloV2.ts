@@ -13,7 +13,6 @@ type Move = {
 }
 
 export function solve(gs: GameState) {
-  console.log()
   while (!gs.gameEnded) {
     gs = solveRound(gs)
     gs = gs.endRound()
@@ -40,7 +39,6 @@ function solveRound(gs: GameState) {
 
     const simulationResults: Array<{moves: Move[]; score: number}> = []
 
-    console.time("simulation")
     for (let i = 0; i < 1000; i++) {
       const simulationResult = simulate(gs)
       simulationResults.push(simulationResult)
@@ -55,7 +53,6 @@ function solveRound(gs: GameState) {
         }
       }
     }
-    console.timeEnd("simulation")
 
     const bestOpeningMoveString = Object.keys(possibleOpeningMoveLog).reduce(
       (a, b) =>

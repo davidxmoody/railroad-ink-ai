@@ -34,7 +34,17 @@ export class Grid<T> {
       for (let x = 0; x < Grid.size; x++) {
         const p = {y, x}
         const value = this.get(p)
-        if (value) fn(p, value)
+        if (value !== undefined) fn(p, value)
+      }
+    }
+  }
+
+  public *entries() {
+    for (let y = 0; y < Grid.size; y++) {
+      for (let x = 0; x < Grid.size; x++) {
+        const position = {y, x}
+        const value = this.get(position)
+        if (value !== undefined) yield [position, value] as const
       }
     }
   }

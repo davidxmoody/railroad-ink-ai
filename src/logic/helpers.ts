@@ -105,6 +105,6 @@ export function tileFitsInSlot(tile: TileString, slot: OpenSlot) {
   return numMatches >= 1
 }
 
-export function updateSlot(r: Rotation, t: TrackType, slot: OpenSlot = "____") {
+export function updateSlot(r: Rotation, t: TrackType, slot: OpenSlot) {
   return (slot.substring(0, r) + t + slot.substring(r + 1)) as OpenSlot
 }

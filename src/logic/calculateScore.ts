@@ -1,6 +1,13 @@
 import {Board} from "./Board"
-import {hasOverpass, hasTrackType, isCenterSquare, pEqual} from "./helpers"
-import type {Exit, Position, TrackPosition, TrackType} from "./types"
+import {Grid} from "./Grid"
+import {
+  hasOverpass,
+  hasTrackType,
+  isCenterSquare,
+  pEqual,
+  tileFitsInSlot,
+} from "./helpers"
+import type {Position, TrackType} from "./types"
 
 export default function calculateScore(board: Board) {
   const exits = calculateExitsScore(board)
@@ -43,51 +50,91 @@ const exitScoringTable: Record<number, number | undefined> = {
 }
 
 function calculateExitsScore(board: Board) {
+  const networkGrid = Grid.fromList<{horizontal: number; vertical: number}>([])
+
+  board.forEachTile((p, tile) => {
+    const defaultNetworkId = p.y * Board.size + p.x
+    let leftNetworkId: number | undefined = undefined
+    let aboveNetworkId: number | undefined = undefined
+
+    if (p.x > 0 && tile[3] !== "_") {
+      const positionToLeft = {y: p.y, x: p.x - 1}
+      const tileToLeft = board.get(positionToLeft)
+      const networkToLeft = networkGrid.get(positionToLeft)
+
+      if (tileToLeft && tileToLeft[1] !== "_" && networkToLeft) {
+        leftNetworkId = networkToLeft.horizontal
+      }
+    }
+
+    if (p.y > 0 && tile[0] !== "_") {
+      const positionAbove = {y: p.y - 1, x: p.x}
+      const tileAbove = board.get(positionAbove)
+      const networkAbove = networkGrid.get(positionAbove)
+
+      if (tileAbove && tileAbove[2] !== "_" && networkAbove) {
+        aboveNetworkId = networkAbove.vertical
+      }
+    }
+
+    if (hasOverpass(tile)) {
+      networkGrid.set(p, {
+        horizontal: leftNetworkId ?? defaultNetworkId,
+        vertical: aboveNetworkId ?? defaultNetworkId,
+      })
+    } else if (leftNetworkId !== undefined && aboveNetworkId !== undefined) {
+      networkGrid.forEach((_p, value) => {
+        if (value.horizontal === leftNetworkId) {
+          value.horizontal = aboveNetworkId!
+        }
+        if (value.vertical === leftNetworkId) {
+          value.vertical = aboveNetworkId!
+        }
+      })
+      networkGrid.set(p, {
+        horizontal: aboveNetworkId,
+        vertical: aboveNetworkId,
+      })
+    } else if (aboveNetworkId !== undefined) {
+      networkGrid.set(p, {
+        horizontal: aboveNetworkId,
+        vertical: aboveNetworkId,
+      })
+    } else if (leftNetworkId !== undefined) {
+      networkGrid.set(p, {
+        horizontal: leftNetworkId,
+        vertical: leftNetworkId,
+      })
+    } else {
+      networkGrid.set(p, {
+        horizontal: defaultNetworkId,
+        vertical: defaultNetworkId,
+      })
+    }
+  })
+
+  const exitGroups: Record<number, number> = {}
+
+  for (const [exitP, exitSlot] of Board.exitSlots.entries()) {
+    const tileAtExit = board.get(exitP)
+    if (!tileAtExit || !tileFitsInSlot(tileAtExit, exitSlot)) continue
+
+    const networkValues = networkGrid.get(exitP)
+    if (!networkValues) throw new Error("Could not find network values")
+
+    const isVerticalExit = exitSlot[0] !== "_" && exitSlot[2] !== "_"
+    const exitNetworkId = isVerticalExit
+      ? networkValues.vertical
+      : networkValues.horizontal
+
+    exitGroups[exitNetworkId] = (exitGroups[exitNetworkId] ?? 0) + 1
+  }
+
   let exitsScore = 0
-
-  const alreadyCheckedExits: Exit[] = []
-
-  for (const exit of Board.exits) {
-    if (alreadyCheckedExits.includes(exit)) continue
-
-    const connectedExits = findConnectedExits(board, exit)
-    alreadyCheckedExits.push(...connectedExits)
-
-    exitsScore += exitScoringTable[connectedExits.length] ?? 0
+  for (const count of Object.values(exitGroups)) {
+    exitsScore += exitScoringTable[count] ?? 0
   }
-
   return exitsScore
-}
-
-function findConnectedExits(board: Board, startingExit: Exit) {
-  const tileAtExit = board.get(startingExit)
-  if (!tileAtExit || tileAtExit[startingExit.r] === "_") return [startingExit]
-
-  const visitedExits: Exit[] = []
-  const visitedTileKeys: Record<string, boolean> = {}
-  const unexploredTrackPositions: TrackPosition[] = [startingExit]
-
-  while (unexploredTrackPositions.length) {
-    const tp = unexploredTrackPositions.shift()!
-    const tile = board.get(tp)!
-
-    const key = `${tp.y},${tp.x}${hasOverpass(tile) ? tp.t : ""}`
-    if (visitedTileKeys[key]) continue
-    visitedTileKeys[key] = true
-
-    const connectedExit = Board.exits.find(
-      (e) =>
-        e.y === tp.y &&
-        e.x === tp.x &&
-        tile[e.r] !== "_" &&
-        (!hasOverpass(tile) || tile[e.r] === tp.t),
-    )
-    if (connectedExit) visitedExits.push(connectedExit)
-
-    unexploredTrackPositions.push(...board.getConnectedTiles(tp))
-  }
-
-  return visitedExits
 }
 
 function getConnectionKey(p1: Position, p2: Position) {

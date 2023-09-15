@@ -1,15 +1,21 @@
 <script lang="ts">
-  import type {Exit} from "../logic/types"
+  import {rotations} from "../logic/helpers"
+  import type {OpenSlot, Position} from "../logic/types"
 
-  export let exit: Exit
+  export let position: Position
+  export let exitSlot: OpenSlot
   export let cellSize: number
   export let cellBorderSize: number
 
+  $: rotation = rotations.find((r) => exitSlot[r] !== "_") ?? 0
+
   $: transform = `translate(${
-    (cellSize + 2 * cellBorderSize) * exit.x + cellBorderSize
-  }px, ${(cellSize + 2 * cellBorderSize) * exit.y + cellBorderSize}px) rotate(${
-    90 * exit.r
-  }deg) translate(0, -${cellSize + 2 * cellBorderSize}px)`
+    (cellSize + 2 * cellBorderSize) * position.x + cellBorderSize
+  }px, ${
+    (cellSize + 2 * cellBorderSize) * position.y + cellBorderSize
+  }px) rotate(${90 * rotation}deg) translate(0, -${
+    cellSize + 2 * cellBorderSize
+  }px)`
 </script>
 
 <svg
@@ -19,7 +25,7 @@
   height={cellSize}
   style:transform
 >
-  {#if exit.t === "D"}
+  {#if exitSlot[rotation] === "D"}
     <path d="M40,60 v50 M60,60 v50" />
     <path stroke-width={2} d="M50,69 v9 m0,6 v9" />
   {:else}

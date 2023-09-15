@@ -175,8 +175,8 @@
       </div>
     {/each}
 
-    {#each Board.exits as exit}
-      <DrawnExit {exit} cellSize={60} cellBorderSize={1} />
+    {#each Board.exitSlots.entries() as [position, exitSlot]}
+      <DrawnExit {position} {exitSlot} cellSize={60} cellBorderSize={1} />
     {/each}
   </div>
 </div>

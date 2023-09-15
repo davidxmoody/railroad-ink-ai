@@ -3,7 +3,6 @@ import type {
   TrackType,
   Position,
   TrackPosition,
-  Exit,
   MaybeTrackType,
   OpenSlot,
 } from "./types"
@@ -20,21 +19,6 @@ import {Grid} from "./Grid"
 
 export class Board {
   public static readonly size = Grid.size
-
-  public static exits: Exit[] = [
-    {y: 0, x: 1, r: 0, t: "D"},
-    {y: 0, x: 3, r: 0, t: "L"},
-    {y: 0, x: 5, r: 0, t: "D"},
-    {y: 1, x: 6, r: 1, t: "L"},
-    {y: 3, x: 6, r: 1, t: "D"},
-    {y: 5, x: 6, r: 1, t: "L"},
-    {y: 6, x: 5, r: 2, t: "D"},
-    {y: 6, x: 3, r: 2, t: "L"},
-    {y: 6, x: 1, r: 2, t: "D"},
-    {y: 5, x: 0, r: 3, t: "L"},
-    {y: 3, x: 0, r: 3, t: "D"},
-    {y: 1, x: 0, r: 3, t: "L"},
-  ]
 
   public static readonly exitSlots: Grid<OpenSlot> = Grid.fromList([
     {y: 0, x: 1, v: "D___"},
@@ -147,10 +131,12 @@ export class Board {
       const adjacentP = step(p, r)
       if (!adjacentP || this.get(adjacentP)) continue
 
-      const t = tile[r] as MaybeTrackType
-      if (t === "_") continue
+      const trackType = tile[r] as MaybeTrackType
+      if (trackType === "_") continue
 
-      openSlots.set(adjacentP, updateSlot(flipRotation(r), t))
+      const existingSlot = openSlots.get(adjacentP) ?? "____"
+      const newSlot = updateSlot(flipRotation(r), trackType, existingSlot)
+      openSlots.set(adjacentP, newSlot)
     }
 
     return new Board({tiles, openSlots})
