@@ -1,8 +1,7 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
-import {getPossibleMoves} from "./aiHelpers"
 
-// Runs: 10, score: 42.3, duration: 3831.6ms
+// Runs: 20, score: 40.2, duration: 2020.7ms
 
 type Node = {gs: GameState; bestScore?: number; children?: Node[]}
 
@@ -49,4 +48,19 @@ function iterate(node: Node): number {
   }
 
   return node.bestScore
+}
+
+function* getPossibleMoves(gs: GameState) {
+  for (const {tile} of gs.availableTiles) {
+    for (const p of gs.board.openPositions) {
+      const validTransformedTiles = gs.board.getAllValidTransformedTiles(
+        p,
+        tile,
+      )
+
+      for (const tTile of validTransformedTiles) {
+        yield gs.placeTile(p, tTile)
+      }
+    }
+  }
 }

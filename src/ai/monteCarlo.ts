@@ -1,11 +1,16 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
-import {randomPick} from "../logic/helpers"
-import {getPossibleMoves} from "./aiHelpers"
+import {getAllTransformedTiles, shuffle} from "../logic/helpers"
+import type {Position, TileString} from "../logic/types"
 
-// Runs: 10, score: 28.3, duration: 35155.2ms
+// Runs: 20, score: 35.5, duration: 3686.1ms
 
-type Node = {gs: GameState; bestScore?: number; children?: Node[]}
+type Move = {
+  index: number
+  special: boolean
+  p: Position
+  tTile: TileString
+}
 
 export function solve(gs: GameState) {
   while (!gs.gameEnded) {
@@ -17,56 +22,122 @@ export function solve(gs: GameState) {
 }
 
 function solveRound(gs: GameState) {
-  // TODO this will ignore the possibility of using a special tile on last move
   while (!gs.canEndRound) {
-    let root: Node = {gs}
-
-    for (let i = 0; i < 1000; i++) {
-      iterate(root)
-    }
-
-    const bestChild = root.children!.reduce((a, b) =>
-      (a.bestScore ?? 0) > (b.bestScore ?? 0) ? a : b,
+    const possibleOpeningMoveLog = getPossibleMoves(gs).reduce(
+      (acc, move) => {
+        acc[encodeMove(move)] = {count: 0, averageScore: -1000}
+        return acc
+      },
+      {} as Record<
+        string,
+        {
+          count: number
+          averageScore: number
+        }
+      >,
     )
 
-    root = bestChild
-    gs = bestChild.gs
+    const simulationResults: Array<{moves: Move[]; score: number}> = []
+
+    for (let i = 0; i < 1000; i++) {
+      const simulationResult = simulate(gs)
+      simulationResults.push(simulationResult)
+      for (const move of simulationResult.moves) {
+        const logItem = possibleOpeningMoveLog[encodeMove(move)]
+        if (logItem) {
+          const newCount = logItem.count + 1
+          logItem.averageScore =
+            (logItem.averageScore * logItem.count + simulationResult.score) /
+            newCount
+          logItem.count = newCount
+        }
+      }
+    }
+
+    const bestOpeningMoveString = Object.keys(possibleOpeningMoveLog).reduce(
+      (a, b) =>
+        possibleOpeningMoveLog[a].averageScore >
+        possibleOpeningMoveLog[b].averageScore
+          ? a
+          : b,
+    )
+
+    gs = makeMove(gs, bestOpeningMoveString)
   }
 
   return gs
 }
 
-function iterate(node: Node): number {
-  if (!node.children) {
-    node.children = Array.from(getPossibleMoves(node.gs), (gs) => ({gs}))
+function simulate(
+  gs: GameState,
+  moves: Move[] = [],
+): {moves: Move[]; score: number} {
+  if (gs.gameEnded) {
+    const score = calculateScore(gs.board).total
+    return {moves, score}
   }
 
-  const randomChild =
-    node.children[Math.floor(Math.random() * node.children.length)]
+  const openPositions = shuffle(gs.board.openPositions)
+  const availableTiles = shuffle(gs.availableTiles)
 
-  if (randomChild) {
-    const bestChildScore = iterate(randomChild)
-    node.bestScore =
-      node.bestScore !== undefined && node.bestScore > bestChildScore
-        ? node.bestScore
-        : bestChildScore
-  } else {
-    const simulatedScore = calculateScore(simulate(node.gs).board).total
-    const score = Math.max(node.bestScore ?? -Infinity, simulatedScore)
-    node.bestScore = score
+  for (const p of openPositions) {
+    for (const {tile, index, special} of availableTiles) {
+      // TODO account for choosing not to use a special tile sometimes
+      if (special && Math.random() > 0.1) continue
+      // if (special) continue
+
+      for (const tTile of getAllTransformedTiles(tile)) {
+        if (gs.board.isValid(p, tTile)) {
+          const move = {index, special, p, tTile}
+          const nextGs = gs.placeTile(p, tTile)
+          return simulate(nextGs, [...moves, move])
+        }
+      }
+    }
   }
 
-  return node.bestScore
+  return simulate(gs.endRound(), moves)
 }
 
-function simulate(gs: GameState) {
-  if (gs.gameEnded) return gs
+function getPossibleMoves(gs: GameState) {
+  const moves: Move[] = []
 
-  const possibleNextGameStates = [
-    ...getPossibleMoves(gs),
-    // TODO this "cheats" and knows what seeded tiles will come up
-    ...(gs.canEndRound ? [gs.endRound()] : []),
-  ]
+  const openPositions = gs.board.openPositions
+  const availableTiles = gs.availableTiles
 
-  return simulate(randomPick(possibleNextGameStates))
+  for (const {special, index, tile} of availableTiles) {
+    for (const p of openPositions) {
+      const validTransformedTiles = gs.board.getAllValidTransformedTiles(
+        p,
+        tile,
+      )
+
+      for (const tTile of validTransformedTiles) {
+        moves.push({index, special, p, tTile})
+      }
+    }
+  }
+
+  return moves
+}
+
+function encodeMove(move: Move) {
+  return `${move.p.y}${move.p.x}${move.tTile}`
+}
+
+function makeMove(gs: GameState, moveString: string) {
+  const moveTTile = moveString.slice(2) as TileString
+  const allTransformedTiles = getAllTransformedTiles(moveTTile)
+  const chosenTile = gs.availableTiles.find(({tile}) =>
+    allTransformedTiles.includes(tile),
+  )
+
+  if (!chosenTile) {
+    throw new Error("Cannot make move")
+  }
+
+  const y = parseInt(moveString[0], 10)
+  const x = parseInt(moveString[1], 10)
+
+  return gs.placeTile({y, x}, moveTTile)
 }
