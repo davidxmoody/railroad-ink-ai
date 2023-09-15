@@ -3,7 +3,7 @@ import calculateScore from "../logic/calculateScore"
 import {shuffle} from "../logic/helpers"
 import type {Position, TileString} from "../logic/types"
 
-// Runs: 20, score: 47.3, duration: 4015.7ms
+// Runs: 20, score: 47.0, duration: 4149.8ms
 
 type Move = {
   p: Position
@@ -60,7 +60,9 @@ function solveRound(gs: GameState) {
           : b,
     )
 
-    gs = makeMove(gs, bestOpeningMoveString)
+    const bestOpeningMove = parseMove(bestOpeningMoveString)
+
+    gs = gs.placeTile(bestOpeningMove.p, bestOpeningMove.tTile)
   }
 
   return gs
@@ -89,7 +91,9 @@ function* getPossibleMoves(gs: GameState) {
   const availableTiles = shuffle(gs.availableTiles)
 
   for (const p of openPositions) {
-    for (const {tile} of availableTiles) {
+    for (const {tile, special} of availableTiles) {
+      if (special && gs.roundNumber <= 4) continue
+
       const validTransformedTiles = shuffle(
         gs.board.getAllValidTransformedTiles(p, tile),
       )
@@ -105,10 +109,10 @@ function encodeMove(move: Move) {
   return `${move.p.y}${move.p.x}${move.tTile}`
 }
 
-function makeMove(gs: GameState, moveString: string) {
-  const moveTTile = moveString.slice(2) as TileString
+function parseMove(moveString: string): Move {
+  const tTile = moveString.slice(2) as TileString
   const y = parseInt(moveString[0], 10)
   const x = parseInt(moveString[1], 10)
 
-  return gs.placeTile({y, x}, moveTTile)
+  return {p: {y, x}, tTile}
 }
