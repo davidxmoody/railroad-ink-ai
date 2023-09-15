@@ -54,7 +54,7 @@ function solveRound(gs: GameState) {
 }
 
 function* getPossibleMoves(gs: GameState) {
-  for (const {special, index, tile} of gs.availableTiles) {
+  for (const {special, tile} of gs.availableTiles) {
     if (special) return
 
     for (let y = 0; y < Board.size; y++) {
@@ -65,7 +65,7 @@ function* getPossibleMoves(gs: GameState) {
         )
 
         for (const tTile of validTransformedTiles) {
-          yield gs.placeTile(index, special, {y, x}, tTile)
+          yield gs.placeTile({y, x}, tTile)
         }
       }
     }

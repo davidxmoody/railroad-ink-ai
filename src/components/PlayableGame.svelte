@@ -80,12 +80,11 @@
   function commitPendingTile() {
     if (selectionState.type === "tileAndPositionSelected") {
       gameState = gameState.placeTile(
-        selectionState.index,
-        selectionState.special,
         selectionState.position,
         selectionState.validTransformedTiles[
           selectionState.transformedTileIndex
         ],
+        selectionState.index,
       )
       selectionState = {type: "noSelection"}
     }

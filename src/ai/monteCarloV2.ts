@@ -89,7 +89,7 @@ function simulate(
       for (const tTile of getAllTransformedTiles(tile)) {
         if (gs.board.isValid(p, tTile)) {
           const move = {index, special, p, tTile}
-          const nextGs = gs.placeTile(index, special, p, tTile)
+          const nextGs = gs.placeTile(p, tTile)
           return simulate(nextGs, [...moves, move])
         }
       }
@@ -139,5 +139,5 @@ function makeMove(gs: GameState, moveString: string) {
   const y = parseInt(moveString[0], 10)
   const x = parseInt(moveString[1], 10)
 
-  return gs.placeTile(chosenTile.index, chosenTile.special, {y, x}, moveTTile)
+  return gs.placeTile({y, x}, moveTTile)
 }

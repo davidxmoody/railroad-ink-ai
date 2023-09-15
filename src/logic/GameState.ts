@@ -1,5 +1,6 @@
 import {Board} from "./Board"
 import {rollGameDice, rollRoundDice, specialRouteTiles} from "./dice"
+import {getAllTransformedTiles} from "./helpers"
 import type {Position, TileString} from "./types"
 
 export default class GameState {
@@ -66,32 +67,52 @@ export default class GameState {
   }
 
   public placeTile(
-    tileIndex: number,
-    special: boolean,
     position: Position,
-    tile: TileString,
+    transformedTile: TileString,
+    tileIndexHintForUI?: number,
   ) {
-    const board = this.board.set(position, tile)
+    const allTransformedTiles = new Set(getAllTransformedTiles(transformedTile))
 
-    if (special) {
-      if (this.usedSpecialTileThisRound)
-        throw new Error("Already used special tile this round")
+    const regularTileIndex =
+      tileIndexHintForUI ??
+      this.roundTiles.findIndex((roundTile, index) => {
+        if (this.usedTileIndexes.includes(index)) return false
+        return allTransformedTiles.has(roundTile)
+      })
+
+    if (regularTileIndex !== -1) {
+      return new GameState({
+        ...this,
+        diceRolls: this.diceRolls,
+        usedTileIndexes: [...this.usedTileIndexes, regularTileIndex],
+        board: this.board.set(position, transformedTile),
+      })
+    }
+
+    const specialTileIndex = specialRouteTiles.findIndex(
+      (specialTile, index) => {
+        if (this.usedSpecialTileIndexes.includes(index)) return false
+        return allTransformedTiles.has(specialTile)
+      },
+    )
+
+    if (specialTileIndex !== -1) {
+      if (!this.canUseSpecialTile)
+        throw new Error("Cannot place special tile this round")
 
       return new GameState({
         ...this,
         diceRolls: this.diceRolls,
-        usedSpecialTileIndexes: [...this.usedSpecialTileIndexes, tileIndex],
+        usedSpecialTileIndexes: [
+          ...this.usedSpecialTileIndexes,
+          specialTileIndex,
+        ],
         usedSpecialTileThisRound: true,
-        board,
+        board: this.board.set(position, transformedTile),
       })
     }
 
-    return new GameState({
-      ...this,
-      diceRolls: this.diceRolls,
-      usedTileIndexes: [...this.usedTileIndexes, tileIndex],
-      board,
-    })
+    throw new Error("Could not find tile to place")
   }
 
   public get canEndRound() {

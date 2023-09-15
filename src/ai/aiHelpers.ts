@@ -2,7 +2,7 @@ import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 
 export function* getPossibleMoves(gs: GameState) {
-  for (const {special, index, tile} of gs.availableTiles) {
+  for (const {tile} of gs.availableTiles) {
     for (const p of gs.board.openPositions) {
       const validTransformedTiles = gs.board.getAllValidTransformedTiles(
         p,
@@ -10,7 +10,7 @@ export function* getPossibleMoves(gs: GameState) {
       )
 
       for (const tTile of validTransformedTiles) {
-        yield gs.placeTile(index, special, p, tTile)
+        yield gs.placeTile(p, tTile)
       }
     }
   }
