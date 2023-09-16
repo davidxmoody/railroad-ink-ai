@@ -50,6 +50,10 @@ export class Board {
     return this.tiles.get(p)
   }
 
+  public getOpenSlot(p: Position) {
+    return this.openSlots.get(p)
+  }
+
   public forEachTile(fn: (p: Position, tile: TileString) => void) {
     return this.tiles.forEach(fn)
   }

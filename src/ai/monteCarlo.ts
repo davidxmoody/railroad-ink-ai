@@ -1,7 +1,7 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
-import {getAllTransformedTiles, shuffle} from "../logic/helpers"
-import type {Position, TileString} from "../logic/types"
+import {getAllTransformedTiles, rotations, shuffle} from "../logic/helpers"
+import type {OpenSlot, Position, TileString} from "../logic/types"
 
 // Runs: 20, score: 49.8, duration: 39612.0ms
 
@@ -24,7 +24,7 @@ function solveRound(gs: GameState) {
 
   // TODO need to account for possibility of using special tile on last move
   while (!gs.canEndRound) {
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 1000; i++) {
       simulationResults.push(simulate(gs))
     }
 
@@ -97,10 +97,9 @@ function* getPossibleMoves(gs: GameState): Generator<Move> {
     for (const {tile, special} of availableTiles) {
       if (special && gs.roundNumber <= 4) continue
 
-      for (const tTile of shuffle(getAllTransformedTiles(tile))) {
-        if (gs.board.isValid(p, tTile)) {
-          yield {p, tTile}
-        }
+      const slot = gs.board.getOpenSlot(p)!
+      for (const {tTile} of getOrderedTransformedTiles(tile, slot)) {
+        yield {p, tTile}
       }
     }
   }
@@ -116,4 +115,46 @@ function parseMove(moveString: string): Move {
   const x = parseInt(moveString[1], 10)
 
   return {p: {y, x}, tTile}
+}
+
+function getOrderedTransformedTiles(tile: TileString, slot: OpenSlot) {
+  const results: Array<{score: number; tTile: TileString}> = []
+
+  for (const tTile of getAllTransformedTiles(tile)) {
+    const score = scorePlacement(tTile, slot)
+    if (score > 0) {
+      results.push({score, tTile})
+    }
+  }
+
+  return weightedRandomSort(results)
+}
+
+function scorePlacement(tile: TileString, slot: OpenSlot) {
+  let numMatches = 0
+
+  for (const r of rotations) {
+    if (tile[r] === "_" || slot[r] === "_") continue
+    if (tile[r] !== slot[r]) return 0
+    numMatches++
+  }
+
+  return numMatches
+}
+
+function weightedRandomSort(list: Array<{score: number; tTile: TileString}>) {
+  if (list.length <= 1) return list
+
+  const totalWeight = list.reduce((acc, {score}) => acc + score, 0)
+
+  let pickPoint = Math.random() * totalWeight
+
+  const firstIndex = list.findIndex(({score}) => {
+    pickPoint -= score
+    if (pickPoint <= 0) return true
+  })
+
+  ;[list[0], list[firstIndex]] = [list[firstIndex], list[0]]
+
+  return list
 }
