@@ -1,7 +1,8 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
-import {getAllTransformedTiles, rotations, shuffle} from "../logic/helpers"
+import {getAllTransformedTiles, shuffle, tileFitsInSlot} from "../logic/helpers"
 import type {OpenSlot, Position, TileString} from "../logic/types"
+import {scoreMove} from "./heuristics"
 
 // Runs: 20, score: 49.8, duration: 39612.0ms
 
@@ -88,7 +89,7 @@ function* getPossibleMoves(gs: GameState): Generator<Move> {
       if (special && gs.roundNumber <= 4) continue
 
       const slot = gs.board.getOpenSlot(p)!
-      for (const {tTile} of getOrderedTransformedTiles(tile, slot)) {
+      for (const {tTile} of getOrderedTransformedTiles(gs, p, tile, slot)) {
         yield {p, tTile}
       }
     }
@@ -107,12 +108,17 @@ function parseMove(moveString: string): Move {
   return {p: {y, x}, tTile}
 }
 
-function getOrderedTransformedTiles(tile: TileString, slot: OpenSlot) {
+function getOrderedTransformedTiles(
+  gs: GameState,
+  p: Position,
+  tile: TileString,
+  slot: OpenSlot,
+) {
   const results: Array<{score: number; tTile: TileString}> = []
 
   for (const tTile of getAllTransformedTiles(tile)) {
-    const score = scorePlacement(tTile, slot)
-    if (score > 0) {
+    if (tileFitsInSlot(tTile, slot)) {
+      const score = scoreMove(gs, p, tTile, slot)
       results.push({score, tTile})
     }
   }
@@ -120,17 +126,17 @@ function getOrderedTransformedTiles(tile: TileString, slot: OpenSlot) {
   return weightedRandomSort(results)
 }
 
-function scorePlacement(tile: TileString, slot: OpenSlot) {
-  let numMatches = 0
+// function scorePlacement(tile: TileString, slot: OpenSlot) {
+//   let numMatches = 0
 
-  for (const r of rotations) {
-    if (tile[r] === "_" || slot[r] === "_") continue
-    if (tile[r] !== slot[r]) return 0
-    numMatches++
-  }
+//   for (const r of rotations) {
+//     if (tile[r] === "_" || slot[r] === "_") continue
+//     if (tile[r] !== slot[r]) return 0
+//     numMatches++
+//   }
 
-  return numMatches
-}
+//   return numMatches
+// }
 
 function weightedRandomSort(list: Array<{score: number; tTile: TileString}>) {
   if (list.length <= 1) return list
