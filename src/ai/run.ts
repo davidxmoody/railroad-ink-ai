@@ -1,19 +1,25 @@
 import GameState from "../logic/GameState"
-import {solve} from "./monteCarlo"
+import {solveRound} from "./monteCarlo"
 import calculateScore from "../logic/calculateScore"
+import {rollGameDice} from "../logic/dice"
 
-function runOne(solveFn: (gs: GameState) => GameState, seed: number) {
-  const gs = new GameState(undefined, seed)
+function runOne(solveRoundFn: (gs: GameState) => GameState, seed: number) {
+  const gameTiles = rollGameDice(seed)
+  let gs = new GameState({...new GameState(), roundTiles: gameTiles[0]})
   const startTime = performance.now()
-  const score = calculateScore(solveFn(gs).board).total
+  while (!gs.gameEnded) {
+    gs = solveRoundFn(gs)
+    gs = gs.endRound(gameTiles[gs.roundNumber])
+  }
+  const score = calculateScore(gs.board).total
   const duration = performance.now() - startTime
   return {score, duration}
 }
 
-function runMany(solveFn: (gs: GameState) => GameState, numTests: number) {
+function runMany(solveRoundFn: (gs: GameState) => GameState, numTests: number) {
   const results: Array<ReturnType<typeof runOne>> = []
   for (let seed = 0; seed < numTests; seed++) {
-    results.push(runOne(solveFn, seed))
+    results.push(runOne(solveRoundFn, seed))
 
     const avgScore = (
       results.reduce((acc, {score}) => acc + score, 0) / results.length
@@ -30,4 +36,4 @@ function runMany(solveFn: (gs: GameState) => GameState, numTests: number) {
   console.log("")
 }
 
-runMany(solve, 20)
+runMany(solveRound, 20)

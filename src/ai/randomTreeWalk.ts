@@ -5,24 +5,20 @@ import calculateScore from "../logic/calculateScore"
 
 type Node = {gs: GameState; bestScore?: number; children?: Node[]}
 
-export function solve(gs: GameState) {
-  while (!gs.gameEnded) {
-    let root: Node = {gs}
+export function solveRound(gs: GameState) {
+  let root: Node = {gs}
 
-    while (!gs.canEndRound) {
-      for (let i = 0; i < 1000; i++) {
-        iterate(root)
-      }
-
-      const bestChild = root.children!.reduce((a, b) =>
-        (a.bestScore ?? 0) > (b.bestScore ?? 0) ? a : b,
-      )
-
-      root = bestChild
-      gs = bestChild.gs
+  while (!gs.canEndRound) {
+    for (let i = 0; i < 1000; i++) {
+      iterate(root)
     }
 
-    gs = gs.endRound()
+    const bestChild = root.children!.reduce((a, b) =>
+      (a.bestScore ?? 0) > (b.bestScore ?? 0) ? a : b,
+    )
+
+    root = bestChild
+    gs = bestChild.gs
   }
 
   return gs

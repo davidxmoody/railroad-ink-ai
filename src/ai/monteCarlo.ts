@@ -10,16 +10,7 @@ type Move = {
   tTile: TileString
 }
 
-export function solve(gs: GameState) {
-  while (!gs.gameEnded) {
-    gs = solveRound(gs)
-    gs = gs.endRound()
-  }
-
-  return gs
-}
-
-function solveRound(gs: GameState) {
+export function solveRound(gs: GameState) {
   let simulationResults: Array<{moveStrings: string[]; score: number}> = []
 
   // TODO need to account for possibility of using special tile on last move
@@ -85,7 +76,6 @@ function simulate(
     )
   }
 
-  // TODO stop cheating and use random tiles instead of seeded ones
   return simulate(gs.endRound(), moveStrings, true)
 }
 

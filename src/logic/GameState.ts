@@ -1,5 +1,5 @@
 import {Board} from "./Board"
-import {rollGameDice, rollRoundDice, specialRouteTiles} from "./dice"
+import {rollRoundDice, specialRouteTiles} from "./dice"
 import {getAllTransformedTiles} from "./helpers"
 import type {Position, TileString} from "./types"
 
@@ -8,36 +8,28 @@ export default class GameState {
 
   public readonly gameEnded: boolean
   public readonly roundNumber: number
+  public readonly roundTiles: TileString[]
   public readonly usedTileIndexes: number[]
   public readonly usedSpecialTileIndexes: number[]
   public readonly usedSpecialTileThisRound: boolean
   public readonly board: Board
 
-  private readonly diceRolls: TileString[][]
-
-  public constructor(
-    data?: {
-      gameEnded: boolean
-      roundNumber: number
-      diceRolls: TileString[][]
-      usedTileIndexes: number[]
-      usedSpecialTileIndexes: number[]
-      usedSpecialTileThisRound: boolean
-      board: Board
-    },
-    seed?: string | number,
-  ) {
+  public constructor(data?: {
+    gameEnded: boolean
+    roundNumber: number
+    roundTiles: TileString[]
+    usedTileIndexes: number[]
+    usedSpecialTileIndexes: number[]
+    usedSpecialTileThisRound: boolean
+    board: Board
+  }) {
     this.gameEnded = data?.gameEnded ?? false
     this.roundNumber = data?.roundNumber ?? 1
-    this.diceRolls = data?.diceRolls ?? rollGameDice(seed)
+    this.roundTiles = data?.roundTiles ?? rollRoundDice()
     this.usedTileIndexes = data?.usedTileIndexes ?? []
     this.usedSpecialTileIndexes = data?.usedSpecialTileIndexes ?? []
     this.usedSpecialTileThisRound = data?.usedSpecialTileThisRound ?? false
     this.board = data?.board ?? new Board()
-  }
-
-  public get roundTiles() {
-    return this.diceRolls[this.roundNumber - 1]
   }
 
   public get canUseSpecialTile() {
@@ -83,7 +75,6 @@ export default class GameState {
     if (regularTileIndex !== -1) {
       return new GameState({
         ...this,
-        diceRolls: this.diceRolls,
         usedTileIndexes: [...this.usedTileIndexes, regularTileIndex],
         board: this.board.set(position, transformedTile),
       })
@@ -102,7 +93,6 @@ export default class GameState {
 
       return new GameState({
         ...this,
-        diceRolls: this.diceRolls,
         usedSpecialTileIndexes: [
           ...this.usedSpecialTileIndexes,
           specialTileIndex,
@@ -131,22 +121,20 @@ export default class GameState {
     })
   }
 
-  public endRound() {
+  public endRound(newRoundDice?: TileString[]) {
     if (!this.canEndRound) throw new Error("Cannot end round")
 
     if (this.roundNumber === GameState.numRounds) {
       return new GameState({
         ...this,
-        diceRolls: this.diceRolls,
         gameEnded: true,
       })
     }
 
     return new GameState({
       ...this,
-      diceRolls: this.diceRolls,
       roundNumber: this.roundNumber + 1,
-      roundTiles: rollRoundDice(),
+      roundTiles: newRoundDice ?? rollRoundDice(),
       usedTileIndexes: [],
       usedSpecialTileThisRound: false,
     })
