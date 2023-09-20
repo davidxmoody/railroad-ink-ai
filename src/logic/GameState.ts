@@ -61,16 +61,17 @@ export default class GameState {
   public placeTile(
     position: Position,
     transformedTile: TileString,
-    tileIndexHintForUI?: number,
+    tileIndexHintForUI?: {index: number; special: boolean},
   ) {
     const allTransformedTiles = new Set(getAllTransformedTiles(transformedTile))
 
     const regularTileIndex =
-      tileIndexHintForUI ??
-      this.roundTiles.findIndex((roundTile, index) => {
-        if (this.usedTileIndexes.includes(index)) return false
-        return allTransformedTiles.has(roundTile)
-      })
+      tileIndexHintForUI && tileIndexHintForUI.special === false
+        ? tileIndexHintForUI.index
+        : this.roundTiles.findIndex((roundTile, index) => {
+            if (this.usedTileIndexes.includes(index)) return false
+            return allTransformedTiles.has(roundTile)
+          })
 
     if (regularTileIndex !== -1) {
       return new GameState({

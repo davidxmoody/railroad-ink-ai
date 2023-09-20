@@ -36,4 +36,4 @@ function runMany(solveRoundFn: (gs: GameState) => GameState, numTests: number) {
   console.log("")
 }
 
-runMany(solveRound, 20)
+runMany(solveRound, 100)

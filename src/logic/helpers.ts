@@ -1,11 +1,13 @@
 import {Board} from "./Board"
-import type {
-  OpenSlot,
-  Position,
-  Rotation,
-  TileString,
-  TrackType,
-  Transform,
+import {
+  ConnectionType,
+  type MaybeTrackType,
+  type OpenSlot,
+  type Position,
+  type Rotation,
+  type TileString,
+  type TrackType,
+  type Transform,
 } from "./types"
 
 export function step(p: Position, r: Rotation): Position | undefined {
@@ -98,14 +100,30 @@ export function shuffle<T>(array: T[]): T[] {
 
 export function tileFitsInSlot(tile: TileString, slot: OpenSlot) {
   let numMatches = 0
+
   for (const r of rotations) {
-    if (tile[r] === "_" || slot[r] === "_") continue
-    if (tile[r] !== slot[r]) return false
+    const tileC = tile[r] as MaybeTrackType
+    const slotC = slot[r] as ConnectionType
+
+    if (
+      tileC === ConnectionType.NONE ||
+      slotC === ConnectionType.NONE ||
+      slotC === ConnectionType.UNFILLED ||
+      slotC === ConnectionType.EDGE
+    ) {
+      continue
+    }
+
+    if (tileC !== slotC) {
+      return false
+    }
+
     numMatches++
   }
+
   return numMatches >= 1
 }
 
-export function updateSlot(r: Rotation, t: TrackType, slot: OpenSlot) {
+export function updateSlot(r: Rotation, t: ConnectionType, slot: OpenSlot) {
   return (slot.substring(0, r) + t + slot.substring(r + 1)) as OpenSlot
 }

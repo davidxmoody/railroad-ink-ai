@@ -1,13 +1,20 @@
 <script lang="ts">
   import {rotations, hasOverpass, hasTrackType} from "../logic/helpers"
-  import type {Rotation, TileString, MaybeTrackType} from "../logic/types"
+  import {
+    type Rotation,
+    type TileString,
+    type MaybeTrackType,
+    ConnectionType,
+  } from "../logic/types"
 
   export let tile: TileString | undefined
   export let size = 60
 
   function hasStation(tile: TileString) {
     return (
-      !hasOverpass(tile) && hasTrackType(tile, "D") && hasTrackType(tile, "L")
+      !hasOverpass(tile) &&
+      hasTrackType(tile, ConnectionType.ROAD) &&
+      hasTrackType(tile, ConnectionType.RAIL)
     )
   }
 

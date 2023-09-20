@@ -1,5 +1,6 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
+import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
 import {getAllTransformedTiles, shuffle, tileFitsInSlot} from "../logic/helpers"
 import type {OpenSlot, Position, TileString} from "../logic/types"
 import {scoreMove} from "./heuristics"
@@ -48,7 +49,6 @@ export function solveRound(gs: GameState) {
     simulationResults = simulationResults.filter((r) =>
       r.moveStrings.includes(bestOpeningMoveString),
     )
-    // console.log("kept num results", simulationResults.length)
   }
 
   return gs
@@ -116,12 +116,17 @@ function getOrderedTransformedTiles(
 ) {
   const results: Array<{score: number; tTile: TileString}> = []
 
-  for (const tTile of getAllTransformedTiles(tile)) {
-    if (tileFitsInSlot(tTile, slot)) {
-      const score = scoreMove(gs, p, tTile, slot)
-      results.push({score, tTile})
-    }
+  for (const tTile of getMeaningfulPlacements(tile, slot)) {
+    const score = scoreMove(gs, p, tTile, slot)
+    results.push({score, tTile})
   }
+
+  // for (const tTile of getAllTransformedTiles(tile)) {
+  //   if (tileFitsInSlot(tTile, slot)) {
+  //     const score = scoreMove(gs, p, tTile, slot)
+  //     results.push({score, tTile})
+  //   }
+  // }
 
   return weightedRandomSort(results)
 }

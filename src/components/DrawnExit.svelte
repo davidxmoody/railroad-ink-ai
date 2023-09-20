@@ -7,7 +7,8 @@
   export let cellSize: number
   export let cellBorderSize: number
 
-  $: rotation = rotations.find((r) => exitSlot[r] !== "_") ?? 0
+  $: rotation =
+    rotations.find((r) => exitSlot[r] === "D" || exitSlot[r] === "L") ?? 0
 
   $: transform = `translate(${
     (cellSize + 2 * cellBorderSize) * position.x + cellBorderSize

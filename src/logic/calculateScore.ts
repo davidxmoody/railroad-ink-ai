@@ -7,12 +7,12 @@ import {
   pEqual,
   tileFitsInSlot,
 } from "./helpers"
-import type {Position, TrackType} from "./types"
+import {ConnectionType, type Position, type TrackType} from "./types"
 
 export default function calculateScore(board: Board) {
   const exits = calculateExitsScore(board)
-  const road = calculateLongestRouteScore(board, "D")
-  const rail = calculateLongestRouteScore(board, "L")
+  const road = calculateLongestRouteScore(board, ConnectionType.ROAD)
+  const rail = calculateLongestRouteScore(board, ConnectionType.RAIL)
   const center = calculateCenterScore(board)
   const errors = calculateErrorsScore(board)
   const total = exits + road + rail + center + errors

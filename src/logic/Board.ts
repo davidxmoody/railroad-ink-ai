@@ -1,10 +1,11 @@
-import type {
-  TileString,
-  TrackType,
-  Position,
-  TrackPosition,
-  MaybeTrackType,
-  OpenSlot,
+import {
+  type TileString,
+  type TrackType,
+  type Position,
+  type TrackPosition,
+  type MaybeTrackType,
+  type OpenSlot,
+  ConnectionType,
 } from "./types"
 import {
   flipRotation,
@@ -21,18 +22,18 @@ export class Board {
   public static readonly size = Grid.size
 
   public static readonly exitSlots: Grid<OpenSlot> = Grid.fromList([
-    {y: 0, x: 1, v: "D___"},
-    {y: 0, x: 3, v: "L___"},
-    {y: 0, x: 5, v: "D___"},
-    {y: 1, x: 6, v: "_L__"},
-    {y: 3, x: 6, v: "_D__"},
-    {y: 5, x: 6, v: "_L__"},
-    {y: 6, x: 5, v: "__D_"},
-    {y: 6, x: 3, v: "__L_"},
-    {y: 6, x: 1, v: "__D_"},
-    {y: 5, x: 0, v: "___L"},
-    {y: 3, x: 0, v: "___D"},
-    {y: 1, x: 0, v: "___L"},
+    {y: 0, x: 1, v: "D..."},
+    {y: 0, x: 3, v: "L..."},
+    {y: 0, x: 5, v: "D..."},
+    {y: 1, x: 6, v: ".L.."},
+    {y: 3, x: 6, v: ".D.."},
+    {y: 5, x: 6, v: ".L.."},
+    {y: 6, x: 5, v: "..D."},
+    {y: 6, x: 3, v: "..L."},
+    {y: 6, x: 1, v: "..D."},
+    {y: 5, x: 0, v: "...L"},
+    {y: 3, x: 0, v: "...D"},
+    {y: 1, x: 0, v: "...L"},
   ])
 
   private tiles: Grid<TileString>
@@ -135,14 +136,41 @@ export class Board {
       if (!adjacentP || this.get(adjacentP)) continue
 
       const trackType = tile[r] as MaybeTrackType
-      if (trackType === "_") continue
 
-      const existingSlot = openSlots.get(adjacentP) ?? "____"
-      const newSlot = updateSlot(flipRotation(r), trackType, existingSlot)
-      openSlots.set(adjacentP, newSlot)
+      const existingSlot = openSlots.get(adjacentP)
+
+      if (trackType === ConnectionType.NONE) {
+        if (existingSlot) {
+          const newSlot = updateSlot(
+            flipRotation(r),
+            ConnectionType.NONE,
+            existingSlot,
+          )
+          openSlots.set(adjacentP, newSlot)
+        }
+      } else {
+        const newSlot = updateSlot(
+          flipRotation(r),
+          trackType,
+          existingSlot ?? this.calculateSlot(adjacentP),
+        )
+        openSlots.set(adjacentP, newSlot)
+      }
     }
 
     return new Board({tiles, openSlots})
+  }
+
+  private calculateSlot(p: Position) {
+    return rotations
+      .map((r) => {
+        const adjacentP = step(p, r)
+        if (!adjacentP) return ConnectionType.EDGE
+        const adjacentTile = this.get(p)
+        if (!adjacentTile) return ConnectionType.UNFILLED
+        return adjacentTile[r]
+      })
+      .join("") as OpenSlot
   }
 
   public get openPositions() {

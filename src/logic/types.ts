@@ -1,6 +1,14 @@
-export type TrackType = "D" | "L"
+export enum ConnectionType {
+  ROAD = "D",
+  RAIL = "L",
+  NONE = "_",
+  EDGE = "E",
+  UNFILLED = ".",
+}
 
-export type MaybeTrackType = TrackType | "_"
+export type TrackType = ConnectionType.ROAD | ConnectionType.RAIL
+
+export type MaybeTrackType = TrackType | ConnectionType.NONE
 
 export type TileString =
   `${MaybeTrackType}${MaybeTrackType}${MaybeTrackType}${MaybeTrackType}${
@@ -8,7 +16,7 @@ export type TileString =
     | ""}`
 
 export type OpenSlot =
-  `${MaybeTrackType}${MaybeTrackType}${MaybeTrackType}${MaybeTrackType}`
+  `${ConnectionType}${ConnectionType}${ConnectionType}${ConnectionType}`
 
 export type Rotation = 0 | 1 | 2 | 3
 

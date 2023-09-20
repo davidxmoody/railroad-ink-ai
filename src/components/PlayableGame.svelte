@@ -3,13 +3,25 @@
   import DrawnTile from "./DrawnTile.svelte"
   import ScoreTable from "./ScoreTable.svelte"
   import {Board} from "../logic/Board"
-  import {specialRouteTiles} from "../logic/dice"
+  import {rollGameDice, specialRouteTiles} from "../logic/dice"
   import {isCenterSquare} from "../logic/helpers"
   import type {Position, TileString} from "../logic/types"
   import DrawnExit from "./DrawnExit.svelte"
   import GameState from "../logic/GameState"
+  import {onMount} from "svelte"
+  import {solveRound} from "../ai/heuristics"
 
   let gameState = new GameState()
+
+  //  onMount(() => {
+  //    const gameTiles = rollGameDice("4")
+  //    let gs = new GameState({...new GameState(), roundTiles: gameTiles[0]})
+  //    while (!gs.gameEnded) {
+  //      gs = solveRound(gs)
+  //      gs = gs.endRound(gameTiles[gs.roundNumber])
+  //    }
+  //    gameState = gs
+  //  })
 
   type SelectionState =
     | {type: "noSelection"}
@@ -84,7 +96,7 @@
         selectionState.validTransformedTiles[
           selectionState.transformedTileIndex
         ],
-        selectionState.index,
+        selectionState,
       )
       selectionState = {type: "noSelection"}
     }
@@ -142,6 +154,7 @@
       <div style:display="flex">
         {#each {length: Board.size} as _, x}
           <div class="cell" class:centerSquare={isCenterSquare({y, x})}>
+            {gameState.board.getOpenSlot({y, x}) ?? ""}
             {#if gameState.board.get({y, x})}
               <DrawnTile tile={gameState.board.get({y, x})} />
             {:else if selectionState.type === "tileSelected"}
