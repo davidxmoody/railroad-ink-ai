@@ -9,9 +9,12 @@
   import DrawnExit from "./DrawnExit.svelte"
   import GameState from "../logic/GameState"
   import {onMount} from "svelte"
-  import {solveRound} from "../ai/heuristics"
+  import {solveRound} from "../ai/monteCarlo"
 
-  let gameState = new GameState()
+  const gameDice = rollGameDice("5")
+  let gameState = new GameState({...new GameState(), roundTiles: gameDice[0]})
+
+  const placements: string[] = []
 
   //  onMount(() => {
   //    const gameTiles = rollGameDice("4")
@@ -91,6 +94,15 @@
 
   function commitPendingTile() {
     if (selectionState.type === "tileAndPositionSelected") {
+      placements.push(
+        `${selectionState.position.y}${selectionState.position.x}${
+          selectionState.validTransformedTiles[
+            selectionState.transformedTileIndex
+          ]
+        }`,
+      )
+      console.log(placements)
+
       gameState = gameState.placeTile(
         selectionState.position,
         selectionState.validTransformedTiles[
@@ -100,6 +112,14 @@
       )
       selectionState = {type: "noSelection"}
     }
+  }
+
+  function endRound() {
+    gameState = gameState.endRound(gameDice[gameState.roundNumber])
+  }
+
+  function solveRoundNow() {
+    gameState = solveRound(gameState).endRound(gameDice[gameState.roundNumber])
   }
 </script>
 
@@ -117,7 +137,7 @@
 
   <div style:height="20px" />
 
-  <div style:display="flex">
+  <div style:display="flex" style:align-items="center">
     <DiceSelection
       disabled={gameState.gameEnded}
       tiles={gameState.roundTiles}
@@ -138,7 +158,12 @@
       <button
         class="endRoundButton"
         disabled={!gameState.canEndRound}
-        on:click={() => (gameState = gameState.endRound())}>Next round</button
+        on:click={endRound}>Next round</button
+      >
+      <button
+        class="endRoundButton"
+        disabled={gameState.gameEnded}
+        on:click={solveRoundNow}>Solve round</button
       >
     </div>
   </div>
@@ -154,7 +179,6 @@
       <div style:display="flex">
         {#each {length: Board.size} as _, x}
           <div class="cell" class:centerSquare={isCenterSquare({y, x})}>
-            {gameState.board.getOpenSlot({y, x}) ?? ""}
             {#if gameState.board.get({y, x})}
               <DrawnTile tile={gameState.board.get({y, x})} />
             {:else if selectionState.type === "tileSelected"}

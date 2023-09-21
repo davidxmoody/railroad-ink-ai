@@ -1,7 +1,7 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {getAllTransformedTiles, shuffle, tileFitsInSlot} from "../logic/helpers"
+import {shuffle} from "../logic/helpers"
 import type {OpenSlot, Position, TileString} from "../logic/types"
 import {scoreMove} from "./heuristics"
 
@@ -12,7 +12,33 @@ type Move = {
   tTile: TileString
 }
 
+// TODO try exhaustive search on final round
+
 export function solveRound(gs: GameState) {
+  let bestGs: GameState | null = null
+  let bestScore = -1000
+
+  if (gs.roundNumber === 7) {
+    let count = 0
+
+    // console.time("Exhaustive search")
+    for (const endGs of exhaustiveSearch(gs, [], new Set())) {
+      const endScore = calculateScore(endGs.board).total
+      if (endScore > bestScore) {
+        bestScore = endScore
+        bestGs = endGs
+      }
+      count++
+    }
+    // console.timeEnd("Exhaustive search")
+
+    if (!bestGs) throw new Error("Could not find best GameState")
+
+    // console.log(`Exhaustive search examined ${count} states`)
+
+    // return bestGs
+  }
+
   let simulationResults: Array<{moveStrings: string[]; score: number}> = []
 
   // TODO need to account for possibility of using special tile on last move
@@ -21,37 +47,97 @@ export function solveRound(gs: GameState) {
       simulationResults.push(simulate(gs))
     }
 
-    const openingMoveLog = [...getPossibleMoves(gs)].reduce((acc, move) => {
-      acc[encodeMove(move)] = {count: 0, averageScore: -1000}
-      return acc
-    }, {} as Record<string, {count: number; averageScore: number}>)
+    const openingMoveScores = [...getPossibleMoves(gs)].reduce(
+      (acc, move) => ({...acc, [encodeMove(move)]: []}),
+      {} as Record<string, number[]>,
+    )
 
-    for (const simulationResult of simulationResults) {
-      for (const moveString of simulationResult.moveStrings) {
-        const logItem = openingMoveLog[moveString]
-        if (logItem) {
-          const newCount = logItem.count + 1
-          logItem.averageScore =
-            (logItem.averageScore * logItem.count + simulationResult.score) /
-            newCount
-          logItem.count = newCount
-        }
+    for (const {score, moveStrings} of simulationResults) {
+      for (const moveString of moveStrings) {
+        openingMoveScores[moveString]?.push(score)
       }
     }
 
-    const bestOpeningMoveString = Object.keys(openingMoveLog).reduce((a, b) =>
-      openingMoveLog[a].averageScore > openingMoveLog[b].averageScore ? a : b,
-    )
+    let bestOpeningMoveString: string | null = null
+    let bestScore = -Infinity
+
+    for (const [openingMoveString, scores] of Object.entries(
+      openingMoveScores,
+    )) {
+      if (!scores.length) continue
+      const mean = getMean(scores)
+      const std = getStandardDeviation(scores)
+
+      if (mean > bestScore) {
+        bestOpeningMoveString = openingMoveString
+        bestScore = mean
+      }
+
+      // console.log(
+      //   openingMoveString.padEnd(7, " "),
+      //   scores.length.toString().padStart(4, " "),
+      //   mean.toFixed(2).padStart(7, " "),
+      //   std.toFixed(2).padStart(7, " "),
+      // )
+    }
+
+    if (!bestOpeningMoveString) throw new Error("Could not find opening move")
 
     const bestOpeningMove = parseMove(bestOpeningMoveString)
 
+    // console.log("Chosen best opening move", bestOpeningMoveString)
+
     gs = gs.placeTile(bestOpeningMove.p, bestOpeningMove.tTile)
-    simulationResults = simulationResults.filter((r) =>
-      r.moveStrings.includes(bestOpeningMoveString),
-    )
+    // simulationResults = simulationResults.filter((r) =>
+    //   r.moveStrings.includes(bestOpeningMoveString),
+    // )
+    simulationResults = []
+  }
+
+  // console.log("End round")
+
+  if (bestGs && bestScore > 0) {
+    console.log("\nScore difference", bestScore, calculateScore(gs.board).total)
+
+    return bestGs
   }
 
   return gs
+}
+
+function* exhaustiveSearch(
+  gs: GameState,
+  moves: string[],
+  encounteredStates: Set<string>,
+): Generator<GameState> {
+  if (gs.canEndRound) {
+    yield gs
+    return
+  }
+
+  for (const move of getPossibleMoves(gs)) {
+    const newMoves = [...moves, encodeMove(move)].sort()
+    const key = newMoves.join("")
+    if (encounteredStates.has(key)) continue
+    encounteredStates.add(key)
+    yield* exhaustiveSearch(
+      gs.placeTile(move.p, move.tTile),
+      newMoves,
+      encounteredStates,
+    )
+  }
+}
+
+function getMean(list: number[]) {
+  return list.reduce((a, b) => a + b) / list.length
+}
+
+function getStandardDeviation(list: number[]) {
+  const mean = getMean(list)
+  return Math.sqrt(
+    list.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b) /
+      list.length,
+  )
 }
 
 function simulate(
@@ -76,6 +162,15 @@ function simulate(
       roundEndedOnce,
     )
   }
+
+  // return {moveStrings, score: calculateScore(gs.board).total}
+
+  //   return simulate(gs.endRound([
+  //     "DLLL",
+  //     "DDLL",
+  //     "DDDL",
+  //     "DLDL",
+  //   ]), moveStrings, true)
 
   return simulate(gs.endRound(), moveStrings, true)
 }
@@ -128,7 +223,8 @@ function getOrderedTransformedTiles(
   //   }
   // }
 
-  return weightedRandomSort(results)
+  // return weightedRandomSort(results)
+  return shuffle(results)
 }
 
 // function scorePlacement(tile: TileString, slot: OpenSlot) {
