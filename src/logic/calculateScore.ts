@@ -50,12 +50,11 @@ const exitScoringTable: Record<number, number | undefined> = {
 }
 
 function calculateExitsScore(board: Board) {
-  const networkGrid = Grid.fromList<{horizontal: number; vertical: number}>([])
+  const networkGrid = Grid.fromList<{horizontal: string; vertical: string}>([])
 
   board.forEachTile((p, tile) => {
-    const defaultNetworkId = p.y * Board.size + p.x
-    let leftNetworkId: number | undefined = undefined
-    let aboveNetworkId: number | undefined = undefined
+    let leftNetworkId: string | undefined = undefined
+    let aboveNetworkId: string | undefined = undefined
 
     if (p.x > 0 && tile[3] !== "_") {
       const positionToLeft = {y: p.y, x: p.x - 1}
@@ -79,8 +78,8 @@ function calculateExitsScore(board: Board) {
 
     if (hasOverpass(tile)) {
       networkGrid.set(p, {
-        horizontal: leftNetworkId ?? defaultNetworkId,
-        vertical: aboveNetworkId ?? defaultNetworkId,
+        horizontal: leftNetworkId ?? `${p.y}${p.x}h`,
+        vertical: aboveNetworkId ?? `${p.y}${p.x}v`,
       })
     } else if (leftNetworkId !== undefined && aboveNetworkId !== undefined) {
       networkGrid.forEach((_p, value) => {
@@ -107,13 +106,13 @@ function calculateExitsScore(board: Board) {
       })
     } else {
       networkGrid.set(p, {
-        horizontal: defaultNetworkId,
-        vertical: defaultNetworkId,
+        horizontal: `${p.y}${p.x}`,
+        vertical: `${p.y}${p.x}`,
       })
     }
   })
 
-  const exitGroups: Record<number, number> = {}
+  const exitGroups: Record<string, number> = {}
 
   for (const [exitP, exitSlot] of Board.exitSlots.entries()) {
     const tileAtExit = board.get(exitP)
@@ -122,7 +121,7 @@ function calculateExitsScore(board: Board) {
     const networkValues = networkGrid.get(exitP)
     if (!networkValues) throw new Error("Could not find network values")
 
-    const isVerticalExit = exitSlot[0] !== "_" && exitSlot[2] !== "_"
+    const isVerticalExit = exitSlot[1] === "_" && exitSlot[3] === "_"
     const exitNetworkId = isVerticalExit
       ? networkValues.vertical
       : networkValues.horizontal
