@@ -1,27 +1,30 @@
-import GameState from "../logic/GameState"
-import {solveRound} from "./monteCarlo"
-import calculateScore from "../logic/calculateScore"
-import {rollGameDice} from "../logic/dice"
+import {Worker} from "node:worker_threads"
 import {getMean, getStandardDeviation} from "../logic/helpers"
 
-function runOne(solveRoundFn: (gs: GameState) => GameState, seed: number) {
-  const gameTiles = rollGameDice(seed)
-  let gs = new GameState({...new GameState(), roundTiles: gameTiles[0]})
-  const startTime = performance.now()
-  while (!gs.gameEnded) {
-    gs = solveRoundFn(gs)
-    gs = gs.endRound(gameTiles[gs.roundNumber])
+const numThreads = 8
+
+const seedStart = 0
+const seedEnd = 16
+const runsPerSeed = 8
+
+const threadSeeds: string[][] = Array.from({length: numThreads}, () => [])
+let nextThreadIndex = 0
+
+for (let seed = seedStart; seed <= seedEnd; seed++) {
+  for (let i = 0; i < runsPerSeed; i++) {
+    threadSeeds[nextThreadIndex].push(seed.toString())
+    nextThreadIndex = (nextThreadIndex + 1) % numThreads
   }
-  const score = calculateScore(gs.board).total
-  const duration = (performance.now() - startTime) / 1000
-  return {score, duration}
 }
 
-function runMany(solveRoundFn: (gs: GameState) => GameState, numTests: number) {
-  const results: Array<ReturnType<typeof runOne>> = []
-  for (let i = 0; i < numTests; i++) {
-    const seed = Math.floor(i / 8)
-    const result = runOne(solveRoundFn, seed)
+const results: Array<{score: number; duration: number}> = []
+
+for (let i = 0; i < numThreads; i++) {
+  const worker = new Worker("./src/ai/worker.ts", {workerData: threadSeeds[i]})
+
+  worker.on("error", console.error)
+
+  worker.on("message", (result) => {
     results.push(result)
 
     const scores = results.map((r) => r.score)
@@ -32,9 +35,7 @@ function runMany(solveRoundFn: (gs: GameState) => GameState, numTests: number) {
     const avgDuration = getMean(durations).toFixed(1)
 
     console.log(
-      `Last: ${result.score}, seed: ${seed}, avg: ${avgScore}, std: ${stdScore}, avg time: ${avgDuration}s`,
+      `Last: ${result.score}, seed: ${result.seed}, avg: ${avgScore}, std: ${stdScore}, avg time: ${avgDuration}s`,
     )
-  }
+  })
 }
-
-runMany(solveRound, 16 * 8)
