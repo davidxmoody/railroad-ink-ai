@@ -10,11 +10,15 @@
   import GameState from "../logic/GameState"
   import {onMount} from "svelte"
   import {solveRound} from "../ai/monteCarlo"
+  import calculateScore from "../logic/calculateScore"
 
-  const gameDice = rollGameDice("5")
+  const seed = "16"
+  const gameDice = rollGameDice(seed)
   let gameState = new GameState({...new GameState(), roundTiles: gameDice[0]})
 
   const placements: string[] = []
+
+  // TODO add an undo button
 
   //  onMount(() => {
   //    const gameTiles = rollGameDice("4")
@@ -101,7 +105,6 @@
           ]
         }`,
       )
-      console.log(placements)
 
       gameState = gameState.placeTile(
         selectionState.position,
@@ -116,6 +119,13 @@
 
   function endRound() {
     gameState = gameState.endRound(gameDice[gameState.roundNumber])
+    if (gameState.gameEnded) {
+      console.log({
+        seed,
+        score: calculateScore(gameState.board).total,
+        moves: placements,
+      })
+    }
   }
 
   function solveRoundNow() {

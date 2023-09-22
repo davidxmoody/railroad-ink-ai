@@ -127,3 +127,15 @@ export function tileFitsInSlot(tile: TileString, slot: OpenSlot) {
 export function updateSlot(r: Rotation, t: ConnectionType, slot: OpenSlot) {
   return (slot.substring(0, r) + t + slot.substring(r + 1)) as OpenSlot
 }
+
+export function getMean(list: number[]) {
+  return list.reduce((a, b) => a + b) / list.length
+}
+
+export function getStandardDeviation(list: number[]) {
+  const mean = getMean(list)
+  return Math.sqrt(
+    list.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b) /
+      list.length,
+  )
+}

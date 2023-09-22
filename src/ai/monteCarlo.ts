@@ -1,42 +1,31 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {shuffle} from "../logic/helpers"
+import {getMean, getStandardDeviation, shuffle} from "../logic/helpers"
 import type {OpenSlot, Position, TileString} from "../logic/types"
 import {scoreMove} from "./heuristics"
-
-// Runs: 20, score: 49.8, duration: 39612.0ms
 
 type Move = {
   p: Position
   tTile: TileString
 }
 
-// TODO try exhaustive search on final round
-
 export function solveRound(gs: GameState) {
-  let bestGs: GameState | null = null
-  let bestScore = -1000
-
   if (gs.roundNumber === 7) {
-    let count = 0
+    let bestGs: GameState | null = null
+    let bestScore = -Infinity
 
-    // console.time("Exhaustive search")
     for (const endGs of exhaustiveSearch(gs, [], new Set())) {
       const endScore = calculateScore(endGs.board).total
       if (endScore > bestScore) {
         bestScore = endScore
         bestGs = endGs
       }
-      count++
     }
-    // console.timeEnd("Exhaustive search")
 
     if (!bestGs) throw new Error("Could not find best GameState")
 
-    // console.log(`Exhaustive search examined ${count} states`)
-
-    // return bestGs
+    return bestGs
   }
 
   let simulationResults: Array<{moveStrings: string[]; score: number}> = []
@@ -44,7 +33,7 @@ export function solveRound(gs: GameState) {
   // TODO need to account for possibility of using special tile on last move
   while (!gs.canEndRound) {
     for (let i = 0; i < 1000; i++) {
-      simulationResults.push(simulate(gs))
+      simulationResults.push(simulate(gs, gs.roundNumber))
     }
 
     const openingMoveScores = [...getPossibleMoves(gs)].reduce(
@@ -73,12 +62,12 @@ export function solveRound(gs: GameState) {
         bestScore = mean
       }
 
-      // console.log(
-      //   openingMoveString.padEnd(7, " "),
-      //   scores.length.toString().padStart(4, " "),
-      //   mean.toFixed(2).padStart(7, " "),
-      //   std.toFixed(2).padStart(7, " "),
-      // )
+      //       console.log(
+      //         openingMoveString.padEnd(7, " "),
+      //         scores.length.toString().padStart(4, " "),
+      //         mean.toFixed(2).padStart(7, " "),
+      //         std.toFixed(2).padStart(7, " "),
+      //       )
     }
 
     if (!bestOpeningMoveString) throw new Error("Could not find opening move")
@@ -88,19 +77,13 @@ export function solveRound(gs: GameState) {
     // console.log("Chosen best opening move", bestOpeningMoveString)
 
     gs = gs.placeTile(bestOpeningMove.p, bestOpeningMove.tTile)
-    // simulationResults = simulationResults.filter((r) =>
-    //   r.moveStrings.includes(bestOpeningMoveString),
-    // )
-    simulationResults = []
+    simulationResults = simulationResults.filter((r) =>
+      r.moveStrings.includes(bestOpeningMoveString!),
+    )
+    // simulationResults = []
   }
 
   // console.log("End round")
-
-  if (bestGs && bestScore > 0) {
-    console.log("\nScore difference", bestScore, calculateScore(gs.board).total)
-
-    return bestGs
-  }
 
   return gs
 }
@@ -128,25 +111,18 @@ function* exhaustiveSearch(
   }
 }
 
-function getMean(list: number[]) {
-  return list.reduce((a, b) => a + b) / list.length
-}
-
-function getStandardDeviation(list: number[]) {
-  const mean = getMean(list)
-  return Math.sqrt(
-    list.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b) /
-      list.length,
-  )
-}
-
 function simulate(
   gs: GameState,
+  originalRoundNumber: number,
   moveStrings: string[] = [],
   roundEndedOnce = false,
 ) {
   if (gs.gameEnded) {
-    const score = calculateScore(gs.board).total
+    const s = calculateScore(gs.board)
+    // const score = s.total
+    // TODO think about running multi-cored to speed up results gathering
+    // the alternate scoring seems to consistently get 2.5 points more
+    const score = 1.5 * s.exits + s.rail + s.road + s.center
     return {moveStrings, score}
   }
 
@@ -158,6 +134,7 @@ function simulate(
       : [...moveStrings, encodeMove(move)]
     return simulate(
       gs.placeTile(move.p, move.tTile),
+      originalRoundNumber,
       newMoveStrings,
       roundEndedOnce,
     )
@@ -172,7 +149,7 @@ function simulate(
   //     "DLDL",
   //   ]), moveStrings, true)
 
-  return simulate(gs.endRound(), moveStrings, true)
+  return simulate(gs.endRound(), originalRoundNumber, moveStrings, true)
 }
 
 function* getPossibleMoves(gs: GameState): Generator<Move> {
