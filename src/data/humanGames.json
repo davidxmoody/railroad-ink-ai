@@ -1,8 +1,8 @@
-export const games: Array<{seed: string; score: number; moves: string[]}> = [
+[
   {
-    seed: "0",
-    score: 60,
-    moves: [
+    "seed": "0",
+    "score": 60,
+    "moves": [
       "10__LL",
       "20L_D_",
       "30D_DD",
@@ -33,13 +33,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "43__DD",
       "53DLLD",
       "52_DD_",
-      "45_L_L",
-    ],
+      "45_L_L"
+    ]
   },
   {
-    seed: "1",
-    score: 56,
-    moves: [
+    "seed": "1",
+    "score": 56,
+    "moves": [
       "03LL_L",
       "01DLDLo",
       "02_L_L",
@@ -70,13 +70,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "53LLL_",
       "34_D_D",
       "43LDLDo",
-      "33DD_D",
-    ],
+      "33DD_D"
+    ]
   },
   {
-    seed: "2",
-    score: 57,
-    moves: [
+    "seed": "2",
+    "score": 57,
+    "moves": [
       "01DD_D",
       "00_DD_",
       "10D__L",
@@ -106,13 +106,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "34DLLD",
       "33_D_D",
       "32_D_D",
-      "44L__L",
-    ],
+      "44L__L"
+    ]
   },
   {
-    seed: "3",
-    score: 57,
-    moves: [
+    "seed": "3",
+    "score": 57,
+    "moves": [
       "03LL_L",
       "10L_LL",
       "05D__L",
@@ -143,13 +143,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "40L_L_",
       "11DDD_",
       "12__DD",
-      "44_D_L",
-    ],
+      "44_D_L"
+    ]
   },
   {
-    seed: "4",
-    score: 46,
-    moves: [
+    "seed": "4",
+    "score": 46,
+    "moves": [
       "01D__D",
       "00_DD_",
       "10DLDLo",
@@ -179,13 +179,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "24LL__",
       "25L__L",
       "55_L_L",
-      "56DLDLo",
-    ],
+      "56DLDLo"
+    ]
   },
   {
-    seed: "5",
-    score: 61,
-    moves: [
+    "seed": "5",
+    "score": 61,
+    "moves": [
       "30D_DD",
       "40D_D_",
       "01DDD_",
@@ -216,13 +216,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "14DLDLo",
       "24D_D_",
       "34D_DD",
-      "16LLDL",
-    ],
+      "16LLDL"
+    ]
   },
   {
-    seed: "6",
-    score: 44,
-    moves: [
+    "seed": "6",
+    "score": 44,
+    "moves": [
       "30D_DD",
       "10DLDLo",
       "16_L_L",
@@ -252,13 +252,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "22DL__",
       "23_L_L",
       "24__LL",
-      "21D__D",
-    ],
+      "21D__D"
+    ]
   },
   {
-    seed: "7",
-    score: 41,
-    moves: [
+    "seed": "7",
+    "score": 41,
+    "moves": [
       "03LL_L",
       "04_D_L",
       "02_L_L",
@@ -285,13 +285,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "21__DD",
       "31D__D",
       "30LDLD",
-      "40LDLDo",
-    ],
+      "40LDLDo"
+    ]
   },
   {
-    seed: "8",
-    score: 56,
-    moves: [
+    "seed": "8",
+    "score": 56,
+    "moves": [
       "10_LLL",
       "11L__L",
       "01D_L_",
@@ -322,13 +322,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "55D_DD",
       "54_D_D",
       "45DLDLo",
-      "44LL__",
-    ],
+      "44LL__"
+    ]
   },
   {
-    seed: "9",
-    score: 57,
-    moves: [
+    "seed": "9",
+    "score": 57,
+    "moves": [
       "05DD_D",
       "06__DD",
       "04_D_D",
@@ -359,13 +359,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "46_LLL",
       "45_LL_",
       "34_DD_",
-      "66LDLDo",
-    ],
+      "66LDLDo"
+    ]
   },
   {
-    seed: "10",
-    score: 35,
-    moves: [
+    "seed": "10",
+    "score": 35,
+    "moves": [
       "03LDLDo",
       "02_D_D",
       "04_D_D",
@@ -392,13 +392,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "55LLDL",
       "54_LL_",
       "31D_D_",
-      "06_D_L",
-    ],
+      "06_D_L"
+    ]
   },
   {
-    seed: "11",
-    score: 50,
-    moves: [
+    "seed": "11",
+    "score": 50,
+    "moves": [
       "30LDLDo",
       "20L_L_",
       "10L_LL",
@@ -428,13 +428,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "04LL_L",
       "60LDLDo",
       "45D_D_",
-      "44D_DD",
-    ],
+      "44D_DD"
+    ]
   },
   {
-    seed: "12",
-    score: 39,
-    moves: [
+    "seed": "12",
+    "score": 39,
+    "moves": [
       "01DD_D",
       "00_DD_",
       "10D__L",
@@ -464,13 +464,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "35DDLL",
       "45L_L_",
       "55_L_L",
-      "26_L_D",
-    ],
+      "26_L_D"
+    ]
   },
   {
-    seed: "13",
-    score: 68,
-    moves: [
+    "seed": "13",
+    "score": 68,
+    "moves": [
       "03LDLDo",
       "02_D_D",
       "01DD_D",
@@ -500,13 +500,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "62LL__",
       "65LLDL",
       "55_DL_",
-      "12__LL",
-    ],
+      "12__LL"
+    ]
   },
   {
-    seed: "14",
-    score: 51,
-    moves: [
+    "seed": "14",
+    "score": 51,
+    "moves": [
       "01DLDLo",
       "00_LL_",
       "10LL_L",
@@ -537,13 +537,13 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "06_LLL",
       "53_LL_",
       "63LLL_",
-      "66DLLL",
-    ],
+      "66DLLL"
+    ]
   },
   {
-    seed: "15",
-    score: 50,
-    moves: [
+    "seed": "15",
+    "score": 50,
+    "moves": [
       "10__LL",
       "03LL_L",
       "02_L_D",
@@ -574,7 +574,7 @@ export const games: Array<{seed: string; score: number; moves: string[]}> = [
       "24_DL_",
       "34LL_L",
       "35__LL",
-      "06DDDD",
-    ],
-  },
+      "06DDDD"
+    ]
+  }
 ]
