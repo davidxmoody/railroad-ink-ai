@@ -123,7 +123,10 @@ export class Board {
   }
 
   public set(p: Position, tile: TileString) {
-    if (!this.isValid(p, tile)) throw new Error("Invalid tile placement")
+    if (!this.isValid(p, tile))
+      throw new Error(
+        `Invalid tile placement ${p.y}${p.x}${tile} ${this.toString()}`,
+      )
 
     const tiles = this.tiles.clone()
     tiles.set(p, tile)
@@ -183,7 +186,7 @@ export class Board {
     let str = ""
 
     this.forEachTile(({y, x}, tile) => {
-      str += `${y},${x}${tile} `
+      str += `${y}${x}${tile} `
     })
 
     return str || "Empty"

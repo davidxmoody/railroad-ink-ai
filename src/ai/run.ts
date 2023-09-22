@@ -1,41 +1,41 @@
 import {Worker} from "node:worker_threads"
-import {getMean, getStandardDeviation} from "../logic/helpers"
+// import {getMean, getStandardDeviation} from "../logic/helpers"
 
-const numThreads = 8
+const numThreads = 6
 
+const seedPrefix = "training-"
 const seedStart = 0
-const seedEnd = 16
-const runsPerSeed = 8
+const seedEnd = 999
+const runsPerSeed = 1
 
 const threadSeeds: string[][] = Array.from({length: numThreads}, () => [])
 let nextThreadIndex = 0
 
-for (let seed = seedStart; seed <= seedEnd; seed++) {
-  for (let i = 0; i < runsPerSeed; i++) {
-    threadSeeds[nextThreadIndex].push(seed.toString())
+for (let seedIndex = seedStart; seedIndex <= seedEnd; seedIndex++) {
+  for (let runIndex = 0; runIndex < runsPerSeed; runIndex++) {
+    threadSeeds[nextThreadIndex].push(`${seedPrefix}${seedIndex}`)
     nextThreadIndex = (nextThreadIndex + 1) % numThreads
   }
 }
 
-const results: Array<{score: number; duration: number}> = []
+const records: Array<{score: number}> = []
 
 for (let i = 0; i < numThreads; i++) {
   const worker = new Worker("./src/ai/worker.ts", {workerData: threadSeeds[i]})
 
   worker.on("error", console.error)
 
-  worker.on("message", (result) => {
-    results.push(result)
+  worker.on("message", (record) => {
+    records.push(record)
 
-    const scores = results.map((r) => r.score)
-    const avgScore = getMean(scores).toFixed(1)
-    const stdScore = getStandardDeviation(scores).toFixed(1)
+    //     const scores = records.map((r) => r.score)
+    //     const avgScore = getMean(scores).toFixed(1)
+    //     const stdScore = getStandardDeviation(scores).toFixed(1)
 
-    const durations = results.map((r) => r.duration)
-    const avgDuration = getMean(durations).toFixed(1)
+    // console.log(
+    //   `Score: ${record.score}, seed: ${record.seed}, avg: ${avgScore}, std: ${stdScore}`,
+    // )
 
-    console.log(
-      `Last: ${result.score}, seed: ${result.seed}, avg: ${avgScore}, std: ${stdScore}, avg time: ${avgDuration}s`,
-    )
+    console.log(JSON.stringify(record))
   })
 }

@@ -3,24 +3,25 @@ import GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import {rollGameDice} from "../logic/dice"
 import {solveRound} from "./monteCarlo"
+import type {GameRecord} from "./types"
 
 const seeds = workerData as string[]
 
 for (const seed of seeds) {
   const gameTiles = rollGameDice(seed)
 
+  const moves: string[][] = []
   let gs = new GameState(undefined, gameTiles[0])
 
-  const startTime = performance.now()
-
   while (!gs.gameEnded) {
-    gs = solveRound(gs)
-    gs = gs.endRound(gameTiles[gs.roundNumber])
+    const roundMoves = solveRound(gs)
+    moves.push(roundMoves)
+    gs = gs.makeMoves(roundMoves).endRound(gameTiles[gs.roundNumber])
   }
 
   const score = calculateScore(gs.board).total
 
-  const duration = (performance.now() - startTime) / 1000
+  const record: GameRecord = {seed, score, moves}
 
-  parentPort?.postMessage({score, duration, seed})
+  parentPort?.postMessage(record)
 }

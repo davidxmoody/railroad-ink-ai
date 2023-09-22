@@ -109,6 +109,15 @@ export default class GameState {
     throw new Error("Could not find tile to place")
   }
 
+  public makeMoves(moves: string[]) {
+    return moves.reduce((gs, move) => {
+      const tile = move.slice(2) as TileString
+      const y = parseInt(move[0], 10)
+      const x = parseInt(move[1], 10)
+      return gs.placeTile({y, x}, tile)
+    }, this as GameState)
+  }
+
   public get canEndRound() {
     if (this.gameEnded) return false
 
