@@ -14,18 +14,21 @@ export default class GameState {
   public readonly usedSpecialTileThisRound: boolean
   public readonly board: Board
 
-  public constructor(data?: {
-    gameEnded: boolean
-    roundNumber: number
-    roundTiles: TileString[]
-    usedTileIndexes: number[]
-    usedSpecialTileIndexes: number[]
-    usedSpecialTileThisRound: boolean
-    board: Board
-  }) {
+  public constructor(
+    data?: {
+      gameEnded: boolean
+      roundNumber: number
+      roundTiles: TileString[]
+      usedTileIndexes: number[]
+      usedSpecialTileIndexes: number[]
+      usedSpecialTileThisRound: boolean
+      board: Board
+    },
+    roundTilesOverride?: TileString[],
+  ) {
     this.gameEnded = data?.gameEnded ?? false
     this.roundNumber = data?.roundNumber ?? 1
-    this.roundTiles = data?.roundTiles ?? rollRoundDice()
+    this.roundTiles = roundTilesOverride ?? data?.roundTiles ?? rollRoundDice()
     this.usedTileIndexes = data?.usedTileIndexes ?? []
     this.usedSpecialTileIndexes = data?.usedSpecialTileIndexes ?? []
     this.usedSpecialTileThisRound = data?.usedSpecialTileThisRound ?? false

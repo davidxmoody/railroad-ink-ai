@@ -14,7 +14,7 @@
 
   const seed = "16"
   const gameDice = rollGameDice(seed)
-  let gameState = new GameState({...new GameState(), roundTiles: gameDice[0]})
+  let gameState = new GameState(undefined, gameDice[0])
 
   const placements: string[] = []
 

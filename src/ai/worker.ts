@@ -9,7 +9,7 @@ const seeds = workerData as string[]
 for (const seed of seeds) {
   const gameTiles = rollGameDice(seed)
 
-  let gs = new GameState({...new GameState(), roundTiles: gameTiles[0]})
+  let gs = new GameState(undefined, gameTiles[0])
 
   const startTime = performance.now()
 
