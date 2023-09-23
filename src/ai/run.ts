@@ -1,11 +1,11 @@
 import {Worker} from "node:worker_threads"
 // import {getMean, getStandardDeviation} from "../logic/helpers"
 
-const numThreads = 6
+const numThreads = 8
 
 const seedPrefix = "training-"
-const seedStart = 0
-const seedEnd = 999
+const seedStart = 1000
+const seedEnd = 9999
 const runsPerSeed = 1
 
 const threadSeeds: string[][] = Array.from({length: numThreads}, () => [])
