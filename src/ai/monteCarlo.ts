@@ -3,9 +3,10 @@ import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
 import {getMean, shuffle} from "../logic/helpers"
 import type {OpenSlot, Position, TileString} from "../logic/types"
+import estimateScore from "./estimateScore"
 import {scoreMove} from "./heuristics"
 
-export function solveRound(gs: GameState): string[] {
+export async function solveRound(gs: GameState): Promise<string[]> {
   if (gs.roundNumber === 7) {
     let bestMoves: string[] | null = null
     let bestScore = -Infinity
@@ -30,7 +31,7 @@ export function solveRound(gs: GameState): string[] {
   // TODO need to account for possibility of using special tile on last move
   while (!gs.canEndRound) {
     for (let i = 0; i < 1000; i++) {
-      simulationResults.push(simulate(gs, gs.roundNumber))
+      simulationResults.push(await simulate(gs, gs.roundNumber))
     }
 
     const openingMoveScores = [...getPossibleMoves(gs)].reduce(
@@ -90,7 +91,7 @@ function* exhaustiveSearch(
   }
 }
 
-function simulate(
+async function simulate(
   gs: GameState,
   originalRoundNumber: number,
   moveStrings: string[] = [],
@@ -126,7 +127,10 @@ function simulate(
   //     "DLDL",
   //   ]), moveStrings, true)
 
-  return simulate(gs.endRound(), originalRoundNumber, moveStrings, true)
+  // return simulate(gs.endRound(), originalRoundNumber, moveStrings, true)
+
+  const score = await estimateScore(gs)
+  return {moveStrings, score}
 }
 
 function* getPossibleMoves(gs: GameState): Generator<string> {

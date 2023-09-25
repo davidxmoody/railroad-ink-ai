@@ -1,8 +1,8 @@
 import type {GameRecord} from "./types"
 import GameState from "../logic/GameState"
 import {rollGameDice} from "../logic/dice"
-import calculateScore from "../logic/calculateScore"
 import readJsonl from "./readJsonl"
+import {getFeatures} from "./getFeatures"
 
 const gameRecords = readJsonl<GameRecord>("./src/data/training.jsonl")
 
@@ -16,17 +16,4 @@ for (const game of gameRecords) {
     console.log(JSON.stringify({score: game.score, features: getFeatures(gs)}))
     gs = gs.endRound(gameTiles[gs.roundNumber])
   }
-}
-
-function getFeatures(gs: GameState) {
-  const score = calculateScore(gs.board)
-
-  return [
-    score.exits,
-    score.road,
-    score.rail,
-    score.center,
-    gs.board.countErrors(),
-    gs.roundNumber,
-  ]
 }
