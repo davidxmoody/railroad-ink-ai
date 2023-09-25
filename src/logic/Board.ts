@@ -191,4 +191,15 @@ export class Board {
 
     return str || "Empty"
   }
+
+  public erase(p: Position) {
+    const tiles = this.tiles.clone()
+    tiles.delete(p)
+
+    const openSlots = this.openSlots.clone()
+    const newSlot = this.calculateSlot(p)
+    openSlots.set(p, newSlot)
+
+    return new Board({tiles, openSlots})
+  }
 }

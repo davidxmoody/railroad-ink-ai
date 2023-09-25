@@ -3,8 +3,9 @@ import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
 import {getMean, shuffle} from "../logic/helpers"
 import type {OpenSlot, Position, TileString} from "../logic/types"
-import predictScore from "./predictScore/predictScore"
+// import predictScore from "./predictScore/predictScore"
 import {scoreMove} from "./heuristics"
+import orderMoves from "./orderMoves/orderMoves"
 
 export async function solveRound(gs: GameState): Promise<string[]> {
   if (gs.roundNumber === 7) {
@@ -30,8 +31,10 @@ export async function solveRound(gs: GameState): Promise<string[]> {
 
   // TODO need to account for possibility of using special tile on last move
   while (!gs.canEndRound) {
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 200; i++) {
+      // console.time("simulate")
       simulationResults.push(await simulate(gs, gs.roundNumber))
+      // console.timeEnd("simulate")
     }
 
     const openingMoveScores = [...getPossibleMoves(gs)].reduce(
@@ -91,6 +94,12 @@ function* exhaustiveSearch(
   }
 }
 
+async function pickRandomGoodMove(gs: GameState): Promise<string | null> {
+  // return getPossibleMoves(gs).next().value
+  const ordered = await orderMoves(gs, [...getPossibleMoves(gs)])
+  return ordered[Math.floor(Math.random() * Math.random() * ordered.length)]
+}
+
 async function simulate(
   gs: GameState,
   originalRoundNumber: number,
@@ -106,7 +115,7 @@ async function simulate(
     return {moveStrings, score}
   }
 
-  const move = getPossibleMoves(gs).next().value
+  const move = await pickRandomGoodMove(gs)
 
   if (move) {
     const newMoveStrings = roundEndedOnce ? moveStrings : [...moveStrings, move]
@@ -127,10 +136,10 @@ async function simulate(
   //     "DLDL",
   //   ]), moveStrings, true)
 
-  // return simulate(gs.endRound(), originalRoundNumber, moveStrings, true)
+  return simulate(gs.endRound(), originalRoundNumber, moveStrings, true)
 
-  const score = await predictScore(gs)
-  return {moveStrings, score}
+  // const score = await predictScore(gs)
+  // return {moveStrings, score}
 }
 
 function* getPossibleMoves(gs: GameState): Generator<string> {
