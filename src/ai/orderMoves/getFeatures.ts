@@ -1,15 +1,10 @@
 import {Board} from "../../logic/Board"
 import type GameState from "../../logic/GameState"
-import {isCenterSquare, rotations} from "../../logic/helpers"
-import {
-  ConnectionType,
-  type MaybeTrackType,
-  type TileString,
-} from "../../logic/types"
+import {isCenterSquare, parseMove, rotations} from "../../logic/helpers"
+import {ConnectionType, type MaybeTrackType} from "../../logic/types"
 
 export default function getFeatures(gs: GameState, move: string) {
-  const p = {y: parseInt(move[0], 10), x: parseInt(move[1], 10)}
-  const tile = move.slice(2) as TileString
+  const {p, tile} = parseMove(move)
   const slot = gs.board.getOpenSlot(p)!
 
   let numMatches = 0

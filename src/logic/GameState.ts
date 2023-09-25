@@ -1,6 +1,6 @@
 import {Board} from "./Board"
 import {rollRoundDice, specialRouteTiles} from "./dice"
-import {getAllTransformedTiles} from "./helpers"
+import {getAllTransformedTiles, parseMove} from "./helpers"
 import type {Position, TileString} from "./types"
 
 export default class GameState {
@@ -111,10 +111,8 @@ export default class GameState {
 
   public makeMoves(moves: string[]) {
     return moves.reduce((gs, move) => {
-      const tile = move.slice(2) as TileString
-      const y = parseInt(move[0], 10)
-      const x = parseInt(move[1], 10)
-      return gs.placeTile({y, x}, tile)
+      const {p, tile} = parseMove(move)
+      return gs.placeTile(p, tile)
     }, this as GameState)
   }
 

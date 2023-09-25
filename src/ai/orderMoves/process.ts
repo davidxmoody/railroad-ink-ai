@@ -4,6 +4,7 @@ import {rollGameDice} from "../../logic/dice"
 import readJsonl from "../readJsonl"
 import calculateScore from "../../logic/calculateScore"
 import getFeatures from "./getFeatures"
+import {parseMove} from "../../logic/helpers"
 
 const gameRecords = readJsonl<GameRecord>("./src/data/training.jsonl")
 
@@ -57,7 +58,7 @@ for (const game of gameRecords) {
   let gs = new GameState(undefined, gameTiles[0])
   for (const roundMoves of game.moves) {
     for (const move of roundMoves) {
-      const p = {y: parseInt(move[0], 10), x: parseInt(move[1], 10)}
+      const {p} = parseMove(move)
       const finalBoardWithoutMove = finalGs.board.erase(p)
       const finalScoreWithoutMove = calculateScore(finalBoardWithoutMove).total
       const scoreDiff = game.score - finalScoreWithoutMove
