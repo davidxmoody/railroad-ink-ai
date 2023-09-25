@@ -1,5 +1,5 @@
-import type GameState from "../logic/GameState"
-import calculateScore from "../logic/calculateScore"
+import type GameState from "../../logic/GameState"
+import calculateScore from "../../logic/calculateScore"
 
 export function getFeatures(gs: GameState) {
   const score = calculateScore(gs.board)

@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs-node"
-import readJsonl from "./readJsonl"
+import readJsonl from "../readJsonl"
 
 const NUM_EPOCHS = 200
 const BATCH_SIZE = 40
@@ -53,17 +53,7 @@ async function train() {
 
   result.print()
 
-  await model.save("file://./src/data/model")
-
-  // console.log(model.predict(tf.tensor2d([[0, 4, 1, 0, 4, 1]])).toString())
-  // console.log(model.predict(tf.tensor2d([[20, 6, 6, 4, 8, 5]])).toString())
-
-  // const xs = tf.tensor2d([-1, 0, 1, 2, 3, 4], [6, 1])
-  // const ys = tf.tensor2d([-3, -1, 1, 3, 5, 7], [6, 1])
-
-  // await model.fit(xs, ys, {epochs: 250})
-
-  // console.log(model.predict(tf.tensor2d([20], [1, 1])).toString())
+  await model.save("file://./src/ai/predictScore/model")
 }
 
 train()

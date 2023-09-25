@@ -3,7 +3,7 @@ import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
 import {getMean, shuffle} from "../logic/helpers"
 import type {OpenSlot, Position, TileString} from "../logic/types"
-import estimateScore from "./estimateScore"
+import predictScore from "./predictScore/predictScore"
 import {scoreMove} from "./heuristics"
 
 export async function solveRound(gs: GameState): Promise<string[]> {
@@ -129,7 +129,7 @@ async function simulate(
 
   // return simulate(gs.endRound(), originalRoundNumber, moveStrings, true)
 
-  const score = await estimateScore(gs)
+  const score = await predictScore(gs)
   return {moveStrings, score}
 }
 

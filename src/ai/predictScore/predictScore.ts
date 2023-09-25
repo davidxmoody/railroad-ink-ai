@@ -1,8 +1,10 @@
 import * as tf from "@tensorflow/tfjs-node"
-import type GameState from "../logic/GameState"
+import type GameState from "../../logic/GameState"
 import {getFeatures} from "./getFeatures"
 
-const modelPromise = tf.loadLayersModel("file://./src/data/model/model.json")
+const modelPromise = tf.loadLayersModel(
+  "file://./src/ai/predictScore/model/model.json",
+)
 
 export default async function (gs: GameState) {
   const model = await modelPromise

@@ -1,7 +1,7 @@
-import type {GameRecord} from "./types"
-import GameState from "../logic/GameState"
-import {rollGameDice} from "../logic/dice"
-import readJsonl from "./readJsonl"
+import type {GameRecord} from "../types"
+import GameState from "../../logic/GameState"
+import {rollGameDice} from "../../logic/dice"
+import readJsonl from "../readJsonl"
 import {getFeatures} from "./getFeatures"
 
 const gameRecords = readJsonl<GameRecord>("./src/data/training.jsonl")
