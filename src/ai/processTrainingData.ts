@@ -1,16 +1,10 @@
-import {readFileSync} from "node:fs"
 import type {GameRecord} from "./types"
 import GameState from "../logic/GameState"
 import {rollGameDice} from "../logic/dice"
 import calculateScore from "../logic/calculateScore"
+import readJsonl from "./readJsonl"
 
-const gameRecords: GameRecord[] = readFileSync(
-  "./src/data/training.jsonl",
-  "utf-8",
-)
-  .split("\n")
-  .filter((x) => x)
-  .map((x) => JSON.parse(x))
+const gameRecords = readJsonl<GameRecord>("./src/data/training.jsonl")
 
 for (const game of gameRecords) {
   const gameTiles = rollGameDice(game.seed)

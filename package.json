@@ -11,6 +11,7 @@
     "test": "vitest",
     "ai-run": "node --no-warnings --loader ts-node/esm --es-module-specifier-resolution=node src/ai/run.ts",
     "process-training-data": "node --no-warnings --loader ts-node/esm --es-module-specifier-resolution=node src/ai/processTrainingData.ts",
+    "train-model": "node --no-warnings --loader ts-node/esm --es-module-specifier-resolution=node src/ai/trainModel.ts",
     "lint": "prettier --plugin-search-dir . --check . && eslint .",
     "format": "prettier --plugin-search-dir . --write ."
   },
@@ -36,6 +37,7 @@
   "type": "module",
   "dependencies": {
     "@tensorflow/tfjs": "^4.11.0",
+    "@tensorflow/tfjs-node": "^4.11.0",
     "seedrandom": "^3.0.5"
   }
 }
