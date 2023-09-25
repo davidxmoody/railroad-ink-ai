@@ -3,26 +3,14 @@ import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
 import {getMean, shuffle} from "../logic/helpers"
 import type {OpenSlot, Position, TileString} from "../logic/types"
+import exhaustiveSearch from "./exhaustiveSearch"
 // import predictScore from "./predictScore/predictScore"
 import {scoreMove} from "./heuristics"
-import orderMoves from "./orderMoves/orderMoves"
+// import orderMoves from "./orderMoves/orderMoves"
 
 export async function solveRound(gs: GameState): Promise<string[]> {
   if (gs.roundNumber === 7) {
-    let bestMoves: string[] | null = null
-    let bestScore = -Infinity
-
-    for (const [endGs, endMoves] of exhaustiveSearch(gs, [], new Set())) {
-      const endScore = calculateScore(endGs.board).total
-      if (endScore > bestScore) {
-        bestScore = endScore
-        bestMoves = endMoves
-      }
-    }
-
-    if (!bestMoves) throw new Error("Could not find best GameState")
-
-    return bestMoves
+    return exhaustiveSearch(gs)
   }
 
   const moves: string[] = []
@@ -31,7 +19,7 @@ export async function solveRound(gs: GameState): Promise<string[]> {
 
   // TODO need to account for possibility of using special tile on last move
   while (!gs.canEndRound) {
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 1000; i++) {
       // console.time("simulate")
       simulationResults.push(await simulate(gs, gs.roundNumber))
       // console.timeEnd("simulate")
@@ -75,29 +63,10 @@ export async function solveRound(gs: GameState): Promise<string[]> {
   return moves
 }
 
-function* exhaustiveSearch(
-  gs: GameState,
-  moves: string[],
-  encounteredStates: Set<string>,
-): Generator<[GameState, string[]]> {
-  if (gs.canEndRound) {
-    yield [gs, moves]
-    return
-  }
-
-  for (const move of getPossibleMoves(gs)) {
-    const newMoves = [...moves, move]
-    const key = [...newMoves].sort().join("")
-    if (encounteredStates.has(key)) continue
-    encounteredStates.add(key)
-    yield* exhaustiveSearch(gs.makeMoves([move]), newMoves, encounteredStates)
-  }
-}
-
 async function pickRandomGoodMove(gs: GameState): Promise<string | null> {
-  // return getPossibleMoves(gs).next().value
-  const ordered = await orderMoves(gs, [...getPossibleMoves(gs)])
-  return ordered[Math.floor(Math.random() * Math.random() * ordered.length)]
+  return getPossibleMoves(gs).next().value
+  // const ordered = await orderMoves(gs, [...getPossibleMoves(gs)])
+  // return ordered[Math.floor(Math.random() * Math.random() * ordered.length)]
 }
 
 async function simulate(
