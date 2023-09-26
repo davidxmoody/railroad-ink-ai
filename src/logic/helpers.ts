@@ -37,6 +37,10 @@ export function hasOverpass(tile: TileString) {
   return tile[4] === "o"
 }
 
+export function isSpecial(tile: TileString) {
+  return !(tile.includes("_") || hasOverpass(tile))
+}
+
 export function hasTrackType(tile: TileString, trackType: TrackType) {
   return rotations.some((r) => tile[r] === trackType)
 }

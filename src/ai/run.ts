@@ -6,12 +6,12 @@ import {solveRound} from "./monteCarlo"
 import type {GameRecord} from "./types"
 import {getMean, getStandardDeviation} from "../logic/helpers"
 
-const numThreads = 1 as number
+const numThreads = 6 as number
 // const seedPrefix = "training-"
 const seedPrefix = ""
 const seedStart = 0
-const seedEnd = 10
-const runsPerSeed = 1
+const seedEnd = 0
+const runsPerSeed = 20
 
 async function run(seeds: string[], callback: (record: GameRecord) => void) {
   for (const seed of seeds) {
