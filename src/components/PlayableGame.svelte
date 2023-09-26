@@ -10,29 +10,15 @@
   import GameState from "../logic/GameState"
   import {solveRound} from "../ai/monteCarlo"
   import calculateScore from "../logic/calculateScore"
-  import prioritise from "../ai/prioritisePositions/prioritise"
+
+  // TODO add an undo button
 
   // const seed = "16"
   const seed = `${Math.random()}`
   const gameDice = rollGameDice(seed)
   let gameState = new GameState(undefined, gameDice[0])
 
-  $: weights = prioritise(gameState.board.openPositions)
-  $: totalWeight = weights.reduce((acc, item) => acc + item.weight, 0)
-
   const placements: string[] = []
-
-  // TODO add an undo button
-
-  //  onMount(() => {
-  //    const gameTiles = rollGameDice("4")
-  //    let gs = new GameState({...new GameState(), roundTiles: gameTiles[0]})
-  //    while (!gs.gameEnded) {
-  //      gs = solveRound(gs)
-  //      gs = gs.endRound(gameTiles[gs.roundNumber])
-  //    }
-  //    gameState = gs
-  //  })
 
   type SelectionState =
     | {type: "noSelection"}
@@ -196,15 +182,6 @@
       <div style:display="flex">
         {#each {length: Board.size} as _, x}
           <div class="cell" class:centerSquare={isCenterSquare({y, x})}>
-            <div
-              class="weight"
-              style:background={`rgba(0,200,0,${
-                ((weights.find(({item: p}) => p.y === y && p.x === x)?.weight ??
-                  0) /
-                  totalWeight) *
-                3
-              })`}
-            />
             {#if gameState.board.get({y, x})}
               <DrawnTile tile={gameState.board.get({y, x})} />
             {:else if selectionState.type === "tileSelected"}
@@ -278,15 +255,6 @@
     opacity: 0.5;
   }
 
-  .weight {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    pointer-events: none;
-  }
-
   .cellSelectionHighlight {
     position: absolute;
     top: 0;
@@ -294,8 +262,7 @@
     left: 0;
     right: 0;
     border: 0;
-    /*background-color: rgba(0, 200, 0, 0.3);*/
-    background-color: transparent;
+    background-color: rgba(0, 200, 0, 0.3);
   }
 
   .cellButtonContainer {

@@ -1,9 +1,8 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {getMean, shuffle, weightedRandomIterate} from "../logic/helpers"
+import {getMean, shuffle} from "../logic/helpers"
 import exhaustiveSearch from "./exhaustiveSearch"
-import prioritiseMoves from "./prioritiseMoves/prioritiseMoves"
 
 export async function solveRound(gs: GameState): Promise<string[]> {
   if (gs.roundNumber === 7) {
@@ -63,10 +62,7 @@ function scoreSimulationResult(gs: GameState) {
 }
 
 function pickSimulationMove(gs: GameState) {
-  // return getPossibleMoves(gs).next().value
-  return weightedRandomIterate(
-    prioritiseMoves(gs.roundNumber, [...getPossibleMoves(gs)]),
-  ).next().value
+  return getPossibleMoves(gs).next().value
 }
 
 async function simulate(

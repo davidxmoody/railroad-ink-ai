@@ -127,10 +127,7 @@ export class Board {
   }
 
   public set(p: Position, tile: TileString) {
-    if (!this.isValid(p, tile))
-      throw new Error(
-        `Invalid tile placement ${p.y}${p.x}${tile} ${this.toString()}`,
-      )
+    if (!this.isValid(p, tile)) throw new Error("Invalid tile placement")
 
     const tiles = this.tiles.clone()
     tiles.set(p, tile)
@@ -184,26 +181,5 @@ export class Board {
     const ps: Position[] = []
     this.openSlots.forEach((p) => ps.push(p))
     return ps
-  }
-
-  public toString() {
-    let str = ""
-
-    this.forEachTile(({y, x}, tile) => {
-      str += `${y}${x}${tile} `
-    })
-
-    return str || "Empty"
-  }
-
-  public erase(p: Position) {
-    const tiles = this.tiles.clone()
-    tiles.delete(p)
-
-    const openSlots = this.openSlots.clone()
-    const newSlot = this.calculateSlot(p)
-    openSlots.set(p, newSlot)
-
-    return new Board({tiles, openSlots})
   }
 }

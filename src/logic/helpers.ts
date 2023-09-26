@@ -37,10 +37,6 @@ export function hasOverpass(tile: TileString) {
   return tile[4] === "o"
 }
 
-export function isSpecial(tile: TileString) {
-  return !(tile.includes("_") || hasOverpass(tile))
-}
-
 export function hasTrackType(tile: TileString, trackType: TrackType) {
   return rotations.some((r) => tile[r] === trackType)
 }
@@ -149,27 +145,4 @@ export function parseMove(move: string) {
   const y = parseInt(move[0], 10)
   const x = parseInt(move[1], 10)
   return {p: {y, x}, tile}
-}
-
-export function* weightedRandomIterate<T>(
-  weightedList: Array<{weight: number; item: T}>,
-): Generator<T> {
-  if (weightedList.length > 0) {
-    const totalWeight = weightedList.reduce((acc, {weight}) => acc + weight, 0)
-    // const totalWeight = weightedList.length
-
-    let pickPoint = totalWeight * Math.random()
-    const index = weightedList.findIndex(({weight}) => {
-      pickPoint -= weight
-      // pickPoint--
-      if (pickPoint <= 0) return true
-    })
-
-    yield weightedList[index].item
-
-    yield* weightedRandomIterate([
-      ...weightedList.slice(0, index),
-      ...weightedList.slice(index + 1),
-    ])
-  }
 }
