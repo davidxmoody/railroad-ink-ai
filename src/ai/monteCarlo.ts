@@ -1,11 +1,12 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {getMean, shuffle} from "../logic/helpers"
+import {getMean, shuffle, weightedRandomIterate} from "../logic/helpers"
 import type {OpenSlot, Position, TileString} from "../logic/types"
 import exhaustiveSearch from "./exhaustiveSearch"
 // import predictScore from "./predictScore/predictScore"
 import {scoreMove} from "./heuristics"
+import prioritise from "./prioritisePositions/prioritise"
 // import orderMoves from "./orderMoves/orderMoves"
 
 export async function solveRound(gs: GameState): Promise<string[]> {
@@ -112,7 +113,9 @@ async function simulate(
 }
 
 function* getPossibleMoves(gs: GameState): Generator<string> {
-  const openPositions = shuffle(gs.board.openPositions)
+  const openPositions = weightedRandomIterate(
+    prioritise(gs.board.openPositions),
+  )
   const availableTiles = shuffle(gs.availableTiles)
 
   for (const p of openPositions) {
