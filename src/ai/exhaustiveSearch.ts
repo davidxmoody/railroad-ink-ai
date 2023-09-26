@@ -1,7 +1,7 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {randomPick} from "../logic/helpers"
+import {randomPick, shuffle} from "../logic/helpers"
 
 export default function exhaustiveSearch(gs: GameState) {
   let bestMoves: string[][] = []
@@ -31,7 +31,7 @@ function* visitAllStates(
     yield [gs, moves]
   }
 
-  for (const move of getPossibleMoves(gs)) {
+  for (const move of shuffle([...getPossibleMoves(gs)])) {
     const newMoves = [...moves, move]
     const key = [...newMoves].sort().join("")
     if (encounteredStates.has(key)) continue
