@@ -1,22 +1,25 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
+import {randomPick} from "../logic/helpers"
 
 export default function exhaustiveSearch(gs: GameState) {
-  let bestMoves: string[] | null = null
+  let bestMoves: string[][] = []
   let bestScore = -Infinity
 
   for (const [endGs, endMoves] of visitAllStates(gs, [], new Set())) {
     const endScore = calculateScore(endGs.board).total
     if (endScore > bestScore) {
       bestScore = endScore
-      bestMoves = endMoves
+      bestMoves = [endMoves]
+    } else if (endScore === bestScore) {
+      bestMoves.push(endMoves)
     }
   }
 
-  if (!bestMoves) throw new Error("Could not find best GameState")
+  if (bestMoves.length === 0) throw new Error("Could not find best GameState")
 
-  return bestMoves
+  return randomPick(bestMoves)
 }
 
 function* visitAllStates(
