@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs-node"
 import GameState from "../../logic/GameState"
-import {shuffle} from "../../logic/helpers"
+import {hasOverpass, rotations, shuffle} from "../../logic/helpers"
 import getMeaningfulPlacements from "../../logic/getMeaningfulPlacements"
 import calculateScore from "../../logic/calculateScore"
 import {Board} from "../../logic/Board"
@@ -62,20 +62,41 @@ function* generateTrainingData(num: number): Generator<[number[], number]> {
     for (let roundNumber = 1; roundNumber <= 7; roundNumber++) {
       gs = simulateToEndOfRound(gs)
 
-      const output = calculateScore(simulateToEndOfGame(gs).board).exits
+      // const output = calculateScore(simulateToEndOfGame(gs).board).exits
+      const output = calculateScore(gs.board).exits
 
       for (const transformedBoard of getAllBoardTransforms(gs.board)) {
         const input: number[] = []
 
         for (let y = 0; y < Board.size; y++) {
           for (let x = 0; x < Board.size; x++) {
-            for (let r = 0; r < 5; r++) {
-              const tile = transformedBoard.get({y, x})
-              if (!tile) input.push(0)
-              else input.push({D: 1, L: -1, o: 1}[tile[r]] ?? 0)
+            for (const r1 of rotations) {
+              for (const r2 of rotations) {
+                if (r1 >= r2) continue
+                const tile = transformedBoard.get({y, x})
+                if (!tile) {
+                  input.push(0)
+                } else if (hasOverpass(tile) && r2 - r1 !== 2) {
+                  input.push(-1)
+                } else if (tile[r1] !== "_" && tile[r2] !== "_") {
+                  input.push(1)
+                } else {
+                  input.push(-1)
+                }
+              }
             }
           }
         }
+
+        // for (let y = 0; y < Board.size; y++) {
+        //   for (let x = 0; x < Board.size; x++) {
+        //     for (let r = 0; r < 5; r++) {
+        //       const tile = transformedBoard.get({y, x})
+        //       if (!tile) input.push(0)
+        //       else input.push({D: 1, L: -1, o: 1}[tile[r]] ?? 0)
+        //     }
+        //   }
+        // }
 
         yield [input, output]
       }
@@ -86,10 +107,26 @@ function* generateTrainingData(num: number): Generator<[number[], number]> {
 }
 
 async function train() {
+  const trainFeatures: number[][] = []
+  const trainTargets: number[] = []
+  for (const [train, target] of generateTrainingData(5000)) {
+    trainFeatures.push(train)
+    trainTargets.push(target)
+  }
+
+  const testFeatures: number[][] = []
+  const testTargets: number[] = []
+  for (const [test, target] of generateTrainingData(100)) {
+    testFeatures.push(test)
+    testTargets.push(target)
+  }
+
+  const featuresLength = trainFeatures[0].length
+
   const model = tf.sequential()
   model.add(
     tf.layers.dense({
-      inputShape: [7 * 7 * 5],
+      inputShape: [featuresLength],
       units: 7 * 7,
       activation: "sigmoid",
       kernelInitializer: "leCunNormal",
@@ -111,28 +148,14 @@ async function train() {
     loss: "meanSquaredError",
   })
 
-  const trainFeatures: number[][] = []
-  const trainTargets: number[] = []
-  for (const [train, target] of generateTrainingData(1000)) {
-    trainFeatures.push(train)
-    trainTargets.push(target)
-  }
-
-  const testFeatures: number[][] = []
-  const testTargets: number[] = []
-  for (const [test, target] of generateTrainingData(100)) {
-    testFeatures.push(test)
-    testTargets.push(target)
-  }
-
   await model.fit(
-    tf.tensor2d(trainFeatures, [trainFeatures.length, 7 * 7 * 5]),
+    tf.tensor2d(trainFeatures, [trainFeatures.length, featuresLength]),
     tf.tensor1d(trainTargets),
     {batchSize: BATCH_SIZE, epochs: NUM_EPOCHS, validationSplit: 0.2},
   )
 
   const result = model.evaluate(
-    tf.tensor2d(testFeatures, [testFeatures.length, 7 * 7 * 5]),
+    tf.tensor2d(testFeatures, [testFeatures.length, featuresLength]),
     tf.tensor1d(testTargets),
     {batchSize: BATCH_SIZE},
   ) as tf.Scalar
