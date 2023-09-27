@@ -15,6 +15,9 @@ import {
   tileFitsInSlot,
   updateSlot,
   getAllTransformedTiles,
+  flipGridV,
+  flipGridH,
+  rotateGrid,
 } from "./helpers"
 import {Grid} from "./Grid"
 
@@ -181,5 +184,26 @@ export class Board {
     const ps: Position[] = []
     this.openSlots.forEach((p) => ps.push(p))
     return ps
+  }
+
+  public flipV() {
+    return new Board({
+      tiles: flipGridV(this.tiles),
+      openSlots: flipGridV(this.openSlots),
+    })
+  }
+
+  public flipH() {
+    return new Board({
+      tiles: flipGridH(this.tiles),
+      openSlots: flipGridH(this.openSlots),
+    })
+  }
+
+  public rotate() {
+    return new Board({
+      tiles: rotateGrid(this.tiles),
+      openSlots: rotateGrid(this.openSlots),
+    })
   }
 }
