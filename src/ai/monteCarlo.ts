@@ -16,15 +16,27 @@ export function solveRound(gs: GameState) {
   let simulationResults: SimulationResult[] = []
 
   while (!gs.canEndRound) {
-    for (let i = 0; i < 1000; i++) {
-      simulationResults.push(simulate(gs))
-    }
-
     const openingMoves = [...getPossibleMoves(gs)]
     const openingMoveMeans = calculateOpeningMoveMeans(
       openingMoves,
       simulationResults,
     )
+
+    for (let i = 0; i < 1000; i++) {
+      const result = simulate(gs)
+      simulationResults.push(result)
+      updateOpeningMoveMeans(openingMoveMeans, result)
+    }
+
+    for (let i = 0; i < 4000; i++) {
+      const bestNextMove = Object.keys(openingMoveMeans).reduce((a, b) =>
+        openingMoveMeans[a].mean > openingMoveMeans[b].mean ? a : b,
+      )
+      const result = simulate(gs.makeMoves([bestNextMove]), [bestNextMove])
+      simulationResults.push(result)
+      updateOpeningMoveMeans(openingMoveMeans, result)
+    }
+
     const bestOpeningMove = Object.keys(openingMoveMeans).reduce((a, b) =>
       openingMoveMeans[a].mean > openingMoveMeans[b].mean ? a : b,
     )
@@ -39,6 +51,22 @@ export function solveRound(gs: GameState) {
   return moves
 }
 
+function updateOpeningMoveMeans(
+  means: Record<string, {count: number; mean: number}>,
+  result: SimulationResult,
+) {
+  for (const move of result.moves) {
+    if (means[move]) {
+      const oldCount = means[move].count
+      const newCount = means[move].count + 1
+      const oldMean = means[move].mean
+      const newMean = (oldMean * oldCount + result.score) / newCount
+      means[move].mean = newMean
+      means[move].count = newCount
+    }
+  }
+}
+
 function calculateOpeningMoveMeans(
   openingMoves: string[],
   simulationResults: SimulationResult[],
@@ -49,16 +77,7 @@ function calculateOpeningMoveMeans(
   )
 
   for (const result of simulationResults) {
-    for (const move of result.moves) {
-      if (means[move]) {
-        const oldCount = means[move].count
-        const newCount = means[move].count + 1
-        const oldMean = means[move].mean
-        const newMean = (oldMean * oldCount + result.score) / newCount
-        means[move].mean = newMean
-        means[move].count = newCount
-      }
-    }
+    updateOpeningMoveMeans(means, result)
   }
 
   return means
