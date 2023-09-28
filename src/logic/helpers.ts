@@ -1,5 +1,4 @@
 import {Board} from "./Board"
-import {Grid} from "./Grid"
 import {
   ConnectionType,
   type MaybeTrackType,
@@ -146,48 +145,6 @@ export function parseMove(move: string) {
   const y = parseInt(move[0], 10)
   const x = parseInt(move[1], 10)
   return {p: {y, x}, tile}
-}
-
-export function flipGridV<T extends TileString | OpenSlot>(
-  grid: Grid<T>,
-): Grid<T> {
-  const newGrid = Grid.fromList<T>([])
-  for (const [{y, x}, t] of grid.entries()) {
-    const newY = Grid.size - y - 1
-    const newT = `${t[2]}${t[1]}${t[0]}${t[3]}${t[4] ?? ""}` as T
-    newGrid.set({y: newY, x}, newT)
-  }
-  return newGrid
-}
-
-export function flipGridH<T extends TileString | OpenSlot>(
-  grid: Grid<T>,
-): Grid<T> {
-  const newGrid = Grid.fromList<T>([])
-  for (const [{y, x}, t] of grid.entries()) {
-    const newX = Grid.size - x - 1
-    const newT = `${t[0]}${t[3]}${t[2]}${t[1]}${t[4] ?? ""}` as T
-    newGrid.set({y, x: newX}, newT)
-  }
-  return newGrid
-}
-
-export function rotateGrid<T extends TileString | OpenSlot>(
-  grid: Grid<T>,
-): Grid<T> {
-  const newGrid = Grid.fromList<T>([])
-  for (const [{y, x}, t] of grid.entries()) {
-    const newY = x
-    const newX = Grid.size - y - 1
-
-    const newT = `${t[3]}${t[0]}${t[1]}${t[2]}${t[4] ?? ""}`.replace(
-      /[DL]/g,
-      (m) => (m === "D" ? "L" : "D"),
-    ) as T
-
-    newGrid.set({y: newY, x: newX}, newT)
-  }
-  return newGrid
 }
 
 export function argmax<T>(list: T[], fn: (item: T) => number) {

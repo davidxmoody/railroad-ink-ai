@@ -8,8 +8,6 @@ type SimulationResult = {moves: string[]; score: number}
 
 type OpeningMoveMeans = Record<string, {count: number; mean: number}>
 
-const regrets: number[] = []
-
 export function solveRound(gs: GameState) {
   if (gs.roundNumber === 7) {
     return exhaustiveSearch(gs)
@@ -26,9 +24,6 @@ export function solveRound(gs: GameState) {
       simulationResults,
     )
 
-    // TODO try visualising distributions of scores from simulating a single
-    // end round state, see what distribution it falls into in different rounds
-
     for (const openingMove of openingMoves) {
       for (let i = 0; i < 10; i++) {
         const result = simulateWithOpeningMove(gs, openingMove)
@@ -38,14 +33,13 @@ export function solveRound(gs: GameState) {
     }
 
     for (let i = 0; i < 4000; i++) {
-      const openingMove = selectNextOpeningMove(openingMoves, openingMoveMeans)
+      const openingMove = argmax(
+        openingMoves,
+        (move) => openingMoveMeans[move].mean,
+      )
       const result = simulateWithOpeningMove(gs, openingMove)
       simulationResults.push(result)
       updateOpeningMoveMeans(openingMoveMeans, result)
-      // if (gs.roundNumber === 5)
-      //   console.log(
-      //     openingMoves.map((move) => openingMoveMeans[move].mean).join("	"),
-      //   )
     }
 
     const bestOpeningMove = argmax(
@@ -58,55 +52,9 @@ export function solveRound(gs: GameState) {
     simulationResults = simulationResults.filter((r) =>
       r.moves.includes(bestOpeningMove),
     )
-
-    // if (gs.roundNumber === 5) throw new Error("End")
-
-    // console.log(
-    //   "Regret",
-    //   gs.roundNumber,
-    //   moves.length,
-    //   calculateRegret(openingMoveMeans).toFixed(3),
-    // )
-    regrets.push(calculateRegret(openingMoveMeans))
   }
-
-  // if (gs.roundNumber === 6) console.log("Avg regret", getMean(regrets))
 
   return moves
-}
-
-function calculateRegret(means: OpeningMoveMeans) {
-  const bestMean = argmax(Object.values(means), ({mean}) => mean).mean
-  let totalCount = 0
-  let totalRegret = 0
-  for (const {count, mean} of Object.values(means)) {
-    totalCount += count
-    totalRegret += (bestMean - mean) * count
-  }
-  return totalRegret / totalCount
-}
-
-function selectNextOpeningMove(moves: string[], means: OpeningMoveMeans) {
-  // constant=0, avg=54.4
-  // constant=0.5, avg=54.6
-  // constant=5, avg=54.4
-  // constant=50, avg=54.1
-  // constant=5 only first move, avg=54.3
-  // constant=0 only first move, avg=47.5 (stopped early)
-  // just mean, 0.1 errors but otherwise full score, avg=54.4
-  // just mean, 0.1 errors but otherwise full score, 10 initial on every state, avg=54.6
-  // just mean, 0.1 errors but otherwise full score, 10 initial on every state, using s.total instead of less for errors, avg=50.1
-
-  // const explorationConstant = 0
-  // const logTotalCount = Math.log2(
-  //   Object.values(means).reduce((acc, {count}) => acc + count, 0) + 1,
-  // )
-
-  return argmax(
-    moves,
-    (move) => means[move].mean,
-    // + explorationConstant * Math.sqrt(logTotalCount / means[move].count),
-  )
 }
 
 function updateOpeningMoveMeans(
