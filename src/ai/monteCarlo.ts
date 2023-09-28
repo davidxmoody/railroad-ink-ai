@@ -1,10 +1,12 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {shuffle} from "../logic/helpers"
+import {argmax, shuffle} from "../logic/helpers"
 import exhaustiveSearch from "./exhaustiveSearch"
 
 type SimulationResult = {moves: string[]; score: number}
+
+type OpeningMoveMeans = Record<string, {count: number; mean: number}>
 
 export function solveRound(gs: GameState) {
   if (gs.roundNumber === 7) {
@@ -22,23 +24,26 @@ export function solveRound(gs: GameState) {
       simulationResults,
     )
 
-    for (let i = 0; i < 1000; i++) {
-      const result = simulate(gs)
+    // TODO try visualising distributions of scores from simulating a single
+    // end round state, see what distribution it falls into in different rounds
+
+    for (const openingMove of openingMoves) {
+      const result = simulateWithOpeningMove(gs, openingMove)
       simulationResults.push(result)
       updateOpeningMoveMeans(openingMoveMeans, result)
     }
 
     for (let i = 0; i < 4000; i++) {
-      const bestNextMove = Object.keys(openingMoveMeans).reduce((a, b) =>
-        openingMoveMeans[a].mean > openingMoveMeans[b].mean ? a : b,
-      )
-      const result = simulate(gs.makeMoves([bestNextMove]), [bestNextMove])
+      const openingMove = selectNextOpeningMove(openingMoves, openingMoveMeans)
+      const result = simulateWithOpeningMove(gs, openingMove)
       simulationResults.push(result)
       updateOpeningMoveMeans(openingMoveMeans, result)
+      // console.log(openingMoves.map(move => openingMoveMeans[move].mean).join("	"))
     }
 
-    const bestOpeningMove = Object.keys(openingMoveMeans).reduce((a, b) =>
-      openingMoveMeans[a].mean > openingMoveMeans[b].mean ? a : b,
+    const bestOpeningMove = argmax(
+      openingMoves,
+      (move) => openingMoveMeans[move].mean,
     )
 
     moves.push(bestOpeningMove)
@@ -46,13 +51,29 @@ export function solveRound(gs: GameState) {
     simulationResults = simulationResults.filter((r) =>
       r.moves.includes(bestOpeningMove),
     )
+
+    // throw new Error("End")
   }
 
   return moves
 }
 
+function selectNextOpeningMove(moves: string[], means: OpeningMoveMeans) {
+  const explorationConstant = 1
+  const logTotalCount = Math.log2(
+    Object.values(means).reduce((acc, {count}) => acc + count, 0) + 1,
+  )
+
+  return argmax(
+    moves,
+    (move) =>
+      means[move].mean +
+      explorationConstant * Math.sqrt(logTotalCount / means[move].count),
+  )
+}
+
 function updateOpeningMoveMeans(
-  means: Record<string, {count: number; mean: number}>,
+  means: OpeningMoveMeans,
   result: SimulationResult,
 ) {
   for (const move of result.moves) {
@@ -73,7 +94,7 @@ function calculateOpeningMoveMeans(
 ) {
   const means = openingMoves.reduce(
     (acc, move) => ({...acc, [move]: {count: 0, mean: 0}}),
-    {} as Record<string, {count: number; mean: number}>,
+    {} as OpeningMoveMeans,
   )
 
   for (const result of simulationResults) {
@@ -90,6 +111,10 @@ function scoreSimulationResult(gs: GameState) {
 
 function pickSimulationMove(gs: GameState) {
   return getPossibleMoves(gs).next().value
+}
+
+function simulateWithOpeningMove(gs: GameState, openingMove: string) {
+  return simulate(gs.makeMoves([openingMove]), [openingMove])
 }
 
 function simulate(

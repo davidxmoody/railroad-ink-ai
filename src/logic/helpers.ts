@@ -189,3 +189,9 @@ export function rotateGrid<T extends TileString | OpenSlot>(
   }
   return newGrid
 }
+
+export function argmax<T>(list: T[], fn: (item: T) => number) {
+  return list
+    .map((item) => [item, fn(item)] as const)
+    .reduce((a, b) => (a[1] > b[1] ? a : b))[0]
+}
