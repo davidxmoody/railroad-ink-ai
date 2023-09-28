@@ -121,7 +121,7 @@ function calculateExitsScore(board: Board) {
     const networkValues = networkGrid.get(exitP)
     if (!networkValues) throw new Error("Could not find network values")
 
-    const isVerticalExit = exitSlot[1] === "_" && exitSlot[3] === "_"
+    const isVerticalExit = exitSlot[1] === "." && exitSlot[3] === "."
     const exitNetworkId = isVerticalExit
       ? networkValues.vertical
       : networkValues.horizontal

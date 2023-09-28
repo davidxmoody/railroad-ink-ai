@@ -2,6 +2,16 @@ import {describe, test, expect} from "vitest"
 import {Board} from "./Board"
 import calculateScore from "./calculateScore"
 import type {TileString} from "./types"
+import {parseMove} from "./helpers"
+
+function generateBoardFromMoves(moves: string[]) {
+  let board = new Board()
+  for (const move of moves) {
+    const {p, tile} = parseMove(move)
+    board = board.set(p, tile)
+  }
+  return board
+}
 
 function generateBoard(
   placements: Array<{y: number; x: number; tile: TileString}>,
@@ -234,6 +244,45 @@ describe("scoring", () => {
 
       expect(calculateScore(board)).toMatchObject({
         exits: 32,
+      })
+    })
+
+    test("another complex full game", () => {
+      const board = generateBoardFromMoves([
+        "30__LD",
+        "50L_LL",
+        "40L_L_",
+        "60LL_L",
+        "61__DL",
+        "36DD_D",
+        "35_D_D",
+        "10_L_L",
+        "34LDLDo",
+        "24__LL",
+        "33_D_D",
+        "44L__L",
+        "11D__L",
+        "01DDD_",
+        "43_L_L",
+        "23_L_L",
+        "16DLDD",
+        "26DLDLo",
+        "15DD__",
+        "42LL__",
+        "22_L_L",
+        "05DDDD",
+        "03LDLDo",
+        "04_D_D",
+        "32DD__",
+        "06__DD",
+        "02DD_D",
+        "56_L_D",
+        "55_DD_",
+        "65D_D_",
+      ])
+
+      expect(calculateScore(board)).toMatchObject({
+        exits: 28,
       })
     })
   })
