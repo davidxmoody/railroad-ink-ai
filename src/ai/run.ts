@@ -3,7 +3,7 @@ import GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import {rollGameDice} from "../logic/dice"
 import {solveRound} from "./monteCarlo"
-import type {GameRecord} from "./types"
+import type {GameRecord} from "../logic/types"
 import {getMean, getStandardDeviation} from "../logic/helpers"
 
 const numThreads = 6 as number

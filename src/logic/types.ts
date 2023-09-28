@@ -25,3 +25,9 @@ export type Transform = {flip?: boolean; rotation?: Rotation}
 export type Position = {y: number; x: number}
 
 export type TrackPosition = Position & {t: TrackType}
+
+export interface GameRecord {
+  seed: string
+  score: number
+  moves: string[][]
+}

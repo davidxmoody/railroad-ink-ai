@@ -119,7 +119,7 @@
   }
 
   async function solveRoundNow() {
-    const moves = await solveRound(gameState)
+    const moves = solveRound(gameState)
     gameState = gameState
       .makeMoves(moves)
       .endRound(gameDice[gameState.roundNumber])
