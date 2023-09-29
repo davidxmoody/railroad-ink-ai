@@ -122,14 +122,13 @@ function simulate(
 }
 
 function* getPossibleMoves(gs: GameState): Generator<string> {
-  const openPositions = shuffle(gs.board.openPositions)
+  const openSlots = shuffle([...gs.board.openSlotEntries()])
   const availableTiles = shuffle(gs.availableTiles)
 
-  for (const p of openPositions) {
+  for (const [p, slot] of openSlots) {
     for (const {tile, special} of availableTiles) {
       if (special && gs.roundNumber <= 4) continue
 
-      const slot = gs.board.getOpenSlot(p)!
       for (const tTile of shuffle(getMeaningfulPlacements(tile, slot))) {
         yield `${p.y}${p.x}${tTile}`
       }

@@ -176,10 +176,4 @@ export class Board {
       })
       .join("") as OpenSlot
   }
-
-  public get openPositions() {
-    const ps: Position[] = []
-    this.openSlots.forEach((p) => ps.push(p))
-    return ps
-  }
 }
