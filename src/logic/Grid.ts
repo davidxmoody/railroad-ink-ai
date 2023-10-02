@@ -49,6 +49,10 @@ export class Grid<T> {
     }
   }
 
+  public keys() {
+    return [...this.entries()].map(([p]) => p)
+  }
+
   public clone() {
     return new Grid([...this.data])
   }

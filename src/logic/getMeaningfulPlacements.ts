@@ -6,10 +6,7 @@ import {
   type TileString,
 } from "./types"
 
-export default function getMeaningfulPlacements(
-  tile: TileString,
-  slot: OpenSlot,
-) {
+export default (tile: TileString, slot: OpenSlot) => {
   const placements = getAllTransformedTiles(tile)
     .map((tTile) => {
       let numMatches = 0

@@ -53,24 +53,41 @@ export function flipTile(tile: TileString) {
   }` as TileString
 }
 
-const transformedTileCache: Partial<Record<TileString, TileString[]>> = {}
+export function memo1<A extends string, T>(fn: (arg: A) => T): (arg: A) => T {
+  const cache = {} as Record<A, T>
+  return (arg: A) => {
+    if (!(arg in cache)) {
+      cache[arg] = fn(arg)
+      // console.log("cache miss")
+    }
+    return cache[arg]
+  }
+}
 
-export function getAllTransformedTiles(tile: TileString) {
-  const cachedValue = transformedTileCache[tile]
-  if (cachedValue) return cachedValue
+export function memo2<A1 extends string, A2 extends string, T>(
+  fn: (arg1: A1, arg2: A2) => T,
+): (arg1: A1, arg2: A2) => T {
+  const cache = {} as Record<A1, Record<A2, T>>
+  return (arg1: A1, arg2: A2) => {
+    if (!(arg1 in cache) || !(arg2 in cache[arg1])) {
+      if (!(arg1 in cache)) cache[arg1] = {} as Record<A2, T>
+      cache[arg1][arg2] = fn(arg1, arg2)
+      console.log("cache miss", arg1, arg2)
+    }
+    return cache[arg1][arg2]
+  }
+}
 
+export const getAllTransformedTiles = memo1((tile: TileString) => {
   const results: TileString[] = []
-
   for (const rotation of rotations) {
     for (const flip of [false, true]) {
       const tTile = transformTile(tile, {rotation, flip})
       if (!results.includes(tTile)) results.push(tTile)
     }
   }
-
-  transformedTileCache[tile] = results
   return results
-}
+})
 
 export function transformTile(tile: TileString, transform: Transform) {
   const rotated = rotateTile(tile, transform.rotation ?? 0)

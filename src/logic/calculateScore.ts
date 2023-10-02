@@ -145,12 +145,25 @@ function getConnectionKey(p1: Position, p2: Position) {
 }
 
 function calculateLongestRouteScore(board: Board, trackType: TrackType) {
+  return trackType === ConnectionType.RAIL
+    ? board.railNetwork.getLongestRoute()
+    : board.roadNetwork.getLongestRoute()
+
   let longestRoute = 0
 
   const nodes: Array<{
     p: Position
     c: Array<{p: Position; d: number; k: string}>
   }> = []
+
+  // TODO rewrite this to progressively build the node network as each new tile
+  // is added (rather than building then shrinking)
+  // TODO then once that's done try caching the result in the board as it's
+  // built up
+  //
+  // Idea: iterate over junctions, if all paths or all paths but one are dead
+  // ends then prune off the shortest dead ends until only two paths remain,
+  // then prune self
 
   board.forEachTile((p, tile) => {
     if (hasTrackType(tile, trackType)) {
@@ -203,6 +216,15 @@ function calculateLongestRouteScore(board: Board, trackType: TrackType) {
     )
   }
 
+  // const longestRouteV2 =
+  //   trackType === ConnectionType.RAIL
+  //     ? board.railNetwork.getLongestRoute()
+  //     : board.roadNetwork.getLongestRoute()
+
+  // if (longestRoute !== longestRouteV2) {
+  //   console.log("MISSMATCH in longest routes", longestRoute, longestRouteV2)
+  // }
+
   return longestRoute
 }
 
@@ -213,6 +235,7 @@ function traverseAllRoutes(
   routeLength = 0,
   visitedConnections: Record<string, boolean> = {},
 ) {
+  // TODO could maybe call only if no children
   onRouteLength(routeLength + 1)
 
   for (const nextC of nodes[p.y * Board.size + p.x].c) {
@@ -223,5 +246,66 @@ function traverseAllRoutes(
       ...visitedConnections,
       [nextC.k]: true,
     })
+  }
+}
+
+export function printNodes(board: Board, trackType: TrackType) {
+  const nodes: Array<{
+    p: Position
+    c: Array<{p: Position; d: number; k: string}>
+  }> = []
+
+  board.forEachTile((p, tile) => {
+    if (hasTrackType(tile, trackType)) {
+      nodes[p.y * Board.size + p.x] = {
+        p,
+        c: board
+          .getConnectedTiles({...p, t: trackType}, trackType)
+          .map((pc) => ({p: pc, d: 1, k: getConnectionKey(p, pc)})),
+      }
+    }
+  })
+
+  for (const node of nodes) {
+    if (node && node.c.length === 2) {
+      const left = nodes[node.c[0].p.y * Board.size + node.c[0].p.x]
+      const right = nodes[node.c[1].p.y * Board.size + node.c[1].p.x]
+
+      if (pEqual(node.p, left.p) || pEqual(node.p, right.p)) {
+        continue
+      }
+
+      delete nodes[node.p.y * Board.size + node.p.x]
+
+      const key = node.c[0].k
+      const newD = node.c[0].d + node.c[1].d
+
+      left.c = left.c.map((leftC) => {
+        if (pEqual(node.p, leftC.p)) {
+          return {p: right.p, d: newD, k: key}
+        }
+        return leftC
+      })
+
+      right.c = right.c.map((rightC) => {
+        if (pEqual(node.p, rightC.p)) {
+          return {p: left.p, d: newD, k: key}
+        }
+        return rightC
+      })
+    }
+  }
+
+  console.log("Nodes for track type", trackType)
+  for (let y = 0; y < 7; y++) {
+    for (let x = 0; x < 7; x++) {
+      if (nodes[y * 7 + x]) {
+        console.log(
+          `${y}${x}: ${nodes[y * 7 + x].c
+            .map((c) => `${c.p.y}${c.p.x}_${c.d}_${c.k}`)
+            .join(" ")}`,
+        )
+      }
+    }
   }
 }

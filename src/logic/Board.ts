@@ -17,6 +17,7 @@ import {
   getAllTransformedTiles,
 } from "./helpers"
 import {Grid} from "./Grid"
+import TrackNetwork from "./TrackNetwork"
 
 export class Board {
   public static readonly size = Grid.size
@@ -39,12 +40,21 @@ export class Board {
   private tiles: Grid<TileString>
   private openSlots: Grid<OpenSlot>
 
+  public readonly railNetwork: TrackNetwork
+  public readonly roadNetwork: TrackNetwork
+
   public constructor(data?: {
     tiles: Grid<TileString>
     openSlots: Grid<OpenSlot>
+    railNetwork: TrackNetwork
+    roadNetwork: TrackNetwork
   }) {
     this.tiles = data?.tiles ?? Grid.fromList([])
     this.openSlots = data?.openSlots ?? Board.exitSlots
+    this.railNetwork =
+      data?.railNetwork ?? new TrackNetwork(ConnectionType.RAIL)
+    this.roadNetwork =
+      data?.roadNetwork ?? new TrackNetwork(ConnectionType.ROAD)
   }
 
   public get(p: Position) {
@@ -162,7 +172,10 @@ export class Board {
       }
     }
 
-    return new Board({tiles, openSlots})
+    const railNetwork = this.railNetwork.update(p, tile, tiles)
+    const roadNetwork = this.roadNetwork.update(p, tile, tiles)
+
+    return new Board({tiles, openSlots, railNetwork, roadNetwork})
   }
 
   private calculateSlot(p: Position) {
