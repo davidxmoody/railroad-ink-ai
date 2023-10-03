@@ -9,9 +9,9 @@ type SimulationResult = {moves: string[]; score: number}
 type OpeningMoveMeans = Record<string, {count: number; mean: number}>
 
 export function solveRound(gs: GameState) {
-  if (gs.roundNumber === 7) {
-    return exhaustiveSearch(gs)
-  }
+  // if (gs.roundNumber === 7) {
+  //   return exhaustiveSearch(gs)
+  // }
 
   const moves: string[] = []
 
@@ -32,7 +32,7 @@ export function solveRound(gs: GameState) {
       }
     }
 
-    for (let i = 0; i < 4000; i++) {
+    for (let i = 0; i < 2000; i++) {
       const openingMove = argmax(
         openingMoves,
         (move) => openingMoveMeans[move].mean,

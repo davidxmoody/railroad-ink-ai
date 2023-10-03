@@ -10,6 +10,7 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test": "vitest",
     "ai-run": "node --no-warnings --loader ts-node/esm --es-module-specifier-resolution=node src/ai/run.ts",
+    "ai-run-inspect": "node --inspect --no-warnings --loader ts-node/esm --es-module-specifier-resolution=node src/ai/run.ts",
     "lint": "prettier --plugin-search-dir . --check . && eslint .",
     "format": "prettier --plugin-search-dir . --write ."
   },

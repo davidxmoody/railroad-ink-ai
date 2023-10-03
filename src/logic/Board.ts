@@ -61,6 +61,10 @@ export class Board {
     return this.tiles.get(p)
   }
 
+  public tileEntries() {
+    return this.tiles.entries()
+  }
+
   public getOpenSlot(p: Position) {
     return this.openSlots.get(p)
   }

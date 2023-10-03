@@ -11,8 +11,8 @@ import {ConnectionType, type Position, type TrackType} from "./types"
 
 export default function calculateScore(board: Board) {
   const exits = calculateExitsScore(board)
-  const road = calculateLongestRouteScore(board, ConnectionType.ROAD)
-  const rail = calculateLongestRouteScore(board, ConnectionType.RAIL)
+  const road = calculateLongestRouteScoreV2(board, ConnectionType.ROAD)
+  const rail = calculateLongestRouteScoreV2(board, ConnectionType.RAIL)
   const center = calculateCenterScore(board)
   const errors = calculateErrorsScore(board)
   const total = exits + road + rail + center + errors
@@ -144,10 +144,103 @@ function getConnectionKey(p1: Position, p2: Position) {
     : `${p2.y},${p2.x}-${p1.y},${p1.x}`
 }
 
+function calculateLongestRouteScoreV2(board: Board, trackType: TrackType) {
+  const network = Array.from(
+    {length: Board.size * Board.size},
+    () => [] as Array<{i: number; c: number}>,
+  )
+
+  let numConnections = 0
+
+  for (let y = 0; y < Board.size; y++) {
+    for (let x = 0; x < Board.size; x++) {
+      const tileI = y * Board.size + x
+      const tile = board.get({y, x})
+
+      if (tile?.[1] === trackType && x < Board.size - 1) {
+        const eastTileI = y * Board.size + x + 1
+        const eastTile = board.get({y, x: x + 1})
+        if (eastTile?.[3] === trackType) {
+          const c = 1 << numConnections++
+          network[tileI].push({i: eastTileI, c})
+          network[eastTileI].push({i: tileI, c})
+        }
+      }
+
+      if (tile?.[2] === trackType && y < Board.size - 1) {
+        const southTileI = (y + 1) * Board.size + x
+        const southTile = board.get({y: y + 1, x: x})
+        if (southTile?.[0] === trackType) {
+          const c = 1 << numConnections++
+          network[tileI].push({i: southTileI, c})
+          network[southTileI].push({i: tileI, c})
+        }
+      }
+    }
+  }
+
+  if (numConnections === 0) {
+    return boardContainsTrackType(board, trackType) ? 1 : 0
+  }
+
+  let longestPathLength = 0
+  let examinedPathSegments = 0
+
+  function onPath(path: number) {
+    const pathLength = getPathLength(path)
+    if (pathLength > longestPathLength) longestPathLength = pathLength
+    examinedPathSegments = examinedPathSegments | path
+  }
+
+  for (let i = 0; i < network.length; i++) {
+    if (network[i].length === 0 || network[i].length === 2) continue
+    allPaths(onPath, network, i)
+  }
+
+  while (examinedPathSegments !== (1 << numConnections) - 1) {
+    const closedLoopI = network.findIndex((steps) =>
+      steps.some((step) => (examinedPathSegments & step.c) === 0),
+    )
+    allPaths(onPath, network, closedLoopI)
+  }
+
+  return longestPathLength
+}
+
+function boardContainsTrackType(board: Board, trackType: TrackType) {
+  for (const [, tile] of board.tileEntries()) {
+    if (hasTrackType(tile, trackType)) return true
+  }
+  return false
+}
+
+function getPathLength(path: number): number {
+  if (path === 0) return 1
+  return (path & 1) + getPathLength(path >> 1)
+}
+
+function allPaths(
+  onPath: (path: number) => void,
+  network: Array<Array<{i: number; c: number}>>,
+  i: number,
+  path = 0,
+) {
+  const nextSteps = network[i].filter((step) => (path & step.c) === 0)
+
+  if (nextSteps.length === 0) {
+    onPath(path)
+  } else {
+    for (const step of nextSteps) {
+      allPaths(onPath, network, step.i, path | step.c)
+    }
+  }
+}
+
 function calculateLongestRouteScore(board: Board, trackType: TrackType) {
-  return trackType === ConnectionType.RAIL
-    ? board.railNetwork.getLongestRoute()
-    : board.roadNetwork.getLongestRoute()
+  // return calculateLongestRouteScoreV2(board, trackType)
+  // return trackType === ConnectionType.RAIL
+  //   ? board.railNetwork.getLongestRoute()
+  //   : board.roadNetwork.getLongestRoute()
 
   let longestRoute = 0
 
@@ -216,14 +309,19 @@ function calculateLongestRouteScore(board: Board, trackType: TrackType) {
     )
   }
 
-  // const longestRouteV2 =
-  //   trackType === ConnectionType.RAIL
-  //     ? board.railNetwork.getLongestRoute()
-  //     : board.roadNetwork.getLongestRoute()
+  const longestRouteV2 = calculateLongestRouteScoreV2(board, trackType)
 
-  // if (longestRoute !== longestRouteV2) {
-  //   console.log("MISSMATCH in longest routes", longestRoute, longestRouteV2)
-  // }
+  if (longestRoute !== longestRouteV2) {
+    console.log("MISSMATCH in longest routes, logs follow", {
+      longestRoute,
+      longestRouteV2,
+    })
+    const r: Array<{p: Position; t: string}> = []
+    board.forEachTile((p, t) => {
+      r.push({p, t})
+    })
+    console.log(JSON.stringify(r))
+  }
 
   return longestRoute
 }
