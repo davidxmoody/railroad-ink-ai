@@ -6,6 +6,7 @@ import {
   type TileString,
 } from "./types"
 
+// TODO memoise again
 export default (tile: TileString, slot: OpenSlot) => {
   const placements = getAllTransformedTiles(tile)
     .map((tTile) => {

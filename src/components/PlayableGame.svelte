@@ -5,11 +5,11 @@
   import {Board} from "../logic/Board"
   import {rollGameDice, specialRouteTiles} from "../logic/dice"
   import {isCenterSquare} from "../logic/helpers"
-  import {ConnectionType, type Position, type TileString} from "../logic/types"
+  import type {Position, TileString} from "../logic/types"
   import DrawnExit from "./DrawnExit.svelte"
   import GameState from "../logic/GameState"
   import {solveRound} from "../ai/monteCarlo"
-  import calculateScore, {printNodes} from "../logic/calculateScore"
+  import calculateScore from "../logic/calculateScore"
 
   // TODO add an undo button
 
@@ -17,6 +17,15 @@
   const seed = `${Math.random()}`
   const gameDice = rollGameDice(seed)
   let gameState = new GameState(undefined, gameDice[0])
+
+  const ms = [
+    {p: {y: 3, x: 0}, t: "_D_D"},
+    {p: {y: 3, x: 6}, t: "_D_D"},
+  ] as const
+
+  for (const m of ms) {
+    gameState.board = gameState.board.set(m.p, m.t)
+  }
 
   const placements: string[] = []
 
@@ -123,8 +132,6 @@
     gameState = gameState
       .makeMoves(moves)
       .endRound(gameDice[gameState.roundNumber])
-    printNodes(gameState.board, ConnectionType.ROAD)
-    printNodes(gameState.board, ConnectionType.RAIL)
   }
 </script>
 
@@ -186,38 +193,6 @@
           <div class="cell" class:centerSquare={isCenterSquare({y, x})}>
             {#if gameState.board.get({y, x})}
               <DrawnTile tile={gameState.board.get({y, x})} />
-              {#if gameState.board.railNetwork.get({y, x})}
-                <div class="networkOverlay">
-                  {#each gameState.board.railNetwork.get({y, x}) ?? [] as c, r}
-                    {#if c}
-                      <div
-                        style:position="absolute"
-                        style:top="0"
-                        style:left="25px"
-                        style:width="10px"
-                        style:height="30px"
-                        style:border-radius="3px"
-                        style:background={c.type === "link" ? "red" : "purple"}
-                        style:transform-origin="bottom"
-                        style:transform={`rotate(${r * 90}deg)`}
-                        style:color="white"
-                        style:text-align="center"
-                      >
-                        {c.type === "link" ? c.d : ""}
-                      </div>
-                    {/if}
-                  {/each}
-                  <div
-                    style:position="absolute"
-                    style:top="20px"
-                    style:left="20px"
-                    style:width="20px"
-                    style:height="20px"
-                    style:border-radius="100%"
-                    style:background="red"
-                  />
-                </div>
-              {/if}
             {:else if selectionState.type === "tileSelected"}
               {#if gameState.board.isValidWithTransform({y, x}, selectionState.selectedTile)}
                 <button
@@ -297,15 +272,6 @@
     right: 0;
     border: 0;
     background-color: rgba(0, 200, 0, 0.3);
-  }
-
-  .networkOverlay {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    opacity: 0.7;
   }
 
   .cellButtonContainer {
