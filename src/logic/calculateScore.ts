@@ -1,6 +1,7 @@
 import {Board} from "./Board"
 import {Grid} from "./Grid"
 import {
+  argmax,
   hasOverpass,
   hasTrackType,
   isCenterSquare,
@@ -135,10 +136,12 @@ function calculateExitsScore(board: Board) {
   return exitsScore
 }
 
+type Network = Array<Array<{toI: number; path: number}>>
+
 function calculateLongestRouteScore(board: Board, trackType: TrackType) {
-  const network = Array.from(
+  const network: Network = Array.from(
     {length: Board.size * Board.size},
-    () => [] as Array<{i: number; c: number}>,
+    () => [],
   )
 
   let numConnections = 0
@@ -152,9 +155,9 @@ function calculateLongestRouteScore(board: Board, trackType: TrackType) {
         const eastTileI = y * Board.size + x + 1
         const eastTile = board.get({y, x: x + 1})
         if (eastTile?.[3] === trackType) {
-          const c = 1 << numConnections++
-          network[tileI].push({i: eastTileI, c})
-          network[eastTileI].push({i: tileI, c})
+          const path = 1 << numConnections++
+          network[tileI].push({toI: eastTileI, path})
+          network[eastTileI].push({toI: tileI, path})
         }
       }
 
@@ -162,9 +165,9 @@ function calculateLongestRouteScore(board: Board, trackType: TrackType) {
         const southTileI = (y + 1) * Board.size + x
         const southTile = board.get({y: y + 1, x: x})
         if (southTile?.[0] === trackType) {
-          const c = 1 << numConnections++
-          network[tileI].push({i: southTileI, c})
-          network[southTileI].push({i: tileI, c})
+          const path = 1 << numConnections++
+          network[tileI].push({toI: southTileI, path})
+          network[southTileI].push({toI: tileI, path})
         }
       }
     }
@@ -172,6 +175,62 @@ function calculateLongestRouteScore(board: Board, trackType: TrackType) {
 
   if (numConnections === 0) {
     return boardContainsTrackType(board, trackType) ? 1 : 0
+  }
+
+  for (let i = 0; i < network.length; i++) {
+    if (network[i].length === 2 && network[i][0].toI !== i) {
+      const [leftStep, rightStep] = network[i]
+      const joinedPath = leftStep.path | rightStep.path
+
+      const leftToRightStep = network[leftStep.toI].find(({toI}) => toI === i)!
+      leftToRightStep.toI = rightStep.toI
+      leftToRightStep.path = joinedPath
+
+      const rightToLeftStep = network[rightStep.toI].find(({toI}) => toI === i)!
+      rightToLeftStep.toI = leftStep.toI
+      rightToLeftStep.path = joinedPath
+
+      network[i] = []
+    }
+  }
+
+  for (let i = 0; i < network.length; i++) {
+    if (network[i].length === 3) {
+      const numNonDeadEnds = network[i].filter(
+        (step) => network[step.toI].length > 1,
+      ).length
+
+      if (numNonDeadEnds <= 1) {
+        const shortestStep = argmax(
+          network[i],
+          (step) => -1 * getPathLength(step.path),
+        )
+        if (network[shortestStep.toI].length === 1) {
+          network[shortestStep.toI] = []
+
+          // TODO refactor out and also call recursively on new neighbours
+
+          network[i] = network[i].filter((step) => step !== shortestStep)
+
+          const [leftStep, rightStep] = network[i]
+          const joinedPath = leftStep.path | rightStep.path
+
+          const leftToRightStep = network[leftStep.toI].find(
+            ({toI}) => toI === i,
+          )!
+          leftToRightStep.toI = rightStep.toI
+          leftToRightStep.path = joinedPath
+
+          const rightToLeftStep = network[rightStep.toI].find(
+            ({toI}) => toI === i,
+          )!
+          rightToLeftStep.toI = leftStep.toI
+          rightToLeftStep.path = joinedPath
+
+          network[i] = []
+        }
+      }
+    }
   }
 
   let longestPathLength = 0
@@ -184,15 +243,8 @@ function calculateLongestRouteScore(board: Board, trackType: TrackType) {
   }
 
   for (let i = 0; i < network.length; i++) {
-    if (network[i].length === 0 || network[i].length === 2) continue
+    if (network[i].length === 0) continue
     allPaths(onPath, network, i)
-  }
-
-  while (examinedPathSegments !== (1 << numConnections) - 1) {
-    const closedLoopI = network.findIndex((steps) =>
-      steps.some((step) => (examinedPathSegments & step.c) === 0),
-    )
-    allPaths(onPath, network, closedLoopI)
   }
 
   return longestPathLength
@@ -212,17 +264,17 @@ function getPathLength(path: number): number {
 
 function allPaths(
   onPath: (path: number) => void,
-  network: Array<Array<{i: number; c: number}>>,
-  i: number,
+  network: Network,
+  currentI: number,
   path = 0,
 ) {
-  const nextSteps = network[i].filter((step) => (path & step.c) === 0)
+  const nextSteps = network[currentI].filter((step) => (path & step.path) === 0)
 
   if (nextSteps.length === 0) {
     onPath(path)
   } else {
     for (const step of nextSteps) {
-      allPaths(onPath, network, step.i, path | step.c)
+      allPaths(onPath, network, step.toI, path | step.path)
     }
   }
 }
