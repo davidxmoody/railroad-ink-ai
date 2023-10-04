@@ -39,18 +39,21 @@ export class Grid<T> {
     }
   }
 
-  public *entries() {
-    for (let y = 0; y < Grid.size; y++) {
-      for (let x = 0; x < Grid.size; x++) {
-        const position = {y, x}
-        const value = this.get(position)
-        if (value !== undefined) yield [position, value] as const
+  public entries() {
+    const entries: Array<[Position, T]> = []
+
+    for (let i = 0; i < Grid.size * Grid.size; i++) {
+      const value: T | undefined = this.data[i]
+      if (value !== undefined) {
+        const position: Position = {
+          y: Math.floor(i / Grid.size),
+          x: i % Grid.size,
+        }
+        entries.push([position, value])
       }
     }
-  }
 
-  public keys() {
-    return [...this.entries()].map(([p]) => p)
+    return entries
   }
 
   public clone() {

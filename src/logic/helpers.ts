@@ -58,7 +58,6 @@ export function memo1<A extends string, T>(fn: (arg: A) => T): (arg: A) => T {
   return (arg: A) => {
     if (!(arg in cache)) {
       cache[arg] = fn(arg)
-      // console.log("cache miss")
     }
     return cache[arg]
   }
@@ -72,7 +71,6 @@ export function memo2<A1 extends string, A2 extends string, T>(
     if (!(arg1 in cache) || !(arg2 in cache[arg1])) {
       if (!(arg1 in cache)) cache[arg1] = {} as Record<A2, T>
       cache[arg1][arg2] = fn(arg1, arg2)
-      console.log("cache miss", arg1, arg2)
     }
     return cache[arg1][arg2]
   }

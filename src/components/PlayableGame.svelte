@@ -18,15 +18,6 @@
   const gameDice = rollGameDice(seed)
   let gameState = new GameState(undefined, gameDice[0])
 
-  const ms = [
-    {p: {y: 3, x: 0}, t: "_D_D"},
-    {p: {y: 3, x: 6}, t: "_D_D"},
-  ] as const
-
-  for (const m of ms) {
-    gameState.board = gameState.board.set(m.p, m.t)
-  }
-
   const placements: string[] = []
 
   type SelectionState =

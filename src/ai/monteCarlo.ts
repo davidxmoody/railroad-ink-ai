@@ -9,16 +9,16 @@ type SimulationResult = {moves: string[]; score: number}
 type OpeningMoveMeans = Record<string, {count: number; mean: number}>
 
 export function solveRound(gs: GameState) {
-  // if (gs.roundNumber === 7) {
-  //   return exhaustiveSearch(gs)
-  // }
+  if (gs.roundNumber === 7) {
+    return exhaustiveSearch(gs)
+  }
 
   const moves: string[] = []
 
   let simulationResults: SimulationResult[] = []
 
   while (!gs.canEndRound) {
-    const openingMoves = [...getPossibleMoves(gs)]
+    const openingMoves = getPossibleMoves(gs)
     const openingMoveMeans = calculateOpeningMoveMeans(
       openingMoves,
       simulationResults,
@@ -32,7 +32,7 @@ export function solveRound(gs: GameState) {
       }
     }
 
-    for (let i = 0; i < 2000; i++) {
+    for (let i = 0; i < 4000; i++) {
       const openingMove = argmax(
         openingMoves,
         (move) => openingMoveMeans[move].mean,
@@ -94,10 +94,6 @@ function scoreSimulationResult(gs: GameState) {
   return s.exits + s.rail + s.road + s.center + 0.1 * s.errors
 }
 
-function pickSimulationMove(gs: GameState) {
-  return getPossibleMoves(gs).next().value
-}
-
 function simulateWithOpeningMove(gs: GameState, openingMove: string) {
   return simulate(gs.makeMoves([openingMove]), [openingMove])
 }
@@ -111,7 +107,7 @@ function simulate(
     return {moves, score: scoreSimulationResult(gs)}
   }
 
-  const move = pickSimulationMove(gs)
+  const move = getRandomMove(gs)
 
   if (move) {
     const newMoves = roundEndedOnce ? moves : [...moves, move]
@@ -121,8 +117,10 @@ function simulate(
   return simulate(gs.endRound(), moves, true)
 }
 
-function* getPossibleMoves(gs: GameState): Generator<string> {
-  const openSlots = shuffle([...gs.board.openSlotEntries()])
+function getPossibleMoves(gs: GameState) {
+  const moves: string[] = []
+
+  const openSlots = shuffle(gs.board.openSlotEntries())
   const availableTiles = shuffle(gs.availableTiles)
 
   for (const [p, slot] of openSlots) {
@@ -130,7 +128,24 @@ function* getPossibleMoves(gs: GameState): Generator<string> {
       if (special && gs.roundNumber <= 4) continue
 
       for (const tTile of shuffle(getMeaningfulPlacements(tile, slot))) {
-        yield `${p.y}${p.x}${tTile}`
+        moves.push(`${p.y}${p.x}${tTile}`)
+      }
+    }
+  }
+
+  return moves
+}
+
+function getRandomMove(gs: GameState) {
+  const openSlots = shuffle(gs.board.openSlotEntries())
+  const availableTiles = shuffle(gs.availableTiles)
+
+  for (const [p, slot] of openSlots) {
+    for (const {tile, special} of availableTiles) {
+      if (special && gs.roundNumber <= 4) continue
+
+      for (const tTile of shuffle(getMeaningfulPlacements(tile, slot))) {
+        return `${p.y}${p.x}${tTile}`
       }
     }
   }

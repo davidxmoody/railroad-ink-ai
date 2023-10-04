@@ -1,4 +1,4 @@
-import {getAllTransformedTiles, rotations} from "./helpers"
+import {getAllTransformedTiles, rotations, memo2} from "./helpers"
 import {
   ConnectionType,
   type MaybeTrackType,
@@ -6,8 +6,7 @@ import {
   type TileString,
 } from "./types"
 
-// TODO memoise again
-export default (tile: TileString, slot: OpenSlot) => {
+export default memo2((tile: TileString, slot: OpenSlot) => {
   const placements = getAllTransformedTiles(tile)
     .map((tTile) => {
       let numMatches = 0
@@ -61,4 +60,4 @@ export default (tile: TileString, slot: OpenSlot) => {
       return !hasStrictlyBetterPlacement
     })
     .map(({tTile}) => tTile)
-}
+})

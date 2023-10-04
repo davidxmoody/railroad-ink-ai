@@ -1,26 +1,26 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {randomPick, shuffle} from "../logic/helpers"
+
+// TODO use argmax function here
 
 export default function exhaustiveSearch(gs: GameState) {
-  let bestMoves: string[][] = []
+  let bestMoves: string[] = []
   let bestScore = -Infinity
 
   for (const [endGs, endMoves] of visitAllStates(gs, [], new Set())) {
     const endScore = calculateScore(endGs.board).total
     if (endScore > bestScore) {
       bestScore = endScore
-      bestMoves = [endMoves]
-    } else if (endScore === bestScore) {
-      bestMoves.push(endMoves)
+      bestMoves = endMoves
     }
   }
 
-  if (bestMoves.length === 0) throw new Error("Could not find best GameState")
-
-  return randomPick(bestMoves)
+  return bestMoves
 }
+
+// TODO remove generator and unnecessary shuffling (bias was caused by
+// a different bug and isn't important any more)
 
 function* visitAllStates(
   gs: GameState,
@@ -31,7 +31,7 @@ function* visitAllStates(
     yield [gs, moves]
   }
 
-  for (const move of shuffle([...getPossibleMoves(gs)])) {
+  for (const move of getPossibleMoves(gs)) {
     const newMoves = [...moves, move]
     const key = [...newMoves].sort().join("")
     if (encounteredStates.has(key)) continue
