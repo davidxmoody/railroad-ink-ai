@@ -41,24 +41,17 @@ export default class GameState {
     )
   }
 
-  public get availableTiles() {
-    return [
-      ...this.roundTiles
-        .map((tile, index) => ({special: false, index, tile}))
-        .filter(({index}) => !this.usedTileIndexes.includes(index))
-        .filter(
-          (item, index, list) =>
-            index === list.findIndex((item2) => item.tile === item2.tile),
-        ),
+  public get availableSpecialTiles() {
+    if (!this.canUseSpecialTile) return []
+    return specialRouteTiles.filter(
+      (_, i) => !this.usedSpecialTileIndexes.includes(i),
+    )
+  }
 
-      ...specialRouteTiles
-        .map((tile, index) => ({special: true, index, tile}))
-        .filter(
-          ({index}) =>
-            this.canUseSpecialTile &&
-            !this.usedSpecialTileIndexes.includes(index),
-        ),
-    ]
+  public get availableTiles() {
+    return this.roundTiles
+      .filter((_, i) => !this.usedTileIndexes.includes(i))
+      .filter((tile, i, list) => i === list.indexOf(tile))
   }
 
   public placeTile(
@@ -109,11 +102,13 @@ export default class GameState {
     throw new Error("Could not find tile to place")
   }
 
+  public makeMove(move: string) {
+    const {p, tile} = parseMove(move)
+    return this.placeTile(p, tile)
+  }
+
   public makeMoves(moves: string[]) {
-    return moves.reduce((gs, move) => {
-      const {p, tile} = parseMove(move)
-      return gs.placeTile(p, tile)
-    }, this as GameState)
+    return moves.reduce((gs, move) => gs.makeMove(move), this as GameState)
   }
 
   public get canEndRound() {

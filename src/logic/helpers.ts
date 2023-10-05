@@ -166,6 +166,10 @@ export function parseMove(move: string) {
   return {p: {y, x}, tile}
 }
 
+export function encodeMove(p: Position, t: TileString) {
+  return `${p.y}${p.x}${t}`
+}
+
 export function argmax<T>(list: T[], fn: (item: T) => number) {
   return list
     .map((item) => [item, fn(item)] as const)

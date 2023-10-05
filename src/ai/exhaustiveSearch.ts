@@ -1,6 +1,7 @@
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
+import {encodeMove} from "../logic/helpers"
 
 export default function exhaustiveSearch(gs: GameState) {
   let bestMoves: string[] = []
@@ -31,17 +32,21 @@ function* visitAllStates(
     const key = [...newMoves].sort().join("")
     if (encounteredStates.has(key)) continue
     encounteredStates.add(key)
-    yield* visitAllStates(gs.makeMoves([move]), newMoves, encounteredStates)
+    yield* visitAllStates(gs.makeMove(move), newMoves, encounteredStates)
   }
 }
 
 function* getPossibleMoves(gs: GameState): Generator<string> {
-  for (const {tile, special} of gs.availableTiles) {
-    if (special && gs.usedTileIndexes.length !== 1) continue
+  const tiles = gs.availableTiles
 
-    for (const [p, slot] of gs.board.openSlotEntries()) {
+  if (gs.usedTileIndexes.length === 1 && gs.canUseSpecialTile) {
+    tiles.push(...gs.availableSpecialTiles)
+  }
+
+  for (const [p, slot] of gs.board.openSlotEntries()) {
+    for (const tile of tiles) {
       for (const tTile of getMeaningfulPlacements(tile, slot)) {
-        yield `${p.y}${p.x}${tTile}`
+        yield encodeMove(p, tTile)
       }
     }
   }

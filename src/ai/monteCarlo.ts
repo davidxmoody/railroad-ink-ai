@@ -1,7 +1,8 @@
+import type {Board} from "../logic/Board"
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {argmax, shuffle} from "../logic/helpers"
+import {argmax, encodeMove, shuffle} from "../logic/helpers"
 import exhaustiveSearch from "./exhaustiveSearch"
 
 type SimulationResult = {moves: string[]; score: number}
@@ -48,7 +49,7 @@ export function solveRound(gs: GameState) {
     )
 
     moves.push(bestOpeningMove)
-    gs = gs.makeMoves([bestOpeningMove])
+    gs = gs.makeMove(bestOpeningMove)
     simulationResults = simulationResults.filter((r) =>
       r.moves.includes(bestOpeningMove),
     )
@@ -111,24 +112,28 @@ function simulate(
 
   if (move) {
     const newMoves = roundEndedOnce ? moves : [...moves, move]
-    return simulate(gs.makeMoves([move]), newMoves, roundEndedOnce)
+    return simulate(gs.makeMove(move), newMoves, roundEndedOnce)
   }
 
   return simulate(gs.endRound(), moves, true)
 }
 
+// TODO see if performance improves if special tiles are forced in certain rounds
+
 function getPossibleMoves(gs: GameState) {
   const moves: string[] = []
 
-  const openSlots = shuffle(gs.board.openSlotEntries())
-  const availableTiles = shuffle(gs.availableTiles)
+  const openSlots = gs.board.openSlotEntries()
+
+  const tiles = gs.availableTiles
+  if (shouldUseSpecial(gs)) {
+    tiles.push(...gs.availableSpecialTiles)
+  }
 
   for (const [p, slot] of openSlots) {
-    for (const {tile, special} of availableTiles) {
-      if (special && gs.roundNumber <= 4) continue
-
-      for (const tTile of shuffle(getMeaningfulPlacements(tile, slot))) {
-        moves.push(`${p.y}${p.x}${tTile}`)
+    for (const tile of tiles) {
+      for (const tTile of getMeaningfulPlacements(tile, slot)) {
+        moves.push(encodeMove(p, tTile))
       }
     }
   }
@@ -138,15 +143,26 @@ function getPossibleMoves(gs: GameState) {
 
 function getRandomMove(gs: GameState) {
   const openSlots = shuffle(gs.board.openSlotEntries())
-  const availableTiles = shuffle(gs.availableTiles)
+
+  let tiles = gs.availableTiles
+  if (shouldUseSpecial(gs)) {
+    tiles.push(...gs.availableSpecialTiles)
+  }
+  tiles = shuffle(tiles)
 
   for (const [p, slot] of openSlots) {
-    for (const {tile, special} of availableTiles) {
-      if (special && gs.roundNumber <= 4) continue
-
+    for (const tile of tiles) {
       for (const tTile of shuffle(getMeaningfulPlacements(tile, slot))) {
-        return `${p.y}${p.x}${tTile}`
+        return encodeMove(p, tTile)
       }
     }
   }
+}
+
+function shouldUseSpecial(gs: GameState) {
+  return (
+    gs.roundNumber >= 5 &&
+    gs.usedTileIndexes.length === 1 &&
+    gs.canUseSpecialTile
+  )
 }
