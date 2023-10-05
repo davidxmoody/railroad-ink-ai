@@ -1,4 +1,3 @@
-import type {Board} from "../logic/Board"
 import type GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
@@ -19,7 +18,8 @@ export function solveRound(gs: GameState) {
   let simulationResults: SimulationResult[] = []
 
   while (!gs.canEndRound) {
-    const openingMoves = getPossibleMoves(gs)
+    const useSpecial = shouldUseSpecial(gs)
+    const openingMoves = getPossibleMoves(gs, useSpecial)
     const openingMoveMeans = calculateOpeningMoveMeans(
       openingMoves,
       simulationResults,
@@ -96,7 +96,7 @@ function scoreSimulationResult(gs: GameState) {
 }
 
 function simulateWithOpeningMove(gs: GameState, openingMove: string) {
-  return simulate(gs.makeMoves([openingMove]), [openingMove])
+  return simulate(gs.makeMove(openingMove), [openingMove])
 }
 
 function simulate(
@@ -108,7 +108,8 @@ function simulate(
     return {moves, score: scoreSimulationResult(gs)}
   }
 
-  const move = getRandomMove(gs)
+  const useSpecial = shouldUseSpecial(gs)
+  const move = getRandomMove(gs, useSpecial)
 
   if (move) {
     const newMoves = roundEndedOnce ? moves : [...moves, move]
@@ -118,17 +119,11 @@ function simulate(
   return simulate(gs.endRound(), moves, true)
 }
 
-// TODO see if performance improves if special tiles are forced in certain rounds
-
-function getPossibleMoves(gs: GameState) {
+function getPossibleMoves(gs: GameState, useSpecial: boolean) {
   const moves: string[] = []
 
   const openSlots = gs.board.openSlotEntries()
-
-  const tiles = gs.availableTiles
-  if (shouldUseSpecial(gs)) {
-    tiles.push(...gs.availableSpecialTiles)
-  }
+  const tiles = useSpecial ? gs.availableSpecialTiles : gs.availableTiles
 
   for (const [p, slot] of openSlots) {
     for (const tile of tiles) {
@@ -138,17 +133,16 @@ function getPossibleMoves(gs: GameState) {
     }
   }
 
+  if (useSpecial && moves.length === 0) return getPossibleMoves(gs, false)
+
   return moves
 }
 
-function getRandomMove(gs: GameState) {
+function getRandomMove(gs: GameState, useSpecial: boolean) {
   const openSlots = shuffle(gs.board.openSlotEntries())
-
-  let tiles = gs.availableTiles
-  if (shouldUseSpecial(gs)) {
-    tiles.push(...gs.availableSpecialTiles)
-  }
-  tiles = shuffle(tiles)
+  const tiles = shuffle(
+    useSpecial ? gs.availableSpecialTiles : gs.availableTiles,
+  )
 
   for (const [p, slot] of openSlots) {
     for (const tile of tiles) {
@@ -157,6 +151,8 @@ function getRandomMove(gs: GameState) {
       }
     }
   }
+
+  if (useSpecial) return getRandomMove(gs, false)
 }
 
 function shouldUseSpecial(gs: GameState) {
