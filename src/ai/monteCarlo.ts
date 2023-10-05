@@ -1,4 +1,4 @@
-import type GameState from "../logic/GameState"
+import GameState from "../logic/GameState"
 import calculateScore from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
 import {argmax, encodeMove, shuffle} from "../logic/helpers"
@@ -9,7 +9,7 @@ type SimulationResult = {moves: string[]; score: number}
 type OpeningMoveMeans = Record<string, {count: number; mean: number}>
 
 export function solveRound(gs: GameState) {
-  if (gs.roundNumber === 7) {
+  if (gs.roundNumber === GameState.numRounds) {
     return exhaustiveSearch(gs)
   }
 
@@ -18,8 +18,7 @@ export function solveRound(gs: GameState) {
   let simulationResults: SimulationResult[] = []
 
   while (!gs.canEndRound) {
-    const useSpecial = shouldUseSpecial(gs)
-    const openingMoves = getPossibleMoves(gs, useSpecial)
+    const openingMoves = getPossibleMoves(gs, shouldUseSpecial(gs))
     const openingMoveMeans = calculateOpeningMoveMeans(
       openingMoves,
       simulationResults,
@@ -27,7 +26,7 @@ export function solveRound(gs: GameState) {
 
     for (const openingMove of openingMoves) {
       for (let i = 0; i < 10; i++) {
-        const result = simulateWithOpeningMove(gs, openingMove)
+        const result = simulate(gs, openingMove)
         simulationResults.push(result)
         updateOpeningMoveMeans(openingMoveMeans, result)
       }
@@ -38,7 +37,7 @@ export function solveRound(gs: GameState) {
         openingMoves,
         (move) => openingMoveMeans[move].mean,
       )
-      const result = simulateWithOpeningMove(gs, openingMove)
+      const result = simulate(gs, openingMove)
       simulationResults.push(result)
       updateOpeningMoveMeans(openingMoveMeans, result)
     }
@@ -65,7 +64,7 @@ function updateOpeningMoveMeans(
   for (const move of result.moves) {
     if (means[move]) {
       const oldCount = means[move].count
-      const newCount = means[move].count + 1
+      const newCount = oldCount + 1
       const oldMean = means[move].mean
       const newMean = (oldMean * oldCount + result.score) / newCount
       means[move].mean = newMean
@@ -95,28 +94,23 @@ function scoreSimulationResult(gs: GameState) {
   return s.exits + s.rail + s.road + s.center + 0.1 * s.errors
 }
 
-function simulateWithOpeningMove(gs: GameState, openingMove: string) {
-  return simulate(gs.makeMove(openingMove), [openingMove])
-}
+function simulate(gs: GameState, openingMove: string): SimulationResult {
+  let inFirstSimulationRound = true
+  const moves = [openingMove]
+  gs = gs.makeMove(openingMove)
 
-function simulate(
-  gs: GameState,
-  moves: string[] = [],
-  roundEndedOnce = false,
-): SimulationResult {
-  if (gs.gameEnded) {
-    return {moves, score: scoreSimulationResult(gs)}
+  while (!gs.gameEnded) {
+    while (!gs.canEndRound) {
+      const move = getRandomMove(gs, shouldUseSpecial(gs))
+      if (!move) throw new Error("Could not find move for simulation")
+      gs = gs.makeMove(move)
+      if (inFirstSimulationRound) moves.push(move)
+    }
+    gs = gs.endRound()
+    inFirstSimulationRound = false
   }
 
-  const useSpecial = shouldUseSpecial(gs)
-  const move = getRandomMove(gs, useSpecial)
-
-  if (move) {
-    const newMoves = roundEndedOnce ? moves : [...moves, move]
-    return simulate(gs.makeMove(move), newMoves, roundEndedOnce)
-  }
-
-  return simulate(gs.endRound(), moves, true)
+  return {moves, score: scoreSimulationResult(gs)}
 }
 
 function getPossibleMoves(gs: GameState, useSpecial: boolean) {
