@@ -89,13 +89,9 @@ function calculateOpeningMoveMeans(
   return means
 }
 
-function scoreSimulationResult(gs: GameState) {
-  const s = calculateScore(gs.board)
-  return s.exits + s.rail + s.road + s.center + 0.1 * s.errors
-}
-
 function simulate(gs: GameState, openingMove: string): SimulationResult {
   let inFirstSimulationRound = true
+  let firstRoundUnfixableErrors = 0
   const moves = [openingMove]
   gs = gs.makeMove(openingMove)
 
@@ -104,13 +100,21 @@ function simulate(gs: GameState, openingMove: string): SimulationResult {
       const move = getRandomMove(gs, shouldUseSpecial(gs))
       if (!move) throw new Error("Could not find move for simulation")
       gs = gs.makeMove(move)
-      if (inFirstSimulationRound) moves.push(move)
+      if (inFirstSimulationRound) {
+        moves.push(move)
+      }
     }
     gs = gs.endRound()
-    inFirstSimulationRound = false
+    if (inFirstSimulationRound) {
+      firstRoundUnfixableErrors = gs.board.countErrors().unfixable
+      inFirstSimulationRound = false
+    }
   }
 
-  return {moves, score: scoreSimulationResult(gs)}
+  const s = calculateScore(gs.board)
+  const score = s.exits + s.rail + s.road + s.center - firstRoundUnfixableErrors
+
+  return {moves, score}
 }
 
 function getPossibleMoves(gs: GameState, useSpecial: boolean) {

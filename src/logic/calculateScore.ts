@@ -20,7 +20,7 @@ export default function calculateScore(board: Board) {
 }
 
 function calculateErrorsScore(board: Board) {
-  return -1 * board.countErrors() || 0
+  return -1 * board.countErrors().total || 0
 }
 
 function calculateCenterScore(board: Board) {

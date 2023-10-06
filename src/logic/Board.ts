@@ -68,20 +68,20 @@ export class Board {
   }
 
   public countErrors() {
-    // TODO see if this could be sped up by counting open slot connections
-    // minus exit connections...
-    let numErrors = 0
+    let total = 0
+    let unfixable = 0
     this.forEachTile(({y, x}, tile) => {
       for (const r of rotations) {
         if (tile[r] === "_") continue
-        const adjacent = step({y, x}, r)
-        if (!adjacent) continue
-        const adjacentTile = this.get(adjacent)
+        const adjacentP = step({y, x}, r)
+        if (!adjacentP) continue
+        const adjacentTile = this.get(adjacentP)
         if (adjacentTile && adjacentTile[flipRotation(r)] !== "_") continue
-        numErrors++
+        if (adjacentTile) unfixable++
+        total++
       }
     })
-    return numErrors
+    return {total, unfixable}
   }
 
   public isValid(p: Position, tile: TileString) {
