@@ -1,7 +1,13 @@
 import GameState from "../logic/GameState"
 import calculateScore, {calculateExitsScore} from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {argmax, encodeMove, shuffle} from "../logic/helpers"
+import {
+  argmax,
+  encodeMove,
+  parseMove,
+  rotations,
+  shuffle,
+} from "../logic/helpers"
 import exhaustiveSearch from "./exhaustiveSearch"
 
 type SimulationResult = {moves: string[]; score: number}
@@ -104,7 +110,12 @@ function simulate(gs: GameState, openingMove: string): SimulationResult {
 
   while (!gs.gameEnded) {
     while (!gs.canEndRound) {
-      const move = getRandomMove(gs, shouldUseSpecial(gs))!
+      const move1 = getRandomMove(gs, shouldUseSpecial(gs))!
+      const move2 = getRandomMove(gs, shouldUseSpecial(gs))!
+      const move3 = getRandomMove(gs, shouldUseSpecial(gs))!
+
+      const move = pickBestMove(gs, [move1, move2, move3])
+
       gs = gs.makeMove(move)
     }
     gs = gs.endRound()
@@ -120,6 +131,19 @@ function simulate(gs: GameState, openingMove: string): SimulationResult {
     firstRoundMaxExitsScoreable / 2
 
   return {moves, score}
+}
+
+function pickBestMove(gs: GameState, moves: string[]) {
+  return argmax(moves, (move) => {
+    const {p, tile} = parseMove(move)
+    const slot = gs.board.getOpenSlot(p)!
+    let numMatches = 0
+    for (const r of rotations) {
+      if ((tile[r] === "D" || tile[r] === "L") && tile[r] === slot[r])
+        numMatches++
+    }
+    return numMatches
+  })
 }
 
 function getPossibleMoves(gs: GameState, useSpecial: boolean) {
