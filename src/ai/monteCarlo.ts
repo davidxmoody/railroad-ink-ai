@@ -90,27 +90,24 @@ function calculateOpeningMoveMeans(
 }
 
 function simulate(gs: GameState, openingMove: string): SimulationResult {
-  let inFirstSimulationRound = true
-  let firstRoundUnfixableErrors = 0
-  let firstRoundMaxExitsScoreable = 0
   const moves = [openingMove]
   gs = gs.makeMove(openingMove)
 
+  while (!gs.canEndRound) {
+    const move = getRandomMove(gs, shouldUseSpecial(gs))!
+    moves.push(move)
+    gs = gs.makeMove(move)
+  }
+
+  const firstRoundUnfixableErrors = gs.board.countErrors().unfixable
+  const firstRoundMaxExitsScoreable = calculateExitsScore(gs.board, true)
+
   while (!gs.gameEnded) {
     while (!gs.canEndRound) {
-      const move = getRandomMove(gs, shouldUseSpecial(gs))
-      if (!move) throw new Error("Could not find move for simulation")
+      const move = getRandomMove(gs, shouldUseSpecial(gs))!
       gs = gs.makeMove(move)
-      if (inFirstSimulationRound) {
-        moves.push(move)
-      }
     }
     gs = gs.endRound()
-    if (inFirstSimulationRound) {
-      firstRoundUnfixableErrors = gs.board.countErrors().unfixable
-      firstRoundMaxExitsScoreable = calculateExitsScore(gs.board, true)
-      inFirstSimulationRound = false
-    }
   }
 
   const s = calculateScore(gs.board)
