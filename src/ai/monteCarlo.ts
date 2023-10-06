@@ -1,5 +1,5 @@
 import GameState from "../logic/GameState"
-import calculateScore from "../logic/calculateScore"
+import calculateScore, {calculateExitsScore} from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
 import {argmax, encodeMove, shuffle} from "../logic/helpers"
 import exhaustiveSearch from "./exhaustiveSearch"
@@ -92,6 +92,7 @@ function calculateOpeningMoveMeans(
 function simulate(gs: GameState, openingMove: string): SimulationResult {
   let inFirstSimulationRound = true
   let firstRoundUnfixableErrors = 0
+  let firstRoundMaxExitsScoreable = 0
   const moves = [openingMove]
   gs = gs.makeMove(openingMove)
 
@@ -107,12 +108,19 @@ function simulate(gs: GameState, openingMove: string): SimulationResult {
     gs = gs.endRound()
     if (inFirstSimulationRound) {
       firstRoundUnfixableErrors = gs.board.countErrors().unfixable
+      firstRoundMaxExitsScoreable = calculateExitsScore(gs.board, true)
       inFirstSimulationRound = false
     }
   }
 
   const s = calculateScore(gs.board)
-  const score = s.exits + s.rail + s.road + s.center - firstRoundUnfixableErrors
+  const score =
+    s.exits +
+    s.rail +
+    s.road +
+    s.center -
+    firstRoundUnfixableErrors +
+    firstRoundMaxExitsScoreable / 2
 
   return {moves, score}
 }

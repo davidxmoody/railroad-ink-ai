@@ -7,7 +7,7 @@ import {
   isCenterSquare,
   tileFitsInSlot,
 } from "./helpers"
-import {ConnectionType, type TrackType} from "./types"
+import {ConnectionType, type TileString, type TrackType} from "./types"
 
 export default function calculateScore(board: Board) {
   const exits = calculateExitsScore(board)
@@ -49,7 +49,21 @@ const exitScoringTable: Record<number, number | undefined> = {
   12: 45,
 }
 
-function calculateExitsScore(board: Board) {
+export function calculateExitsScore(
+  board: Board,
+  allowEmptyTileTravel = false,
+) {
+  if (allowEmptyTileTravel) {
+    let openSlots = board.openSlotEntries()
+    while (openSlots.length > 0) {
+      for (const [p, slot] of openSlots) {
+        const newTile = slot.replace(/[_.E]/g, "D") as TileString
+        board = board.set(p, newTile)
+      }
+      openSlots = board.openSlotEntries()
+    }
+  }
+
   const networkGrid = Grid.fromList<{horizontal: string; vertical: string}>([])
 
   board.forEachTile((p, tile) => {
