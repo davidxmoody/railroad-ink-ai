@@ -1,0 +1,32 @@
+{
+  "totalCounts": {
+    "yes": 78712,
+    "no": 1961072
+  },
+  "featureCounts": {
+    "yes": {
+      "errors1": 1871,
+      "errors2": 59,
+      "errors3": 3,
+      "match1": 53932,
+      "match2": 22386,
+      "match3": 2344,
+      "match4": 50,
+      "open1": 46703,
+      "open2": 14507,
+      "open3": 5050
+    },
+    "no": {
+      "errors1": 219208,
+      "errors2": 9839,
+      "errors3": 591,
+      "match1": 1787215,
+      "match2": 170095,
+      "match3": 3746,
+      "match4": 16,
+      "open1": 1014581,
+      "open2": 531163,
+      "open3": 300342
+    }
+  }
+}

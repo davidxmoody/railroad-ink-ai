@@ -9,6 +9,7 @@ import {
   shuffle,
 } from "../logic/helpers"
 import exhaustiveSearch from "./exhaustiveSearch"
+import getScore from "./naiveBayesMoveScore/getScore"
 
 type SimulationResult = {moves: string[]; score: number}
 
@@ -110,11 +111,15 @@ function simulate(gs: GameState, openingMove: string): SimulationResult {
 
   while (!gs.gameEnded) {
     while (!gs.canEndRound) {
-      const move1 = getRandomMove(gs, shouldUseSpecial(gs))!
-      const move2 = getRandomMove(gs, shouldUseSpecial(gs))!
-      const move3 = getRandomMove(gs, shouldUseSpecial(gs))!
-
-      const move = pickBestMove(gs, [move1, move2, move3])
+      const move = pickBestMove(gs, [
+        getRandomMove(gs, shouldUseSpecial(gs))!,
+        getRandomMove(gs, shouldUseSpecial(gs))!,
+        getRandomMove(gs, shouldUseSpecial(gs))!,
+        getRandomMove(gs, shouldUseSpecial(gs))!,
+        getRandomMove(gs, shouldUseSpecial(gs))!,
+        getRandomMove(gs, shouldUseSpecial(gs))!,
+        getRandomMove(gs, shouldUseSpecial(gs))!,
+      ])
 
       gs = gs.makeMove(move)
     }
@@ -137,16 +142,19 @@ function pickBestMove(gs: GameState, moves: string[]) {
   return argmax(moves, (move) => {
     const {p, tile} = parseMove(move)
     const slot = gs.board.getOpenSlot(p)!
-    let numMatches = 0
-    for (const r of rotations) {
-      if ((tile[r] === "D" || tile[r] === "L") && tile[r] === slot[r])
-        numMatches++
-    }
-    return numMatches
+    return getScore(p, tile, slot)
+    // const {p, tile} = parseMove(move)
+    // const slot = gs.board.getOpenSlot(p)!
+    // let numMatches = 0
+    // for (const r of rotations) {
+    //   if ((tile[r] === "D" || tile[r] === "L") && tile[r] === slot[r])
+    //     numMatches++
+    // }
+    // return numMatches
   })
 }
 
-function getPossibleMoves(gs: GameState, useSpecial: boolean) {
+export function getPossibleMoves(gs: GameState, useSpecial: boolean) {
   const moves: string[] = []
 
   const openSlots = gs.board.openSlotEntries()
@@ -182,7 +190,7 @@ function getRandomMove(gs: GameState, useSpecial: boolean) {
   if (useSpecial) return getRandomMove(gs, false)
 }
 
-function shouldUseSpecial(gs: GameState) {
+export function shouldUseSpecial(gs: GameState) {
   return (
     gs.roundNumber >= 5 &&
     gs.usedTileIndexes.length === 1 &&
