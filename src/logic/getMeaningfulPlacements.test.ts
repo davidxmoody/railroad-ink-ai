@@ -31,6 +31,10 @@ describe("meaningful placements", () => {
       expect(getMeaningfulPlacements("DDD_", "_DDD")).toEqual(["_DDD"])
     })
 
+    test("junction should remain open instead of closing unnecessarily", () => {
+      expect(getMeaningfulPlacements("DDD_", "DD_.")).toEqual(["DD_D"])
+    })
+
     test("straight should connect two edges instead of just one", () => {
       expect(getMeaningfulPlacements("D_D_", "DDD_")).toEqual(["D_D_"])
       expect(getMeaningfulPlacements("D_D_", "DDDE")).toEqual(["D_D_"])
