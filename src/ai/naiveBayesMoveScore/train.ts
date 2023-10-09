@@ -2,7 +2,7 @@ import GameState from "../../logic/GameState"
 import {rollGameDice} from "../../logic/dice"
 import {parseMove} from "../../logic/helpers"
 import type {GameRecord} from "../../logic/types"
-import {getPossibleMoves, shouldUseSpecial} from "../monteCarlo"
+import {getPossibleMoves} from "../monteCarlo"
 import readJsonl from "../readJsonl"
 import getFeatures from "./getFeatures"
 import getScore from "./getScore"
@@ -31,7 +31,7 @@ for (const game of gameRecords) {
 
   for (const roundMoves of game.moves) {
     for (const actualMove of roundMoves) {
-      for (const possibleMove of getPossibleMoves(gs, shouldUseSpecial(gs))) {
+      for (const possibleMove of getPossibleMoves(gs)) {
         const {p, tile} = parseMove(possibleMove)
         const slot = gs.board.getOpenSlot(p)!
 

@@ -1,12 +1,11 @@
 import GameState from "../logic/GameState"
 import {getMean, getStandardDeviation} from "../logic/helpers"
-import {getRandomMove, simulate} from "./monteCarlo"
+import {simulate} from "./monteCarlo"
 
 const results: number[] = []
 
 for (let i = 1; i <= 10000; i++) {
-  const emptyGs = new GameState()
-  const {realScore} = simulate(emptyGs, getRandomMove(emptyGs, false)!)
+  const {realScore} = simulate(new GameState())
   results.push(realScore)
 
   if (i % 1000 === 0) {

@@ -25,7 +25,7 @@ export function solveRound(gs: GameState) {
   let simulationResults: SimulationResult[] = []
 
   while (!gs.canEndRound) {
-    const openingMoves = getPossibleMoves(gs, shouldUseSpecial(gs))
+    const openingMoves = getPossibleMoves(gs)
     const openingMoveMeans = calculateOpeningMoveMeans(
       openingMoves,
       simulationResults,
@@ -96,9 +96,13 @@ function calculateOpeningMoveMeans(
   return means
 }
 
-export function simulate(gs: GameState, openingMove: string) {
-  const moves = [openingMove]
-  gs = gs.makeMove(openingMove)
+export function simulate(gs: GameState, openingMove?: string) {
+  const moves: string[] = []
+
+  if (openingMove) {
+    moves.push(openingMove)
+    gs = gs.makeMove(openingMove)
+  }
 
   while (!gs.canEndRound) {
     const move = getRandomMove(gs, shouldUseSpecial(gs))!
@@ -148,21 +152,15 @@ function pickBestMove(gs: GameState, moves: string[]) {
     const {p, tile} = parseMove(move)
     const slot = gs.board.getOpenSlot(p)!
     return getScore(p, tile, slot)
-    // const {p, tile} = parseMove(move)
-    // const slot = gs.board.getOpenSlot(p)!
-    // let numMatches = 0
-    // for (const r of rotations) {
-    //   if ((tile[r] === "D" || tile[r] === "L") && tile[r] === slot[r])
-    //     numMatches++
-    // }
-    // return numMatches
   })
 }
 
-export function getPossibleMoves(gs: GameState, useSpecial: boolean) {
+export function getPossibleMoves(gs: GameState, forceNoSpecial = false) {
   const moves: string[] = []
 
   const openSlots = gs.board.openSlotEntries()
+
+  const useSpecial = forceNoSpecial ? false : shouldUseSpecial(gs)
   const tiles = useSpecial ? gs.availableSpecialTiles : gs.availableTiles
 
   for (const [p, slot] of openSlots) {
@@ -173,21 +171,15 @@ export function getPossibleMoves(gs: GameState, useSpecial: boolean) {
     }
   }
 
-  if (useSpecial && moves.length === 0) return getPossibleMoves(gs, false)
+  if (useSpecial && moves.length === 0) return getPossibleMoves(gs, true)
 
   return moves
 }
 
-// const getGoodPlacement = memo2(
-//   (tile: TileString, slot: OpenSlot): TileString | undefined => {
-//     const placements = getMeaningfulPlacements(tile, slot)
-//     if (placements.length === 0) return undefined
-//     return argmax(placements, (tTile) => getScore({y: 0, x: 0}, tTile, slot))
-//   },
-// )
-
-export function getRandomMove(gs: GameState, useSpecial: boolean) {
+function getRandomMove(gs: GameState, forceNoSpecial = false) {
   const openSlots = shuffle(gs.board.openSlotEntries())
+
+  const useSpecial = forceNoSpecial ? false : shouldUseSpecial(gs)
   const tiles = shuffle(
     useSpecial ? gs.availableSpecialTiles : gs.availableTiles,
   )
@@ -199,10 +191,10 @@ export function getRandomMove(gs: GameState, useSpecial: boolean) {
     }
   }
 
-  if (useSpecial) return getRandomMove(gs, false)
+  if (useSpecial) return getRandomMove(gs, true)
 }
 
-export function shouldUseSpecial(gs: GameState) {
+function shouldUseSpecial(gs: GameState) {
   return (
     gs.roundNumber >= 5 &&
     gs.usedTileIndexes.length === 1 &&
