@@ -1,7 +1,13 @@
 import GameState from "../logic/GameState"
 import calculateScore, {calculateExitsScore} from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {argmax, encodeMove, parseMove, shuffle} from "../logic/helpers"
+import {
+  argmax,
+  encodeMove,
+  parseMove,
+  shuffle,
+  randomPick,
+} from "../logic/helpers"
 import exhaustiveSearch from "./exhaustiveSearch"
 import getScore from "./naiveBayesMoveScore/getScore"
 
@@ -27,9 +33,9 @@ export function solveRound(gs: GameState) {
 
     for (const openingMove of openingMoves) {
       for (let i = 0; i < 10; i++) {
-        const {moves, score} = simulate(gs, openingMove)
-        simulationResults.push({moves, score})
-        updateOpeningMoveMeans(openingMoveMeans, {moves, score})
+        const result = simulate(gs, openingMove)
+        simulationResults.push(result)
+        updateOpeningMoveMeans(openingMoveMeans, result)
       }
     }
 
@@ -38,9 +44,9 @@ export function solveRound(gs: GameState) {
         openingMoves,
         (move) => openingMoveMeans[move].mean,
       )
-      const {moves, score} = simulate(gs, openingMove)
-      simulationResults.push({moves, score})
-      updateOpeningMoveMeans(openingMoveMeans, {moves, score})
+      const result = simulate(gs, openingMove)
+      simulationResults.push(result)
+      updateOpeningMoveMeans(openingMoveMeans, result)
     }
 
     const bestOpeningMove = argmax(
@@ -111,8 +117,13 @@ export function simulate(gs: GameState, openingMove: string) {
         getRandomMove(gs, shouldUseSpecial(gs))!,
         getRandomMove(gs, shouldUseSpecial(gs))!,
         getRandomMove(gs, shouldUseSpecial(gs))!,
-        getRandomMove(gs, shouldUseSpecial(gs))!,
-        getRandomMove(gs, shouldUseSpecial(gs))!,
+        // getRandomMove(gs, shouldUseSpecial(gs))!,
+        // getRandomMove(gs, shouldUseSpecial(gs))!,
+        // getRandomMove(gs, shouldUseSpecial(gs))!,
+        // getRandomMove(gs, shouldUseSpecial(gs))!,
+        // getRandomMove(gs, shouldUseSpecial(gs))!,
+        // getRandomMove(gs, shouldUseSpecial(gs))!,
+        // getRandomMove(gs, shouldUseSpecial(gs))!,
       ])
 
       gs = gs.makeMove(move)
@@ -129,7 +140,7 @@ export function simulate(gs: GameState, openingMove: string) {
     firstRoundUnfixableErrors +
     firstRoundMaxExitsScoreable / 2
 
-  return {moves, score, gs}
+  return {moves, score, realScore: s.total}
 }
 
 function pickBestMove(gs: GameState, moves: string[]) {
@@ -167,6 +178,14 @@ export function getPossibleMoves(gs: GameState, useSpecial: boolean) {
   return moves
 }
 
+// const getGoodPlacement = memo2(
+//   (tile: TileString, slot: OpenSlot): TileString | undefined => {
+//     const placements = getMeaningfulPlacements(tile, slot)
+//     if (placements.length === 0) return undefined
+//     return argmax(placements, (tTile) => getScore({y: 0, x: 0}, tTile, slot))
+//   },
+// )
+
 export function getRandomMove(gs: GameState, useSpecial: boolean) {
   const openSlots = shuffle(gs.board.openSlotEntries())
   const tiles = shuffle(
@@ -175,9 +194,8 @@ export function getRandomMove(gs: GameState, useSpecial: boolean) {
 
   for (const [p, slot] of openSlots) {
     for (const tile of tiles) {
-      for (const tTile of shuffle(getMeaningfulPlacements(tile, slot))) {
-        return encodeMove(p, tTile)
-      }
+      const tTile = randomPick(getMeaningfulPlacements(tile, slot))
+      if (tTile) return encodeMove(p, tTile)
     }
   }
 
