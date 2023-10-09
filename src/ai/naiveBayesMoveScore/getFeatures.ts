@@ -1,4 +1,5 @@
-import {rotations} from "../../logic/helpers"
+import {Board} from "../../logic/Board"
+import {isCenterSquare, rotations} from "../../logic/helpers"
 import {
   ConnectionType,
   type OpenSlot,
@@ -26,6 +27,9 @@ export default function getFeatures(
         (s[r] === ConnectionType.ROAD || s[r] === ConnectionType.RAIL)),
   ).length
 
+  const onExit = !!Board.exitSlots.get(p)
+  const inCenter = isCenterSquare(p)
+
   return {
     match1: numMatches === 1,
     match2: numMatches === 2,
@@ -37,5 +41,7 @@ export default function getFeatures(
     errors1: numErrors === 1,
     errors2: numErrors === 2,
     errors3: numErrors === 3,
+    onExit,
+    inCenter,
   }
 }
