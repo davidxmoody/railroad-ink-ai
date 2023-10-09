@@ -8,7 +8,7 @@
   import type {Position, TileString} from "../logic/types"
   import DrawnExit from "./DrawnExit.svelte"
   import GameState from "../logic/GameState"
-  import {solveRound} from "../ai/monteCarlo"
+  import {getRandomMove, simulate, solveRound} from "../ai/monteCarlo"
   import calculateScore from "../logic/calculateScore"
 
   // TODO add an undo button
@@ -118,11 +118,16 @@
     }
   }
 
-  async function solveRoundNow() {
+  function solveRoundNow() {
     const moves = solveRound(gameState)
     gameState = gameState
       .makeMoves(moves)
       .endRound(gameDice[gameState.roundNumber])
+  }
+
+  function simulateNow() {
+    gameState = new GameState()
+    gameState = simulate(gameState, getRandomMove(gameState, false)!).gs
   }
 </script>
 
@@ -168,6 +173,7 @@
         disabled={gameState.gameEnded}
         on:click={solveRoundNow}>Solve round</button
       >
+      <button class="endRoundButton" on:click={simulateNow}>Simulate</button>
     </div>
   </div>
 

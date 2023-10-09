@@ -1,13 +1,7 @@
 import GameState from "../logic/GameState"
 import calculateScore, {calculateExitsScore} from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {
-  argmax,
-  encodeMove,
-  parseMove,
-  rotations,
-  shuffle,
-} from "../logic/helpers"
+import {argmax, encodeMove, parseMove, shuffle} from "../logic/helpers"
 import exhaustiveSearch from "./exhaustiveSearch"
 import getScore from "./naiveBayesMoveScore/getScore"
 
@@ -33,9 +27,9 @@ export function solveRound(gs: GameState) {
 
     for (const openingMove of openingMoves) {
       for (let i = 0; i < 10; i++) {
-        const result = simulate(gs, openingMove)
-        simulationResults.push(result)
-        updateOpeningMoveMeans(openingMoveMeans, result)
+        const {moves, score} = simulate(gs, openingMove)
+        simulationResults.push({moves, score})
+        updateOpeningMoveMeans(openingMoveMeans, {moves, score})
       }
     }
 
@@ -44,9 +38,9 @@ export function solveRound(gs: GameState) {
         openingMoves,
         (move) => openingMoveMeans[move].mean,
       )
-      const result = simulate(gs, openingMove)
-      simulationResults.push(result)
-      updateOpeningMoveMeans(openingMoveMeans, result)
+      const {moves, score} = simulate(gs, openingMove)
+      simulationResults.push({moves, score})
+      updateOpeningMoveMeans(openingMoveMeans, {moves, score})
     }
 
     const bestOpeningMove = argmax(
@@ -96,7 +90,7 @@ function calculateOpeningMoveMeans(
   return means
 }
 
-function simulate(gs: GameState, openingMove: string): SimulationResult {
+export function simulate(gs: GameState, openingMove: string) {
   const moves = [openingMove]
   gs = gs.makeMove(openingMove)
 
@@ -135,7 +129,7 @@ function simulate(gs: GameState, openingMove: string): SimulationResult {
     firstRoundUnfixableErrors +
     firstRoundMaxExitsScoreable / 2
 
-  return {moves, score}
+  return {moves, score, gs}
 }
 
 function pickBestMove(gs: GameState, moves: string[]) {
@@ -173,7 +167,7 @@ export function getPossibleMoves(gs: GameState, useSpecial: boolean) {
   return moves
 }
 
-function getRandomMove(gs: GameState, useSpecial: boolean) {
+export function getRandomMove(gs: GameState, useSpecial: boolean) {
   const openSlots = shuffle(gs.board.openSlotEntries())
   const tiles = shuffle(
     useSpecial ? gs.availableSpecialTiles : gs.availableTiles,
