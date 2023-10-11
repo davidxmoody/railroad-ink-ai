@@ -160,10 +160,10 @@ export function getStandardDeviation(list: number[]) {
 }
 
 export function parseMove(move: string) {
-  const tile = move.slice(2) as TileString
+  const t = move.slice(2) as TileString
   const y = parseInt(move[0], 10)
   const x = parseInt(move[1], 10)
-  return {p: {y, x}, tile}
+  return {p: {y, x}, t}
 }
 
 export function encodeMove(p: Position, t: TileString) {

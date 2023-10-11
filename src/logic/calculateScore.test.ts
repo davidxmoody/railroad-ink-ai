@@ -7,8 +7,8 @@ import {parseMove} from "./helpers"
 function generateBoardFromMoves(moves: string[]) {
   let board = new Board()
   for (const move of moves) {
-    const {p, tile} = parseMove(move)
-    board = board.set(p, tile)
+    const {p, t} = parseMove(move)
+    board = board.set(p, t)
   }
   return board
 }

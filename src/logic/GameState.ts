@@ -103,8 +103,8 @@ export default class GameState {
   }
 
   public makeMove(move: string) {
-    const {p, tile} = parseMove(move)
-    return this.placeTile(p, tile)
+    const {p, t} = parseMove(move)
+    return this.placeTile(p, t)
   }
 
   public makeMoves(moves: string[]) {

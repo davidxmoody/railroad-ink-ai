@@ -1,12 +1,10 @@
+import {writeFileSync} from "node:fs"
 import GameState from "../../logic/GameState"
 import {rollGameDice} from "../../logic/dice"
-import {parseMove} from "../../logic/helpers"
 import type {GameRecord} from "../../logic/types"
 import {getPossibleMoves} from "../monteCarlo"
 import readJsonl from "../readJsonl"
 import getFeatures from "./getFeatures"
-import getScore from "./getScore"
-import {shuffle} from "../../logic/helpers"
 
 const gameRecords: GameRecord[] = readJsonl("./src/data/training.jsonl")
 
@@ -16,13 +14,8 @@ const totalCounts = {
 }
 
 const featureCounts = {
-  yes: {} as Record<string, number>,
-  no: {} as Record<string, number>,
-}
-
-const scores = {
-  yes: [] as number[],
-  no: [] as number[],
+  yes: {} as Record<string, Record<number, number>>,
+  no: {} as Record<string, Record<number, number>>,
 }
 
 for (const game of gameRecords) {
@@ -32,21 +25,16 @@ for (const game of gameRecords) {
   for (const roundMoves of game.moves) {
     for (const actualMove of roundMoves) {
       for (const possibleMove of getPossibleMoves(gs)) {
-        const {p, tile} = parseMove(possibleMove)
-        const slot = gs.board.getOpenSlot(p)!
-
-        const features = getFeatures(p, tile, slot)
+        const features = getFeatures(gs, possibleMove)
         const chosen = actualMove === possibleMove ? "yes" : "no"
 
         totalCounts[chosen]++
 
         for (const [name, value] of Object.entries(features)) {
-          if (value) {
-            featureCounts[chosen][name] = (featureCounts[chosen][name] ?? 0) + 1
-          }
+          featureCounts[chosen][name] = featureCounts[chosen][name] ?? {}
+          featureCounts[chosen][name][value] =
+            (featureCounts[chosen][name][value] ?? 0) + 1
         }
-
-        scores[chosen].push(getScore(p, tile, slot))
       }
 
       gs = gs.makeMove(actualMove)
@@ -55,22 +43,19 @@ for (const game of gameRecords) {
   }
 }
 
-// for (const key of Object.keys(featureCounts.yes).sort()) {
-//   console.log(
-//     key.padStart(7, " "),
-//     (featureCounts.yes[key] / featureCounts.no[key]).toFixed(3),
-//   )
-// }
+const data: Record<
+  string,
+  {count: number; features: Record<string, Record<number, number>>}
+> = {}
 
-// console.log(JSON.stringify({totalCounts, featureCounts}, null, 2))
-
-// for (let i = 0; i < scores.no.length; i++) {
-//   if (i % 10 !== 0) continue
-//   console.log(`${scores.no[i].toFixed(4)}	${scores.yes[i]?.toFixed(4) ?? ""}`)
-// }
-
-scores.no = shuffle(scores.no)
-
-for (let i = 0; i < scores.yes.length; i++) {
-  console.log(`${scores.no[i].toFixed(5)}	${scores.yes[i]?.toFixed(5) ?? ""}`)
+for (const chosen of ["yes", "no"] as const) {
+  data[chosen] = {
+    count: totalCounts[chosen],
+    features: featureCounts[chosen],
+  }
 }
+
+writeFileSync(
+  "./src/ai/naiveBayesMoveScore/data.json",
+  JSON.stringify(data, null, 2),
+)

@@ -1,13 +1,7 @@
 import GameState from "../logic/GameState"
 import calculateScore, {calculateExitsScore} from "../logic/calculateScore"
 import getMeaningfulPlacements from "../logic/getMeaningfulPlacements"
-import {
-  argmax,
-  encodeMove,
-  parseMove,
-  shuffle,
-  randomPick,
-} from "../logic/helpers"
+import {argmax, encodeMove, shuffle} from "../logic/helpers"
 import exhaustiveSearch from "./exhaustiveSearch"
 import getScore from "./naiveBayesMoveScore/getScore"
 
@@ -96,7 +90,7 @@ function calculateOpeningMoveMeans(
   return means
 }
 
-export function simulate(gs: GameState, openingMove?: string) {
+export function simulate(gs: GameState, openingMove?: string, numMoves = 16) {
   const moves: string[] = []
 
   if (openingMove) {
@@ -105,7 +99,7 @@ export function simulate(gs: GameState, openingMove?: string) {
   }
 
   while (!gs.canEndRound) {
-    const move = getRandomMove(gs, shouldUseSpecial(gs))!
+    const move = pickBestMove(gs, getRandomMoves(gs, numMoves))
     moves.push(move)
     gs = gs.makeMove(move)
   }
@@ -115,21 +109,7 @@ export function simulate(gs: GameState, openingMove?: string) {
 
   while (!gs.gameEnded) {
     while (!gs.canEndRound) {
-      const move = pickBestMove(gs, [
-        getRandomMove(gs, shouldUseSpecial(gs))!,
-        getRandomMove(gs, shouldUseSpecial(gs))!,
-        getRandomMove(gs, shouldUseSpecial(gs))!,
-        getRandomMove(gs, shouldUseSpecial(gs))!,
-        getRandomMove(gs, shouldUseSpecial(gs))!,
-        // getRandomMove(gs, shouldUseSpecial(gs))!,
-        // getRandomMove(gs, shouldUseSpecial(gs))!,
-        // getRandomMove(gs, shouldUseSpecial(gs))!,
-        // getRandomMove(gs, shouldUseSpecial(gs))!,
-        // getRandomMove(gs, shouldUseSpecial(gs))!,
-        // getRandomMove(gs, shouldUseSpecial(gs))!,
-        // getRandomMove(gs, shouldUseSpecial(gs))!,
-      ])
-
+      const move = pickBestMove(gs, getRandomMoves(gs, numMoves))
       gs = gs.makeMove(move)
     }
     gs = gs.endRound()
@@ -148,11 +128,7 @@ export function simulate(gs: GameState, openingMove?: string) {
 }
 
 function pickBestMove(gs: GameState, moves: string[]) {
-  return argmax(moves, (move) => {
-    const {p, tile} = parseMove(move)
-    const slot = gs.board.getOpenSlot(p)!
-    return getScore(p, tile, slot)
-  })
+  return argmax(moves, (move) => getScore(gs, move))
 }
 
 export function getPossibleMoves(gs: GameState, forceNoSpecial = false) {
@@ -176,7 +152,13 @@ export function getPossibleMoves(gs: GameState, forceNoSpecial = false) {
   return moves
 }
 
-function getRandomMove(gs: GameState, forceNoSpecial = false) {
+function getRandomMoves(
+  gs: GameState,
+  limit: number,
+  forceNoSpecial = false,
+): string[] {
+  const moves: string[] = []
+
   const openSlots = shuffle(gs.board.openSlotEntries())
 
   const useSpecial = forceNoSpecial ? false : shouldUseSpecial(gs)
@@ -184,14 +166,22 @@ function getRandomMove(gs: GameState, forceNoSpecial = false) {
     useSpecial ? gs.availableSpecialTiles : gs.availableTiles,
   )
 
-  for (const [p, slot] of openSlots) {
-    for (const tile of tiles) {
-      const tTile = randomPick(getMeaningfulPlacements(tile, slot))
-      if (tTile) return encodeMove(p, tTile)
+  for (const tile of tiles) {
+    for (const [p, slot] of openSlots) {
+      for (const tTile of shuffle(getMeaningfulPlacements(tile, slot))) {
+        if (tTile) {
+          moves.push(encodeMove(p, tTile))
+          if (moves.length >= limit) return moves
+        }
+      }
     }
   }
 
-  if (useSpecial) return getRandomMove(gs, true)
+  if (useSpecial && moves.length === 0) {
+    return getRandomMoves(gs, limit, true)
+  }
+
+  return moves
 }
 
 function shouldUseSpecial(gs: GameState) {

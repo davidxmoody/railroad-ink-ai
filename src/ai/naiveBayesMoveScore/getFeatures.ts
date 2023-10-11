@@ -1,17 +1,15 @@
-import {Board} from "../../logic/Board"
-import {isCenterSquare, rotations} from "../../logic/helpers"
-import {
-  ConnectionType,
-  type OpenSlot,
-  type Position,
-  type TileString,
-} from "../../logic/types"
+import type GameState from "../../logic/GameState"
+import {parseMove, rotations} from "../../logic/helpers"
+import {ConnectionType} from "../../logic/types"
 
 export default function getFeatures(
-  p: Position,
-  t: TileString,
-  s: OpenSlot,
-): Record<string, boolean> {
+  gs: GameState,
+  move: string,
+): Record<string, number> {
+  const {p, t} = parseMove(move)
+  const s = gs.board.getOpenSlot(p)
+  if (!s) throw new Error("Could not get slot for move")
+
   const numMatches = rotations.filter(
     (r) => t[r] !== ConnectionType.NONE && t[r] === s[r],
   ).length
@@ -27,21 +25,15 @@ export default function getFeatures(
         (s[r] === ConnectionType.ROAD || s[r] === ConnectionType.RAIL)),
   ).length
 
-  const onExit = !!Board.exitSlots.get(p)
-  const inCenter = isCenterSquare(p)
+  const dedupedY = p.y <= 3 ? p.y : 6 - p.y
+  const dedupedX = p.x <= 3 ? p.x : 6 - p.x
+  const squashedCoords = [dedupedY, dedupedX].sort()
+  const positionKey = 1 + squashedCoords[0] + 4 * squashedCoords[1]
 
   return {
-    match1: numMatches === 1,
-    match2: numMatches === 2,
-    match3: numMatches === 3,
-    match4: numMatches === 4,
-    open1: numOpen === 1,
-    open2: numOpen === 2,
-    open3: numOpen === 3,
-    errors1: numErrors === 1,
-    errors2: numErrors === 2,
-    errors3: numErrors === 3,
-    onExit,
-    inCenter,
+    numMatches,
+    numOpen,
+    numErrors,
+    positionKey,
   }
 }
