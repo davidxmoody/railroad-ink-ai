@@ -8,15 +8,13 @@ import getFeatures from "./getFeatures"
 
 const gameRecords: GameRecord[] = readJsonl("./src/data/training.jsonl")
 
-const totalCounts = {
-  yes: 0,
-  no: 0,
-}
+type Chosen = "yes" | "no"
 
-const featureCounts = {
-  yes: {} as Record<string, Record<number, number>>,
-  no: {} as Record<string, Record<number, number>>,
-}
+const observations: Array<{
+  roundNumber: number
+  chosen: Chosen
+  features: Record<string, number>
+}> = []
 
 for (const game of gameRecords) {
   const gameTiles = rollGameDice(game.seed)
@@ -25,18 +23,12 @@ for (const game of gameRecords) {
   for (const roundMoves of game.moves) {
     for (const actualMove of roundMoves) {
       for (const possibleMove of getPossibleMoves(gs)) {
-        const features = getFeatures(gs, possibleMove)
-        const chosen = actualMove === possibleMove ? "yes" : "no"
-
-        totalCounts[chosen]++
-
-        for (const [name, value] of Object.entries(features)) {
-          featureCounts[chosen][name] = featureCounts[chosen][name] ?? {}
-          featureCounts[chosen][name][value] =
-            (featureCounts[chosen][name][value] ?? 0) + 1
-        }
+        observations.push({
+          roundNumber: gs.roundNumber,
+          chosen: actualMove === possibleMove ? "yes" : "no",
+          features: getFeatures(gs, possibleMove),
+        })
       }
-
       gs = gs.makeMove(actualMove)
     }
     gs = gs.endRound(gameTiles[gs.roundNumber])
@@ -44,14 +36,23 @@ for (const game of gameRecords) {
 }
 
 const data: Record<
-  string,
-  {count: number; features: Record<string, Record<number, number>>}
-> = {}
+  number,
+  Record<
+    Chosen,
+    {count: number; features: Record<string, Record<number, number>>}
+  >
+> = Array.from({length: 7}, () => ({
+  yes: {count: 0, features: {}},
+  no: {count: 0, features: {}},
+}))
 
-for (const chosen of ["yes", "no"] as const) {
-  data[chosen] = {
-    count: totalCounts[chosen],
-    features: featureCounts[chosen],
+for (const {roundNumber, chosen, features} of observations) {
+  const item = data[roundNumber - 1][chosen]
+  item.count++
+
+  for (const [feature, value] of Object.entries(features)) {
+    item.features[feature] = item.features[feature] ?? {}
+    item.features[feature][value] = (item.features[feature][value] ?? 0) + 1
   }
 }
 
