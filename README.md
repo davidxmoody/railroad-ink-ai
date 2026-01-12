@@ -4,4 +4,4 @@ This is a playable version of the board game [Railroad Ink](https://boardgamegee
 
 [Click here to try it](https://davidxmoody.github.io/railroad-ink-ai/)
 
-![](images/screenshot.png)
+<video src="images/demo.mp4" controls muted loop playsinline></video>
