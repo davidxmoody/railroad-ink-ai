@@ -4,4 +4,4 @@ This is a playable version of the board game [Railroad Ink](https://boardgamegee
 
 [Click here to try it](https://davidxmoody.github.io/railroad-ink-ai/)
 
-https://github.com/davidxmoody/railroad-ink-ai/raw/refs/heads/main/images/demo.mp4
+![](images/demo.gif)
