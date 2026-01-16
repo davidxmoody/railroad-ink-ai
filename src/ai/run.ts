@@ -5,13 +5,13 @@ import {rollGameDice} from "../logic/dice"
 import {solveRound} from "./monteCarlo"
 import type {GameRecord} from "../logic/types"
 import {getMean, getStandardDeviation} from "../logic/helpers"
+import {appendFileSync} from "fs"
 
 const numThreads = 6 as number
-// const seedPrefix = "training-"
-const seedPrefix = ""
+const seedPrefix = "final-"
 const seedStart = 0
-const seedEnd = 49
-const runsPerSeed = 2
+const seedEnd = 999
+const runsPerSeed = 1
 
 function run(seeds: string[], callback: (record: GameRecord) => void) {
   for (const seed of seeds) {
@@ -50,11 +50,11 @@ function onRecord(record: GameRecord) {
   const avgScore = getMean(scores).toFixed(1)
   const stdScore = getStandardDeviation(scores).toFixed(1)
 
-  console.log(
-    `Score: ${record.score}, seed: ${record.seed}, avg: ${avgScore}, std: ${stdScore}`,
-  )
+  const message = `Score: ${record.score}, seed: ${record.seed}, avg: ${avgScore}, std: ${stdScore}`
 
-  // console.log(JSON.stringify(record))
+  console.log(message)
+
+  appendFileSync("results.txt", `${message}\n`)
 }
 
 if (isMainThread) {
