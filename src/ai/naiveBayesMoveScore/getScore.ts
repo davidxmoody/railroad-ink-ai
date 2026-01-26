@@ -1,10 +1,6 @@
 import getFeatures from "./getFeatures"
 import type GameState from "../../logic/GameState"
-
-import {createRequire} from "module"
-const require = createRequire(import.meta.url)
-
-const data = require("./data.json")
+import data from "./data"
 
 export default function getScore(gs: GameState, move: string) {
   const features = getFeatures(gs, move)

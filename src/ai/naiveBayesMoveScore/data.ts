@@ -1,4 +1,4 @@
-[
+export default [
   {
     "yes": {
       "count": 10192,
