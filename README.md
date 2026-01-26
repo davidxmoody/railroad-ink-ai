@@ -45,7 +45,19 @@ Earlier versions of the algorithm were stuck at around 50 points for a long time
 
 ## Algorithm description
 
-TODO
+This algorithm is loosely based on Monte Carlo Tree Search ([see here](https://github.com/davidxmoody/mctsbot) for one of my past projects using MCTS in Poker).
+
+The aim is to iteratively build up a partial representation of the "game tree". In simpler games (like Tic-Tac-Toe), it's possible to build a complete game tree with every possible game state and the moves linking them. In more complex games the game tree can be impossibly large so something is needed to focus on the most promising paths.
+
+This algorithm uses random game simulations to create estimates for how good it thinks game states are. A "simulation" involves literally playing out a full remaining game from the given state. Importantly, simulations do not necessarily need to accurately predict the final score. They just need to be fast to run and give a signal that points in the right direction.
+
+I tried out many different simulation strategies including making fully random moves and freely drawing arbitrary routes. The final algorithm uses a custom Naive Bayes classifier to rank and pick from a smaller subset of random options. It's trained on data generated from playing with the fully random simulation strategy. It looks at a small set of quick to calculate features (like number of connections a route makes) to estimate which move the previous algorithm would have been most likely to make.
+
+It also needs to balance exploring unknown states vs deciding between the most promising ones. It does this by first running a small fixed number of simulations starting with every possible opening move. It then runs more simulations by starting with the one that currently has the highest expected score.
+
+It also makes a lot of optimisations based on the fact that the moves in a single round often do not depend on each other. If two moves don't conflict and aren't connected then it doesn't matter which order they are made in.
+
+The final round in each game is treated differently. Because there will be no more random elements, it's feasible to actually compute every possible final state and pick the highest scoring one. This can be quite slow (often half the algorithm's total runtime) but finds a better solution often enough that it's worth it.
 
 ## Development history and experiments
 
